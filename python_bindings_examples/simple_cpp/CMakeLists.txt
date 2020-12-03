@@ -16,5 +16,13 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio*")
     LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
 endif()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.py
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# add a custom target for the test.py script, which will copy test.py
+# to the installation folder and update every time there is a change
+add_custom_target(pyTestScript ALL)
+add_custom_command(TARGET pyTestScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/test.py $<TARGET_FILE_DIR:cppBinding>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
+
+install(TARGETS cppBinding DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test.py DESTINATION bin)
