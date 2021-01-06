@@ -3,6 +3,7 @@ project(cuBinding LANGUAGES CXX CUDA)
 
 find_package(PythonInterp 3.6 REQUIRED)
 find_package(PythonLibs 3.6 REQUIRED)
+list(APPEND CMAKE_PREFIX_PATH "D:/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11")
 find_package(pybind11 REQUIRED)
 
 include_directories(${PYTHON_INCLUDE_DIRS})
