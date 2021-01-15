@@ -10,7 +10,8 @@
         "complex": "cpp",
         "iterator": "cpp",
         "random": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "iostream": "cpp"
     },
     "python.pythonPath": "D:\\Anaconda3\\python.exe"
 }

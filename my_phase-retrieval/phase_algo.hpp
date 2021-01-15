@@ -6,76 +6,66 @@
 #include <time.h>
 #include <iostream>
 #include <complex>
+#define CUDA_CHECK(cmd) {cudaError_t error = cmd; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std;
 
 namespace py = pybind11;
-
-// py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag) {
-//    /* read input arrays buffer_info */
-//    py::buffer_info bufMag = mag.request();
-
-//    /* allocate the output buffer */
-//    py::array_t<double> result = py::array_t<double>(bufMag.size);
-//    py::buffer_info bufres = result.request();
-//    double *ptr1 = (double *) bufMag.ptr, *ptrres = (double *)bufres.ptr;
-//    size_t X = bufMag.shape[0];
-//    size_t Y = bufMag.shape[1];
-
-//    /* Add both arrays */
-//    for (size_t idx = 0; idx < X; idx++)
-//        for (size_t idy = 0; idy < Y; idy++)
-//        {
-//            ptrres[idx*Y + idy] = ptr1[idx*Y+ idy];
-//        }
-
-//    /* Reshape result to have same shape as input */
-//    result.resize({X,Y});
-
-//    return result;
-// }
 
 void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose) 
 {
     srand( (unsigned)time( NULL ) );
     py::buffer_info bufMag = mag.request();
 
-     int k=0;
-     int iter;
+    int k=0; 
+    int iter;
+
+    //alternative fot saving mag size, prevent warning while using CUFFT 
+    //( warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data)"
+    int size_x = 0; 
+    int size_y = 0;
 
     double *ptr1 = (double *) bufMag.ptr; //magnitude 1D
     size_t X = bufMag.shape[0]; //width of magnitude
     size_t Y = bufMag.shape[1]; //heght of magnitude
+    
+    //get int version of size instead of size_t
+    for (size_t idx = 0; idx < X; idx++) size_x++;
+    for (size_t idy = 0; idy < Y; idy++) size_y++;
+
 
     double **ptrMag = NULL; //magnitude 2D array
     double **mask = NULL; //mask 2D array, same size as magnitude
     double **image_x = NULL; //initial image x, same size as magnitude
     double **image_x_p = NULL; //previous image for steps
     double **y = NULL; //store inverse fourier transform (real number)
-    complex<double> **y_hat;
+    complex<double> **y_hat; //sample random phase
+    complex<double> **temp_y; //temporary complex version of y after CUFFT, before copying the real number to y
     
     //allocating first dimension of arrays
-    ptrMag = (double**)malloc(X * sizeof(double)); //convert 1D mag to 2D (1)
-    mask = (double**)malloc(X * sizeof(double)); //mask with same size as magnitude
-    image_x = (double**)malloc(X * sizeof(double)); //image x with same size as magnitude
-    image_x_p = (double**)malloc(X * sizeof(double)); //previous image for steps
-    y = (double**)malloc(X * sizeof(double)); //store inverse fourier transform (real number)
-    y_hat = (complex<double>**)malloc(X * sizeof(complex<double>)); //sample random phase
+    ptrMag = (double**)malloc(size_x * sizeof(double)); //convert 1D mag to 2D (1)
+    mask = (double**)malloc(size_x * sizeof(double)); //mask with same size as magnitude
+    image_x = (double**)malloc(size_x * sizeof(double)); //image x with same size as magnitude
+    image_x_p = (double**)malloc(size_x * sizeof(double)); //previous image for steps
+    y = (double**)malloc(size_x * sizeof(double)); //store inverse fourier transform (real number)
+    y_hat = (complex<double>**)malloc(size_x * sizeof(complex<double>)); //sample random phase
+    temp_y = (complex<double>**)malloc(size_x * sizeof(complex<double>));
 
     //allocating second dimension of arrays
-    for (size_t i = 0; i < X; i++) 
+    for (size_t i = 0; i < size_x; i++) 
     {
-        ptrMag[i] = (double*)malloc(Y * sizeof(double)); //convert 1D mag to 2D (2)
-        mask[i] = (double*)malloc(Y * sizeof(double)); //allocate mask
-        image_x[i] = (double*)malloc(Y * sizeof(double)); //allocate image_x
-        image_x_p[i] = (double*)malloc(Y * sizeof(double)); //allocate image_x_p for previous image
-        y[i] = (double*)malloc(Y * sizeof(double)); //store inverse fourier transform (real number)
-        y_hat[i] = (complex<double>*)malloc(Y * sizeof(complex<double>));//sample random phase
+        ptrMag[i] = (double*)malloc(size_y * sizeof(double)); //convert 1D mag to 2D (2)
+        mask[i] = (double*)malloc(size_y * sizeof(double)); //allocate mask
+        image_x[i] = (double*)malloc(size_y * sizeof(double)); //allocate image_x
+        image_x_p[i] = (double*)malloc(size_y * sizeof(double)); //allocate image_x_p for previous image
+        y[i] = (double*)malloc(size_y * sizeof(double)); //store inverse fourier transform (real number)
+        y_hat[i] = (complex<double>*)malloc(size_y * sizeof(complex<double>));//sample random phase
+        temp_y[i] = (complex<double>*)malloc(size_y * sizeof(complex<double>));
     }
 
     //allocating inital values to arrays
-    for (size_t idx = 0; idx < X; idx++)
+    for (int idx = 0; idx < size_x; idx++)
     {
-        for (size_t idy = 0; idy < Y; idy++)
+        for (int idy = 0; idy < size_y; idy++)
         {
             double rand_num = (double) rand()/RAND_MAX;
             mask[idx][idy] = 1.0; //fill mask with 1.0
@@ -85,15 +75,40 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose)
             ptrMag[idx][idy] = ptr1[k]; //convert 1D mag to 2D (3)
             y_hat[idx][idy] = ptr1[k]*exp(1i*2.0*3.14*rand_num); //random phase initial value
             k++;
-            //cout<<y_hat[idx][idy]<<"\t";
-
+            // cout<<y_hat[idx][idy]<<"\t";
         }
-        //printf("\n");
+        // cout<<endl;
     }
+    
 
-    for(iter = 0; iter < steps; iter++)
+    // for(iter = 0; iter < steps; iter++)
+    
+    cufftDoubleComplex *y_dev, *y_devr;
+    for(iter = 0; iter < 1; iter++)
     {
+        CUDA_CHECK(cudaMalloc((void **) &y_dev, size_x * size_y * sizeof(cufftDoubleComplex)));
+        CUDA_CHECK(cudaMalloc((void **) &y_devr, size_x * size_y * sizeof(cufftDoubleComplex)));
+        CUDA_CHECK(cudaMemcpy(y_dev, y_hat, size_x * size_y * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
+        cufftHandle plan;
+        cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z);
+        cufftExecZ2Z(plan, y_dev, y_devr, CUFFT_INVERSE);
+
+        CUDA_CHECK(cudaMemcpy(temp_y, y_devr, size_x * size_y * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
+        
+
+        for (int idx = 0; idx < size_x; idx++)
+        {
+            for (int idy = 0; idy < size_y; idy++)
+            {
+                // y[idx][idy] = real(temp_y[idx][idy]);
+                cout<<temp_y[idx][idy]<<"\t";
+            }
+            //cout<<endl;
+        }
+
+        CUDA_CHECK(cudaFree(y_dev));
+        cufftDestroy(plan);
     }
 
 }
