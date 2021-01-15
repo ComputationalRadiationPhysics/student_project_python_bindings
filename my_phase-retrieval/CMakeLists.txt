@@ -12,7 +12,8 @@ include_directories(${pybind11_INCLUDE_DIR})
 add_library(cuPhaseRet SHARED phase_retrieval.cu)
 target_link_libraries(cuPhaseRet
   ${PYTHON_LIBRARIES}
-  cudart)
+  cudart
+  cufft)
 
 set_target_properties(cuPhaseRet PROPERTIES CUDA_STANDARD 11)
 set_target_properties(cuPhaseRet PROPERTIES PREFIX "")

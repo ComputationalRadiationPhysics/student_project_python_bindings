@@ -3,6 +3,14 @@
     "files.associations": {
         "initializer_list": "cpp",
         "type_traits": "cpp",
-        "xutility": "cpp"
-    }
+        "xutility": "cpp",
+        "xlocale": "cpp",
+        "ostream": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "iterator": "cpp",
+        "random": "cpp",
+        "xstring": "cpp"
+    },
+    "python.pythonPath": "D:\\Anaconda3\\python.exe"
 }

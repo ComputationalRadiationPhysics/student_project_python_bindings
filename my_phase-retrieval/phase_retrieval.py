@@ -87,4 +87,5 @@ def fienup_phase_retrieval(mag, mask=None, beta=0.8,
         # satisfy fourier domain constraints
         # (replace magnitude with input magnitude)
         y_hat = mag*np.exp(1j*np.angle(x_hat))
+        
     return x

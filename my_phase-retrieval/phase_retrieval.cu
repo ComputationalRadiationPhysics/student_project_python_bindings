@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <string>
+#include <cufft.h>
 
 #include "phase_algo.hpp"
 

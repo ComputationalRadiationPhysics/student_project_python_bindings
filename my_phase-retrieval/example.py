@@ -9,12 +9,7 @@ np.random.seed(1)
 image = imageio.imread('test.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 
-mags = cuPhaseRet.fienup_phase_retrieval(magnitudes)
-
-if np.allclose(mags,magnitudes):
-    print("same")
-
-# cuPhaseRet.printMag(mags)
+cuPhaseRet.fienup_phase_retrieval(magnitudes, 500, False)
 
 # result = fienup_phase_retrieval(magnitudes, steps=500,
 #                                 verbose=False)
