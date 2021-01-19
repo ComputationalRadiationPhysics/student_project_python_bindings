@@ -11,7 +11,8 @@
         "iterator": "cpp",
         "random": "cpp",
         "xstring": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "xlocnum": "cpp"
     },
     "python.pythonPath": "D:\\Anaconda3\\python.exe"
 }
