@@ -14,6 +14,47 @@ using namespace std;
 
 namespace py = pybind11;
 
+
+//find elements that violate object domain constraints 
+//or are not masked
+__global__ void update_violated_elements(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode)
+{
+    int idx = threadIdx.x+ blockIdx.x* blockDim.x;
+    bool logical_not_mask;
+    bool y_less_than_zero;
+    bool logical_and;
+    bool indices; //logical or
+
+    //1. logical not of mask
+    if(mask[idx] <= 0) logical_not_mask = true;
+    else if(mask[idx] >= 1) logical_not_mask = false;
+
+    //2. check if any element y is less than zero
+    if(y[idx] < 0) y_less_than_zero = true;
+    else if(y[idx] >= 0) y_less_than_zero = false;
+
+    //use "and" logical to check the "less than zero y" and the mask  
+    if(y_less_than_zero == true && mask[idx] >= 1) logical_and = true;
+    else logical_and = false;
+
+    //create indices with logical "not"
+    if(logical_and == false && logical_not_mask == false) indices = false;
+    else indices = true;
+
+    //updates for elements that violate object domain constraints
+    if(indices == true)
+    {
+        if(mode == 1)
+        {
+            image_x[idx] = image_x_p[idx]-beta*y[idx];
+        }
+        else if(mode == 2)
+        {
+            image_x[idx] = y[idx]-beta*y[idx];
+        }
+    }
+}
+
 void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, string mode, double beta) 
 {
 
@@ -45,26 +86,27 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
     complex<double> *x_hat = new complex<double>[dimension];
 
     //indices and logicals
-    bool *logical_not_mask = new bool[dimension];
-    bool *y_less_than_zero = new bool[dimension];
-    bool *logical_and = new bool[dimension];
-    bool *indices = new bool[dimension]; //logical or
+    // bool *logical_not_mask = new bool[dimension];
+    // bool *y_less_than_zero = new bool[dimension];
+    // bool *logical_and = new bool[dimension];
+    // bool *indices = new bool[dimension]; //logical or
 
     auto begin = chrono::high_resolution_clock::now();
 
     //allocating inital values to arrays
+    fill_n(&mask[0], dimension, 1.0); //fill mask with 1.0
+    fill_n(&image_x[0], dimension, 0.0); //fill image_x with 0.0 for initial data
+    fill_n(&image_x_p[0], dimension, 0.0); //fill image_x_p with 0.0 for initial data
+    fill_n(&y[0], dimension, 0.0); //store inverse fourier transform (real number)
+ 
     for (int i = 0; i < dimension; i++)
     {
         double rand_num = (double) rand()/RAND_MAX;
-        mask[i] = 1.0; //fill mask with 1.0
-        image_x[i] = 0.0; //fill image_x with 0.0 for initial data
-        image_x_p[i] = 0.0; //fill image_x_p with 0.0 for initial data
-        y[i] = 0.0; //store inverse fourier transform (real number)
         y_hat[i] = ptrMag[i]*exp(1i*2.0*3.14*rand_num); //random phase initial value
     }
 
-    //iteration with number of steps
-    for(int iter = 0; iter < steps; iter++)
+    //iteration with number of steps------------------------------------------------------------------------------------------------------
+    for(int iter = 0; iter < 500/*steps*/; iter++)
     {
         //create complex arry for cufft, y_dev is initial complex, y_dev_res, is the result of inverse fft
         cufftDoubleComplex *y_dev, *y_dev_res;
@@ -109,42 +151,64 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
         if(mode.compare("output-output") == 0 || mode.compare("hybrid") == 0) copy(y, y+dimension, image_x);
 
         //get indices and logicals, and updates for elements
-        for(int i = 0; i < dimension; i++)
-        {
-            //find elements that violate object domain constraints 
-            //or are not masked
+        // for(int i = 0; i < dimension; i++)
+        // {
+        //     //find elements that violate object domain constraints 
+        //     //or are not masked
 
-            //1. logical not of mask
-            if(mask[i] <= 0) logical_not_mask[i] = true;
-            else if(mask[i] >= 1) logical_not_mask[i] = false;
+        //     //1. logical not of mask
+        //     if(mask[i] <= 0) logical_not_mask[i] = true;
+        //     else if(mask[i] >= 1) logical_not_mask[i] = false;
 
-            //2. check if any element y is less than zero
-            if(y[i] < 0) y_less_than_zero[i] = true;
-            else if(y[i] >= 0) y_less_than_zero[i] = false;
+        //     //2. check if any element y is less than zero
+        //     if(y[i] < 0) y_less_than_zero[i] = true;
+        //     else if(y[i] >= 0) y_less_than_zero[i] = false;
 
-            //use "and" logical to check the "less than zero y" and the mask  
-            if(y_less_than_zero[i] == true && mask[i] >= 1) logical_and[i] = true;
-            else logical_and[i] = false;
+        //     //use "and" logical to check the "less than zero y" and the mask  
+        //     if(y_less_than_zero[i] == true && mask[i] >= 1) logical_and[i] = true;
+        //     else logical_and[i] = false;
 
-            //create indices with logical "not"
-            if(logical_and[i] == false && logical_not_mask[i] == false) indices[i] = false;
-            else indices[i] = true;
+        //     //create indices with logical "not"
+        //     if(logical_and[i] == false && logical_not_mask[i] == false) indices[i] = false;
+        //     else indices[i] = true;
 
-            //updates for elements that violate object domain constraints
-            if(indices[i] == true)
-            {
-                if(mode.compare("hybrid") == 0 || mode.compare("input-output") == 0)
-                {
-                    image_x[i] = image_x_p[i]-beta*y[i];
-                }
-                if(mode.compare("output-output") == 0)
-                {
-                    image_x[i] = y[i]-beta*y[i];
-                }
-            }
-        }
+        //     //updates for elements that violate object domain constraints
+        //     if(indices[i] == true)
+        //     {
+        //         if(mode.compare("hybrid") == 0 || mode.compare("input-output") == 0)
+        //         {
+        //             image_x[i] = image_x_p[i]-beta*y[i];
+        //         }
+        //         if(mode.compare("output-output") == 0)
+        //         {
+        //             image_x[i] = y[i]-beta*y[i];
+        //         }
+        //     }
+        // }
 
-        //fourier transform
+        //updates for elements that violate object domain constraints (CUDA VERSION)----------------------------------------------------
+        double *mask_dev, *y_device, *image_x_device, *image_x_p_device;
+        CUDA_CHECK(cudaMalloc(&mask_dev, dimension * sizeof(double)));
+        CUDA_CHECK(cudaMalloc(&y_device, dimension * sizeof(double)));
+        CUDA_CHECK(cudaMalloc(&image_x_device, dimension * sizeof(double)));
+        CUDA_CHECK(cudaMalloc(&image_x_p_device, dimension * sizeof(double)));
+
+        CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(y_device, y, dimension * sizeof(double), cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(image_x_device, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(image_x_p_device, image_x_p, dimension * sizeof(double), cudaMemcpyHostToDevice));
+
+        int int_mode;
+        if(mode.compare("hybrid") == 0 || mode.compare("input-output") == 0) int_mode = 1;
+        else if(mode.compare("output-output") == 0) int_mode = 2;
+        
+        update_violated_elements<<<size_x, size_y>>>(mask_dev, y_device, image_x_device, image_x_p_device, beta, int_mode);
+
+        CUDA_CHECK(cudaMemcpy(image_x, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
+
+        cudaFree(mask_dev); cudaFree(y_device); cudaFree(image_x_device); cudaFree(image_x_p_device);
+
+        //fourier transform---------------------------------------------------------------------------------------------------------
         cufftDoubleReal *image_x_dev;
         cufftDoubleComplex *image_x_dev_res;
         CUDA_CHECK(cudaMalloc((void**) &image_x_dev, dimension * sizeof(cufftDoubleReal)));
@@ -191,8 +255,8 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
     delete[] y_hat;
     delete[] temp_y;
     delete[] y;
-    delete[] logical_not_mask;
-    delete[] y_less_than_zero;
-    delete[] logical_and;
-    delete[] indices;
+    // delete[] logical_not_mask;
+    // delete[] y_less_than_zero;
+    // delete[] logical_and;
+    // delete[] indices;
 }
