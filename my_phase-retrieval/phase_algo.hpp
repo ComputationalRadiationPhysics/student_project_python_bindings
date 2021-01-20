@@ -7,6 +7,7 @@
 #include <iostream>
 #include <complex>
 #include <string>
+#include <chrono>
 
 #define CUDA_CHECK(cmd) {cudaError_t error = cmd; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std;
@@ -49,6 +50,8 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
     bool *logical_and = new bool[dimension];
     bool *indices = new bool[dimension]; //logical or
 
+    auto begin = chrono::high_resolution_clock::now();
+
     //allocating inital values to arrays
     for (int i = 0; i < dimension; i++)
     {
@@ -61,7 +64,7 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
     }
 
     //iteration with number of steps
-    for(int iter = 0; iter < 1 /*steps*/; iter++)
+    for(int iter = 0; iter < steps; iter++)
     {
         //create complex arry for cufft, y_dev is initial complex, y_dev_res, is the result of inverse fft
         cufftDoubleComplex *y_dev, *y_dev_res;
@@ -142,12 +145,12 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
         }
 
         //fourier transform
-        double *image_x_dev;
+        cufftDoubleReal *image_x_dev;
         cufftDoubleComplex *image_x_dev_res;
-        CUDA_CHECK(cudaMalloc(&image_x_dev, dimension * sizeof(double)));
+        CUDA_CHECK(cudaMalloc((void**) &image_x_dev, dimension * sizeof(cufftDoubleReal)));
         CUDA_CHECK(cudaMalloc((void **) &image_x_dev_res, dimension * sizeof(cufftDoubleComplex)));
 
-        CUDA_CHECK(cudaMemcpy(image_x_dev, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(image_x_dev, image_x, dimension * sizeof(cufftDoubleReal), cudaMemcpyHostToDevice));
 
         //create cufft plan
         cufftHandle plan2;
@@ -156,21 +159,40 @@ void fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, st
 
         CUDA_CHECK(cudaMemcpy(x_hat, image_x_dev_res, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
 
+        cufftDestroy(plan2);
+        cudaFree(image_x_dev);
+        cudaFree(image_x_dev_res);
+
+        // for(int i = 0; i < dimension; i++) 
+        // {
+        //     cout<<i<<"\t"<<image_x[i]<<"\t"<<x_hat[i]<<endl;
+        //     if(x_hat[i].real() == 0) break;
+        // }
+
         for(int i = 0; i < dimension; i++) 
         {
-            cout<<i<<"\t"<<image_x[i]<<"\t"<<x_hat[i]<<endl;
-            if(x_hat[i].real() == 0) break;
+            y_hat[i] = ptrMag[i]*exp(1i*arg(x_hat[i]));
         }
     }
+
+    auto end = chrono::high_resolution_clock::now();
+    auto elapsed = chrono::duration_cast<chrono::nanoseconds>(end - begin);
+
+    printf("Time measured: %.3f seconds.\n", elapsed.count() * 1e-9);
+    // for(int i = 0; i < dimension; i++) 
+    // {
+    //     cout<<y_hat[i]<<endl;
+    // }
+
     //free all arrays
-    free(mask);
-    free(image_x);
-    free(image_x_p);
-    free(y_hat);
-    free(temp_y);
-    free(y);
-    free(logical_not_mask);
-    free(y_less_than_zero);
-    free(logical_and);
-    free(indices);
+    delete[] mask;
+    delete[] image_x;
+    delete[] image_x_p;
+    delete[] y_hat;
+    delete[] temp_y;
+    delete[] y;
+    delete[] logical_not_mask;
+    delete[] y_less_than_zero;
+    delete[] logical_and;
+    delete[] indices;
 }
