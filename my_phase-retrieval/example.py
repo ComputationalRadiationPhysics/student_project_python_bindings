@@ -7,10 +7,13 @@ import matplotlib.pyplot as plt
 
 
 np.random.seed(1)
-image = imageio.imread('a.png', as_gray=True)
+image = imageio.imread('d.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 
 result = cuPhaseRet.fienup_phase_retrieval(magnitudes, 500, False, "hybrid", 0.8)
+
+print(magnitudes.shape)
+print(result.shape)
 # result = np.reshape(result, magnitudes.shape)
 
 # t1_start = perf_counter()
