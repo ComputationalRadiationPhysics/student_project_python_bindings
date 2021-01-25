@@ -1,4 +1,4 @@
-import cuPhaseRet
+import cuPhaseRet #c++ pybind phase retrieval
 import numpy as np
 import imageio
 import matplotlib.pyplot as plt
@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 np.random.seed(1)
-image = imageio.imread('d.png', as_gray=True)
+image = imageio.imread('a.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 
 result = cuPhaseRet.fienup_phase_retrieval(magnitudes, 500, False, "hybrid", 0.8)

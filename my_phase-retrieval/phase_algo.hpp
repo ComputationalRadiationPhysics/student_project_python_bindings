@@ -16,28 +16,35 @@ namespace py = pybind11;
 
 __global__ void get_real(cufftDoubleComplex *temp_y, double *y)
 {
-    int idx = blockIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
     y[idx] = temp_y[idx].x;
 }
 
 __global__ void get_complex(double *image_x, cufftDoubleComplex *image_x_comp)
 {
-    int idx = blockIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
     image_x_comp[idx].x = image_x[idx];
     image_x_comp[idx].y = 0;
 }
 
 
-//find elements that violate object domain constraints 
-//or are not masked
-__global__ void update_violated_elements(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode)
+__global__ void process_arrays(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode, int iter)
 {
-    int idx = blockIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
     bool logical_not_mask;
     bool y_less_than_zero;
     bool logical_and;
     bool indices; //logical or
 
+    //previous iterate
+    if(iter == 0) image_x_p[idx] = y[idx];
+    else image_x_p[idx] = image_x[idx];
+
+    //updates for elements that satisfy object domain constraints
+    if(mode == 3 || mode == 1) image_x[idx] = y[idx];
+
+    //find elements that violate object domain constraints 
+    //or are not masked 
     //1. logical not of mask
     if(mask[idx] <= 0) logical_not_mask = true;
     else if(mask[idx] >= 1) logical_not_mask = false;
@@ -57,11 +64,11 @@ __global__ void update_violated_elements(double *mask, double *y, double *image_
     //updates for elements that violate object domain constraints
     if(indices == true)
     {
-        if(mode == 1)
+        if(mode == 1 || mode == 2)
         {
             image_x[idx] = image_x_p[idx]-beta*y[idx];
         }
-        else if(mode == 2)
+        else if(mode == 3)
         {
             image_x[idx] = y[idx]-beta*y[idx];
         }
@@ -78,9 +85,14 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     srand( (unsigned)time( NULL ) );
     py::buffer_info bufMag = mag.request();
 
+    int int_mode;
+    if(mode.compare("hybrid") == 0) int_mode = 1;
+    else if(mode.compare("input-output") == 0) int_mode = 2;
+    else if(mode.compare("output-output") == 0) int_mode = 3;
+
     double *ptrMag = (double *) bufMag.ptr; //magnitude 1D
-    size_t X = bufMag.shape[1]; //width of magnitude
-    size_t Y = bufMag.shape[0]; //heght of magnitude
+    size_t X = bufMag.shape[0]; //width of magnitude
+    size_t Y = bufMag.shape[1]; //heght of magnitude
     
     //alternative fot saving mag size, prevent warning while using CUFFT 
     //( warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data)"
@@ -105,7 +117,8 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     fill_n(&image_x[0], dimension, 0.0); //fill image_x with 0.0 for initial data
     fill_n(&image_x_p[0], dimension, 0.0); //fill image_x_p with 0.0 for initial data
     fill_n(&y[0], dimension, 0.0); //store inverse fourier transform (real number)
- 
+    
+    //this is not natively support in CUDA, still finding solution
     for (int i = 0; i < dimension; i++)
     {
         double rand_num = (double) rand()/RAND_MAX;
@@ -119,24 +132,22 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     CUDA_CHECK(cudaMalloc((void **) &temp_y_dev, dimension * sizeof(cufftDoubleComplex)));
     CUDA_CHECK(cudaMalloc(&y_dev_res, dimension * sizeof(double)));
 
-    double *mask_dev, *y_device, *image_x_device, *image_x_p_device;
+    double *mask_dev, *image_x_device, *image_x_p_device;
     CUDA_CHECK(cudaMalloc(&mask_dev, dimension * sizeof(double)));
-    CUDA_CHECK(cudaMalloc(&y_device, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc(&image_x_device, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc(&image_x_p_device, dimension * sizeof(double)));
 
-    double *image_x_dev;
-    cufftHandle plan2;
     cufftDoubleComplex *image_x_dev_comp, *image_x_dev_res;
-    CUDA_CHECK(cudaMalloc((void **) &image_x_dev, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc((void **) &image_x_dev_comp, dimension * sizeof(cufftDoubleComplex)));
     CUDA_CHECK(cudaMalloc((void **) &image_x_dev_res, dimension * sizeof(cufftDoubleComplex)));
+
+    CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(image_x_device, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(image_x_p_device, image_x_p, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
     //iteration with number of steps------------------------------------------------------------------------------------------------------
     for(int iter = 0; iter < steps; iter++)
     {
-        //create complex arry for cufft, y_dev_start is initial complex, temp_y_dev is the result of inverse fft, 
-        //and y_dev_res is a real number version of the result
         CUDA_CHECK(cudaMemcpy(y_dev_start, y_hat, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
         //create cufft plan
@@ -145,70 +156,36 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
         cufftExecZ2Z(plan, y_dev_start, temp_y_dev, CUFFT_INVERSE);
 
         //change temp_y to y, which is a real number version of temp_y
-        get_real<<<dimension, 1>>>(temp_y_dev, y_dev_res);
+        get_real<<<size_x, size_y>>>(temp_y_dev, y_dev_res);
 
-        //copy back y_device to y
-        CUDA_CHECK(cudaMemcpy(y, y_dev_res, dimension * sizeof(double), cudaMemcpyDeviceToHost));
-                
-        
-        //check if x_p is empty (0.0) or not
-        int filled = 0;
-        for(int i = 0; i < dimension; i++)
-        {
-            if(image_x_p[i] != 0.0)
-            {
-                filled = 1;
-                break;
-            }
-        }
-
-        //previous iterate
-        if(filled == 0) copy(y, y+dimension, image_x_p);
-        else copy(image_x, image_x+dimension, image_x_p);
-       
-        //updates for elements that satisfy object domain constraints
-        if(mode.compare("output-output") == 0 || mode.compare("hybrid") == 0) copy(y, y+dimension, image_x);
-
-        //updates for elements that violate object domain constraints--------------------------------------------------------------------
-        CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
-        CUDA_CHECK(cudaMemcpy(y_device, y, dimension * sizeof(double), cudaMemcpyHostToDevice));
-        CUDA_CHECK(cudaMemcpy(image_x_device, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
-        CUDA_CHECK(cudaMemcpy(image_x_p_device, image_x_p, dimension * sizeof(double), cudaMemcpyHostToDevice));
-
-        int int_mode;
-        if(mode.compare("hybrid") == 0 || mode.compare("input-output") == 0) int_mode = 1;
-        else if(mode.compare("output-output") == 0) int_mode = 2;
-        
-        update_violated_elements<<<dimension, 1>>>(mask_dev, y_device, image_x_device, image_x_p_device, beta, int_mode);
-
-        CUDA_CHECK(cudaMemcpy(image_x, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
+        //processing image_x
+        process_arrays<<<size_x, size_y>>>(mask_dev, y_dev_res, image_x_device, image_x_p_device, beta, int_mode, iter);
 
         //fourier transform---------------------------------------------------------------------------------------------------------
-        CUDA_CHECK(cudaMemcpy(image_x_dev, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
+        //convert real to complex (using 0 as imaginary)
+        get_complex<<<size_x, size_y>>>(image_x_device, image_x_dev_comp);
 
-        get_complex<<<dimension, 1>>>(image_x_dev, image_x_dev_comp);
-
-        cufftPlan2d(&plan2, size_x, size_y, CUFFT_Z2Z);
-        cufftExecZ2Z(plan2, image_x_dev_comp, image_x_dev_res, CUFFT_FORWARD);
+        cufftExecZ2Z(plan, image_x_dev_comp, image_x_dev_res, CUFFT_FORWARD);
 
         CUDA_CHECK(cudaMemcpy(x_hat, image_x_dev_res, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
 
+        //this is not natively support in CUDA, still finding solution
         for(int i = 0; i < dimension; i++) 
         {
             y_hat[i] = ptrMag[i]*exp(1i*arg(x_hat[i]));
         }
     }
+
+    //copy image_x from device to host
+    CUDA_CHECK(cudaMemcpy(image_x, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
     
     cufftDestroy(plan);
     cudaFree(y_dev_start);
     cudaFree(temp_y_dev);
     cudaFree(y_dev_res);
-    cudaFree(mask_dev); 
-    cudaFree(y_device); 
+    cudaFree(mask_dev);
     cudaFree(image_x_device); 
     cudaFree(image_x_p_device);
-    cufftDestroy(plan2);
-    cudaFree(image_x_dev);
     cudaFree(image_x_dev_comp);
     cudaFree(image_x_dev_res);
 
