@@ -68,8 +68,9 @@ __global__ void update_violated_elements(double *mask, double *y, double *image_
     }
 }
 
-py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, string mode, double beta) 
+py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, string mode, double beta)
 {
+  using namespace std::literals::complex_literals;
     assert(beta > 0);
     assert(steps > 0);
     assert(mode == "input-output" || mode == "output-output" || mode == "hybrid");

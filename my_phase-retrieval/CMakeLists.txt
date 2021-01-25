@@ -16,7 +16,7 @@ target_link_libraries(cuPhaseRet
   cufft
   curand)
 
-set_target_properties(cuPhaseRet PROPERTIES CUDA_STANDARD 11)
+set_target_properties(cuPhaseRet PROPERTIES CUDA_STANDARD 14)
 set_target_properties(cuPhaseRet PROPERTIES PREFIX "")
 
 if(MSVC)
