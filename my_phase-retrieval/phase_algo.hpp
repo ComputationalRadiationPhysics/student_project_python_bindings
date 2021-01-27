@@ -141,7 +141,6 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     }
 
     double *y_dev_res;
-    cufftHandle plan2d;
     cufftDoubleComplex *y_dev_start;
     CUDA_CHECK(cudaMalloc((void **) &y_dev_start, dimension * sizeof(cufftDoubleComplex)));
     CUDA_CHECK(cudaMalloc((void **) &y_dev_res, dimension * sizeof(double)));
@@ -158,15 +157,15 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     CUDA_CHECK(cudaMemcpy(image_x_device, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(image_x_p_device, image_x_p, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
-    cufftResult fftresult;
-
     //iteration with number of steps------------------------------------------------------------------------------------------------------
     for(int iter = 0; iter < steps; iter++)
     {
+        cufftResult fftresult;
         CUDA_CHECK(cudaMemcpy(y_dev_start, y_hat, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
         //create cufft plan
         //use Z2Z for complex double to complex double, use Z2Z because Z2D has no inverse option
+        cufftHandle plan2d;
         fftresult = cufftPlan2d(&plan2d, dimension, dimension, CUFFT_Z2Z); //why is this plan invalid????
         if(fftresult != CUFFT_SUCCESS) cout<<iter<<"\t"<<fftresult<<endl;
 
@@ -193,12 +192,12 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
         {
             y_hat[i] = ptrMag[i]*exp(complex1i*arg(x_hat[i]));
         }
+        cufftDestroy(plan2d);
     }
 
     //copy image_x from device to host
     CUDA_CHECK(cudaMemcpy(image_x, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
     
-    cufftDestroy(plan);
     cudaFree(y_dev_start);
     cudaFree(y_dev_res);
     cudaFree(mask_dev);
@@ -222,7 +221,6 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
 }
 
 
-//this is works without any invalids, but I dont know why this is invalid in phase retrieval function
 void test_fft(py::array_t<double> mag)
 {
     py::buffer_info bufMag = mag.request();
@@ -241,23 +239,35 @@ void test_fft(py::array_t<double> mag)
     cufftDoubleComplex *mag_dev2;
     CUDA_CHECK(cudaMalloc((void **) &mag_dev2, dimension * sizeof(cufftDoubleComplex)));
 
+    cufftDoubleComplex *mag_dev3;
+    CUDA_CHECK(cudaMalloc((void **) &mag_dev3, dimension * sizeof(cufftDoubleComplex)));
+
+    cufftDoubleComplex *mag_dev4;
+    CUDA_CHECK(cudaMalloc((void **) &mag_dev4, dimension * sizeof(cufftDoubleComplex)));
+
     get_complex<<<dimension, 1>>>(mag_dev, mag_dev2);
 
-    for(int i = 0; i < 10; i++)
-    {
-        cufftHandle plan;
-        cufftResult fftresult;
-        fftresult = cufftPlan2d(&plan, dimension, dimension, CUFFT_Z2Z); //this is not invalid
-        if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-        fftresult = cufftExecZ2Z(plan, mag_dev2, mag_dev2, CUFFT_INVERSE);
-        if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-        fftresult = cufftExecZ2Z(plan, mag_dev2, mag_dev2, CUFFT_FORWARD);
-        if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    }
+    
+    cufftHandle plan1;
+    cufftHandle plan2;
+    cufftResult fftresult;
+    // fftresult = cufftPlan2d(&plan1, size_x, size_y, CUFFT_Z2Z);
+    // if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+    fftresult = cufftPlan1d(&plan1, size_x, CUFFT_Z2Z, size_y);
+    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+    fftresult = cufftExecZ2Z(plan1, mag_dev2, mag_dev3, CUFFT_FORWARD);
+    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+    fftresult = cufftPlan1d(&plan2, size_x, CUFFT_Z2Z, size_y);
+    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+    // fftresult = cufftPlan2d(&plan2, size_x, size_y, CUFFT_Z2Z);
+    // if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+    fftresult = cufftExecZ2Z(plan2, mag_dev3, mag_dev4, CUFFT_INVERSE);
+    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+    
 
-    CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev2, dimension * sizeof(complex<double>), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev4, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
 
-    for(int i = 0; i < dimension; i++) 
+    for(int i = 0; i < 3; i++) 
     {
         cout<<ptrMag[i]<<"\t"<<ptrMag2[i]<<endl;
     }
