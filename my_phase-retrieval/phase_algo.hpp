@@ -28,71 +28,91 @@ __device__ cuDoubleComplex my_complex_exp (cuDoubleComplex arg)
    return res;
 }
 
-__global__ void get_real(cufftDoubleComplex *temp_y, double *y)
+__global__ void normalize(cufftDoubleComplex * data, cufftDoubleComplex * data_res, const int size_y, const int size_x)
 {
-    // int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int idx = blockIdx.x;
-    y[idx] = temp_y[idx].x;
-}
-
-__global__ void get_complex(double *image_x, cufftDoubleComplex *image_x_comp)
-{
-    // int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int idx = blockIdx.x;
-    image_x_comp[idx].x = image_x[idx];
-    image_x_comp[idx].y = 0;
-}
-
-
-__global__ void process_arrays(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode, int iter)
-{
-    // int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int idx = blockIdx.x;
-    bool logical_not_mask;
-    bool y_less_than_zero;
-    bool logical_and;
-    bool indices; //logical or
-
-    //previous iterate
-    if(iter == 0) image_x_p[idx] = y[idx];
-    else image_x_p[idx] = image_x[idx];
-
-    //updates for elements that satisfy object domain constraints
-    if(mode == 3 || mode == 1) image_x[idx] = y[idx];
-
-    //find elements that violate object domain constraints 
-    //or are not masked 
-    //1. logical not of mask
-    if(mask[idx] <= 0) logical_not_mask = true;
-    else if(mask[idx] >= 1) logical_not_mask = false;
-
-    //2. check if any element y is less than zero
-    if(y[idx] < 0) y_less_than_zero = true;
-    else if(y[idx] >= 0) y_less_than_zero = false;
-
-    //use "and" logical to check the "less than zero y" and the mask  
-    if(y_less_than_zero == true && mask[idx] >= 1) logical_and = true;
-    else logical_and = false;
-
-    //create indices with logical "not"
-    if(logical_and == false && logical_not_mask == false) indices = false;
-    else indices = true;
-
-    //updates for elements that violate object domain constraints
-    if(indices == true)
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int size = size_y * size_x;
+    if (idx < size)
     {
-        if(mode == 1 || mode == 2)
+        data_res[idx].x = data[idx].x / static_cast<float>(size);
+        data_res[idx].y = data[idx].y / static_cast<float>(size);
+    }
+}
+
+__global__ void get_real(cufftDoubleComplex *temp_y, double *y, const int size_y, const int size_x)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int size = size_y * size_x;
+    if (idx < size)
+    {
+        y[idx] = temp_y[idx].x;
+    }
+}
+
+__global__ void get_complex(double *image_x, cufftDoubleComplex *image_x_comp, const int size_y, const int size_x)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int size = size_y * size_x;
+    if (idx < size)
+    {
+        image_x_comp[idx].x = image_x[idx];
+        image_x_comp[idx].y = 0;
+    }
+}
+
+
+__global__ void process_arrays(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode, int iter, const int size_y, const int size_x)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int size = size_y * size_x;
+    if (idx < size)
+    {
+        bool logical_not_mask;
+        bool y_less_than_zero;
+        bool logical_and;
+        bool indices; //logical or
+
+        //previous iterate
+        if(iter == 0) image_x_p[idx] = y[idx];
+        else image_x_p[idx] = image_x[idx];
+
+        //updates for elements that satisfy object domain constraints
+        if(mode == 3 || mode == 1) image_x[idx] = y[idx];
+
+        //find elements that violate object domain constraints 
+        //or are not masked 
+        //1. logical not of mask
+        if(mask[idx] <= 0) logical_not_mask = true;
+        else if(mask[idx] >= 1) logical_not_mask = false;
+
+        //2. check if any element y is less than zero
+        if(y[idx] < 0) y_less_than_zero = true;
+        else if(y[idx] >= 0) y_less_than_zero = false;
+
+        //use "and" logical to check the "less than zero y" and the mask  
+        if(y_less_than_zero == true && mask[idx] >= 1) logical_and = true;
+        else logical_and = false;
+
+        //create indices with logical "not"
+        if(logical_and == false && logical_not_mask == false) indices = false;
+        else indices = true;
+
+        //updates for elements that violate object domain constraints
+        if(indices == true)
         {
-            image_x[idx] = image_x_p[idx]-beta*y[idx];
-        }
-        else if(mode == 3)
-        {
-            image_x[idx] = y[idx]-beta*y[idx];
+            if(mode == 1 || mode == 2)
+            {
+                image_x[idx] = image_x_p[idx]-beta*y[idx];
+            }
+            else if(mode == 3)
+            {
+                image_x[idx] = y[idx]-beta*y[idx];
+            }
         }
     }
 }
 
-py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, bool verbose, string mode, double beta)
+py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int steps, bool verbose, string mode, double beta)
 {
   using namespace std::literals::complex_literals;
     assert(beta > 0);
@@ -107,7 +127,7 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     else if(mode.compare("input-output") == 0) int_mode = 2;
     else if(mode.compare("output-output") == 0) int_mode = 3;
 
-    double *ptrMag = (double *) bufMag.ptr; //magnitude 1D
+    complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
     size_t X = bufMag.shape[1]; //width of magnitude
     size_t Y = bufMag.shape[0]; //height of magnitude
     
@@ -141,17 +161,19 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     }
 
     double *y_dev_res;
-    cufftDoubleComplex *y_dev_start;
-    CUDA_CHECK(cudaMalloc((void **) &y_dev_start, dimension * sizeof(cufftDoubleComplex)));
+    cufftDoubleComplex *y_dev_start, *y_dev_start_norm;
     CUDA_CHECK(cudaMalloc((void **) &y_dev_res, dimension * sizeof(double)));
-
+    CUDA_CHECK(cudaMalloc((void **) &y_dev_start, dimension * sizeof(cufftDoubleComplex)));
+    CUDA_CHECK(cudaMalloc((void **) &y_dev_start_norm, dimension * sizeof(cufftDoubleComplex)));
+    
     double *mask_dev, *image_x_device, *image_x_p_device;
     CUDA_CHECK(cudaMalloc((void **) &mask_dev, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc((void **) &image_x_device, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc((void **) &image_x_p_device, dimension * sizeof(double)));
 
-    cufftDoubleComplex *image_x_dev_comp;
+    cufftDoubleComplex *image_x_dev_comp, *image_x_dev_comp_norm;
     CUDA_CHECK(cudaMalloc((void **) &image_x_dev_comp, dimension * sizeof(cufftDoubleComplex)));
+    CUDA_CHECK(cudaMalloc((void **) &image_x_dev_comp_norm, dimension * sizeof(cufftDoubleComplex)));
 
     CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(image_x_device, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
@@ -165,24 +187,27 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
 
         //create cufft plan
         //use Z2Z for complex double to complex double, use Z2Z because Z2D has no inverse option
-        cufftHandle plan2d;
-        fftresult = cufftPlan2d(&plan2d, dimension, dimension, CUFFT_Z2Z); //why is this plan invalid????
+        cufftHandle plan;
+        fftresult = cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z);
         if(fftresult != CUFFT_SUCCESS) cout<<iter<<"\t"<<fftresult<<endl;
 
-        fftresult = cufftExecZ2Z(plan2d, y_dev_start, y_dev_start, CUFFT_INVERSE);
+        fftresult = cufftExecZ2Z(plan, y_dev_start, y_dev_start, CUFFT_INVERSE);
         if(fftresult != CUFFT_SUCCESS) cout<<iter<<"\t"<<fftresult<<endl;
+
+        normalize<<<size_y, size_x>>>(y_dev_start, y_dev_start, size_y, size_x);
 
         //change temp_y to y, which is a real number version of temp_y
-        get_real<<<dimension, 1>>>(y_dev_start, y_dev_res);
+        get_real<<<size_y, size_x>>>(y_dev_start, y_dev_res, size_y, size_x);
 
         //processing image_x
-        process_arrays<<<dimension, 1>>>(mask_dev, y_dev_res, image_x_device, image_x_p_device, beta, int_mode, iter);
+        process_arrays<<<size_y, size_x>>>(mask_dev, y_dev_res, image_x_device, image_x_p_device, beta, int_mode, iter, size_y, size_x);
 
         //fourier transform---------------------------------------------------------------------------------------------------------
         //convert real to complex (using 0 as imaginary)
-        get_complex<<<dimension, 1>>>(image_x_device, image_x_dev_comp);
+        get_complex<<<size_y, size_x>>>(image_x_device, image_x_dev_comp, size_y, size_x);
 
-        fftresult = cufftExecZ2Z(plan2d, image_x_dev_comp, image_x_dev_comp, CUFFT_FORWARD);
+        //there is actually cufftD2Z (double to complex double), but it doesnt work
+        fftresult = cufftExecZ2Z(plan, image_x_dev_comp, image_x_dev_comp, CUFFT_FORWARD);
         if(fftresult != CUFFT_SUCCESS) cout<<iter<<"\t"<<fftresult<<endl;
 
         CUDA_CHECK(cudaMemcpy(x_hat, image_x_dev_comp, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
@@ -192,7 +217,8 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
         {
             y_hat[i] = ptrMag[i]*exp(complex1i*arg(x_hat[i]));
         }
-        cufftDestroy(plan2d);
+        
+        cufftDestroy(plan);
     }
 
     //copy image_x from device to host
@@ -216,63 +242,44 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<double> mag, int steps, b
     delete[] y_hat;
 
     py::array_t<double> image_x_2d =  py::array(dimension, image_x);
-    image_x_2d.resize({Y,X});
+    //image_x_2d.resize({Y,X});
     return image_x_2d;
 }
 
 
-void test_fft(py::array_t<double> mag)
+py::array_t<complex<double>> test_fft(py::array_t<complex<double>> mag)
 {
     py::buffer_info bufMag = mag.request();
-    double *ptrMag = (double *) bufMag.ptr; //magnitude 1D
+    complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
     size_t X = bufMag.shape[1]; //width of magnitude
     size_t Y = bufMag.shape[0]; //height of magnitude
     int size_x = static_cast<int>(X); 
     int size_y = static_cast<int>(Y);
     int dimension = size_x*size_y;
     complex<double> *ptrMag2 = new complex<double>[dimension];
+    complex<double> *ptrMag3 = new complex<double>[dimension];
 
-    double *mag_dev;
-    CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(double)));
-    CUDA_CHECK(cudaMemcpy(mag_dev, ptrMag, dimension * sizeof(double), cudaMemcpyHostToDevice));
+    cufftDoubleComplex *mag_dev;
+    CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(cufftDoubleComplex)));
+    CUDA_CHECK(cudaMemcpy(mag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
-    cufftDoubleComplex *mag_dev2;
-    CUDA_CHECK(cudaMalloc((void **) &mag_dev2, dimension * sizeof(cufftDoubleComplex)));
-
-    cufftDoubleComplex *mag_dev3;
-    CUDA_CHECK(cudaMalloc((void **) &mag_dev3, dimension * sizeof(cufftDoubleComplex)));
-
-    cufftDoubleComplex *mag_dev4;
-    CUDA_CHECK(cudaMalloc((void **) &mag_dev4, dimension * sizeof(cufftDoubleComplex)));
-
-    get_complex<<<dimension, 1>>>(mag_dev, mag_dev2);
-
-    
     cufftHandle plan1;
-    cufftHandle plan2;
     cufftResult fftresult;
-    // fftresult = cufftPlan2d(&plan1, size_x, size_y, CUFFT_Z2Z);
-    // if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    fftresult = cufftPlan1d(&plan1, size_x, CUFFT_Z2Z, size_y);
-    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    fftresult = cufftExecZ2Z(plan1, mag_dev2, mag_dev3, CUFFT_FORWARD);
-    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    fftresult = cufftPlan1d(&plan2, size_x, CUFFT_Z2Z, size_y);
-    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    // fftresult = cufftPlan2d(&plan2, size_x, size_y, CUFFT_Z2Z);
-    // if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    fftresult = cufftExecZ2Z(plan2, mag_dev3, mag_dev4, CUFFT_INVERSE);
+
+    fftresult = cufftPlan2d(&plan1, size_x, size_y, CUFFT_Z2Z);
     if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
     
+    fftresult = cufftExecZ2Z(plan1, mag_dev, mag_dev, CUFFT_INVERSE);
+    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
 
-    CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev4, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
+    normalize<<<size_y, size_x>>>(mag_dev, mag_dev, size_y, size_x);  
 
-    for(int i = 0; i < 3; i++) 
-    {
-        cout<<ptrMag[i]<<"\t"<<ptrMag2[i]<<endl;
-    }
+    
+    cufftDestroy(plan1);
 
-    // get_real<<<size_y, size_x>>>(temp_y_dev, y_dev_res);
+    CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
 
+    py::array_t<complex<double>> image_x_2d =  py::array(dimension, ptrMag2);
+    return image_x_2d;
 
 }

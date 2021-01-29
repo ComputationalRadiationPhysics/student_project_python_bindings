@@ -7,35 +7,29 @@ from time import perf_counter
 
 
 np.random.seed(1)
-image = imageio.imread('test.png', as_gray=True)
+image = imageio.imread('c.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 
-# result = cuPhaseRet.fienup_phase_retrieval(magnitudes, 2, False, "hybrid", 0.8)
+result =  np.reshape(cuPhaseRet.fienup_phase_retrieval(magnitudes, 500, False, "hybrid", 0.8) , magnitudes.shape, "F")
 
-cuPhaseRet.test_fft(magnitudes)
+# result =  cuPhaseRet.fienup_phase_retrieval(magnitudes, 500, False, "hybrid", 0.8)
 
 
+# result = fienup_phase_retrieval(magnitudes, steps=500, verbose=False)
 
 # t1_start = perf_counter()
-
-# result2 = fienup_phase_retrieval(magnitudes, steps=2, verbose=False)
-
 # t1_stop = perf_counter() 
 # print("Elapsed time during the whole program in seconds:", t1_stop-t1_start) 
 
-# print(magnitudes.shape)
-# print(result.shape)
 
-# for i in range(2):
-#     for j in range(2):
-#         print(result[i][j]," ", result2[i][j])
+# cuPhaseRet.test_fft(magnitudes)
 
 
-# plt.show()
-# plt.subplot(121)
-# plt.imshow(magnitudes, cmap='gray')
-# plt.title('Image')
-# plt.subplot(122)
-# plt.imshow(result, cmap='gray')
-# plt.title('Reconstruction')
-# plt.show()
+plt.show()
+plt.subplot(121)
+plt.imshow(image, cmap='gray')
+plt.title('Image')
+plt.subplot(122)
+plt.imshow(result, cmap='gray')
+plt.title('Reconstruction')
+plt.show()
