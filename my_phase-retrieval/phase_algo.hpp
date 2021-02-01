@@ -27,7 +27,7 @@ __global__ void get_real(cufftDoubleComplex *temp_y, double *y, const int size_y
 __global__ void get_complex(double *image_x, cufftDoubleComplex *image_x_comp, const int size_y, const int size_x);
 __global__ void process_arrays(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode, int iter, const int size_y, const int size_x);
 
-py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int steps, bool verbose, string mode, double beta)
+py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py::array_t<double> masks, int steps, bool verbose, string mode, double beta)
 {
   using namespace std::literals::complex_literals;
     assert(beta > 0);
@@ -36,6 +36,7 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int
 
     srand( (unsigned)time( NULL ) );
     py::buffer_info bufMag = mag.request();
+    py::buffer_info bufMask = masks.request();
 
     int int_mode;
     if(mode.compare("hybrid") == 0) int_mode = 1;
@@ -45,6 +46,7 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int
     complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
     size_t X = bufMag.shape[1]; //width of magnitude
     size_t Y = bufMag.shape[0]; //height of magnitude
+    double *mask = (double *) bufMask.ptr; //mask array, same size as magnitude
     
     //alternative fot saving mag size, prevent warning while using CUFFT 
     //( warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data)"
@@ -52,10 +54,9 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int
     int size_x = static_cast<int>(X); 
     int size_y = static_cast<int>(Y);
     int dimension = size_x*size_y;
-    //complex<double> complex1i(0, 1);
 
     //allocating arrays, all arrays bellow are 1D representation of 2D array
-    double *mask = new double[dimension]; //mask array, same size as magnitude
+    //double *mask = new double[dimension]; //mask array, same size as magnitude
     double *image_x = new double[dimension]; //initial image x, same size as magnitude
     double *image_x_p = new double[dimension]; //previous image for steps
     complex<double> *y_hat = new complex<double>[dimension]; //sample random phase
@@ -64,7 +65,7 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int
     auto begin = chrono::high_resolution_clock::now();
 
     //allocating inital values to arrays
-    fill_n(&mask[0], dimension, 1.0); //fill mask with 1.0
+    //fill_n(&mask[0], dimension, 1.0); //fill mask with 1.0
     fill_n(&image_x[0], dimension, 0.0); //fill image_x with 0.0 for initial data
     fill_n(&image_x_p[0], dimension, 0.0); //fill image_x_p with 0.0 for initial data
 
@@ -98,6 +99,12 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int
     //iteration with number of steps------------------------------------------------------------------------------------------------------
     for(int iter = 0; iter < steps; iter++)
     {
+        if(verbose == true)
+        {
+            printf("step %d of %d\n", iter+1, steps);
+        }
+
+        //cufft error checking
         cufftResult fftresult;
 
         //create cufft plan
@@ -151,12 +158,10 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, int
     printf("Time measured: %.3f seconds.\n", elapsed.count() * 1e-9);
 
     //free all arrays
-    delete[] mask;
     delete[] image_x_p;
     delete[] y_hat;
 
     py::array_t<double> image_x_2d =  py::array(dimension, image_x);
-    //image_x_2d.resize({Y,X});
     return image_x_2d;
 }
 

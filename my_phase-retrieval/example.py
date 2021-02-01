@@ -7,17 +7,11 @@ import matplotlib.pyplot as plt
 
 
 np.random.seed(1)
-image = imageio.imread('c.png', as_gray=True)
+image = imageio.imread('a.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
+mask = np.ones(magnitudes.shape) #default mask
 
-result =  np.reshape(cuPhaseRet.fienup_phase_retrieval(magnitudes, 500, False, "hybrid", 0.8) , magnitudes.shape, "F")
-
-# res1 = np.reshape(cuPhaseRet.test_fft(magnitudes), magnitudes.shape, "F")
-# res2 = np.fft.fft2(magnitudes)
-
-# for i in range(5):
-#     for j in range(5):
-#         print(res1[i][j]," ", res2[i][j])
+result =  np.reshape(cuPhaseRet.fienup_phase_retrieval(magnitudes, mask, 500, False, "hybrid", 0.8) , magnitudes.shape, "F")
 
 # result = fienup_phase_retrieval(magnitudes, steps=500, verbose=False)
 
