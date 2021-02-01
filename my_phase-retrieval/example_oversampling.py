@@ -29,6 +29,6 @@ plt.subplot(223)
 plt.imshow(image_padded, cmap='gray')
 plt.title('Image padded')
 plt.subplot(224)
-plt.imshow(result_oversampled, cmap='gray');
+plt.imshow(result_oversampled, cmap='gray')
 plt.title('Reconstruction oversampled')
 plt.show()

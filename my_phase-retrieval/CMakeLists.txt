@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.11)
 project(cuPhaseRet LANGUAGES CXX CUDA)
 
 find_package(PythonInterp 3.6 REQUIRED)
