@@ -26,6 +26,7 @@ __global__ void normalize(cufftDoubleComplex * data, cufftDoubleComplex * data_r
 __global__ void get_real(cufftDoubleComplex *temp_y, double *y, const int size_y, const int size_x);
 __global__ void get_complex(double *image_x, cufftDoubleComplex *image_x_comp, const int size_y, const int size_x);
 __global__ void process_arrays(double *mask, double *y, double *image_x, double *image_x_p, double beta, int mode, int iter, const int size_y, const int size_x);
+__global__ void get_column_major(double *row_major, double *column_major, const int size_y, const int size_x);
 
 py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py::array_t<double> masks, int steps, bool verbose, string mode, double beta)
 {
@@ -140,8 +141,16 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
         cufftDestroy(plan);
     }
 
-    //copy image_x from device to host
-    CUDA_CHECK(cudaMemcpy(image_x, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
+    //store column major version of result
+    double *image_x_device_f;
+    CUDA_CHECK(cudaMalloc((void **) &image_x_device_f, dimension * sizeof(double)));
+
+    //change row-major to column major
+    dim3 block(size_y, size_x);
+    get_column_major<<<block, 1>>>(image_x_device, image_x_device_f, size_y, size_x);  
+
+    //copy image_x column majorfrom device to host
+    CUDA_CHECK(cudaMemcpy(image_x, image_x_device_f, dimension * sizeof(double), cudaMemcpyDeviceToHost));
     
     cudaFree(states);
     cudaFree(y_dev_start);
@@ -162,6 +171,7 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
     delete[] y_hat;
 
     py::array_t<double> image_x_2d =  py::array(dimension, image_x);
+     image_x_2d.resize({Y, X});
     return image_x_2d;
 }
 
@@ -205,6 +215,7 @@ __global__ void get_yhat_dev2(cufftDoubleComplex *y_hat, cufftDoubleComplex *x_h
     int size = size_y * size_x;
     if (idx < size)
     {
+        //arg = atan2(imag, real)
         exp_target.x = atan2(x_hat[idx].y, x_hat[idx].x);
         exp_target.y = 0;
         y_hat[idx] = cuCmul(ptrMag[idx], gpu_exp(cuCmul(complex1i, exp_target)));
@@ -240,6 +251,16 @@ __global__ void get_complex(double *image_x, cufftDoubleComplex *image_x_comp, c
     {
         image_x_comp[idx].x = image_x[idx];
         image_x_comp[idx].y = 0;
+    }
+}
+
+__global__ void get_column_major(double *row_major, double *column_major, const int size_y, const int size_x)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int idy = blockIdx.y * blockDim.y + threadIdx.y;
+    if (idx < size_y && idy < size_x)
+    {
+        column_major[idx * size_x + idy] = row_major[idx + size_y * idy];
     }
 }
 
@@ -294,38 +315,47 @@ __global__ void process_arrays(double *mask, double *y, double *image_x, double 
     }
 }
 
-py::array_t<complex<double>> test_fft(py::array_t<complex<double>> mag)
-{
-    py::buffer_info bufMag = mag.request();
-    complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
-    size_t X = bufMag.shape[1]; //width of magnitude
-    size_t Y = bufMag.shape[0]; //height of magnitude
-    int size_x = static_cast<int>(X); 
-    int size_y = static_cast<int>(Y);
-    int dimension = size_x*size_y;
-    complex<double> *ptrMag2 = new complex<double>[dimension];
-    complex<double> *ptrMag3 = new complex<double>[dimension];
 
-    cufftDoubleComplex *mag_dev;
-    CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(cufftDoubleComplex)));
-    CUDA_CHECK(cudaMemcpy(mag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
+// py::array_t<complex<double>> test_fft(py::array_t<complex<double>> mag)
+// {
+//     py::buffer_info bufMag = mag.request();
+//     complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
+//     size_t X = bufMag.shape[1]; //width of magnitude
+//     size_t Y = bufMag.shape[0]; //height of magnitude
+//     int size_x = static_cast<int>(X); 
+//     int size_y = static_cast<int>(Y);
+//     int dimension = size_x*size_y;
+//     complex<double> *ptrMag2 = new complex<double>[dimension];
+//     complex<double> *ptrMag3 = new complex<double>[dimension];
 
-    cufftHandle plan1;
-    cufftResult fftresult;
+//     cufftDoubleComplex *mag_dev;
+//     CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(cufftDoubleComplex)));
+//     CUDA_CHECK(cudaMemcpy(mag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
-    fftresult = cufftPlan2d(&plan1, size_x, size_y, CUFFT_Z2Z);
-    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+//     cufftDoubleComplex *mag_dev2;
+//     CUDA_CHECK(cudaMalloc((void **) &mag_dev2, dimension * sizeof(cufftDoubleComplex)));
+
+//     cufftHandle plan1;
+//     cufftResult fftresult;
+
+//     fftresult = cufftPlan2d(&plan1, size_x, size_y, CUFFT_Z2Z);
+//     if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
     
-    fftresult = cufftExecZ2Z(plan1, mag_dev, mag_dev, CUFFT_FORWARD);
-    if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
+//     fftresult = cufftExecZ2Z(plan1, mag_dev, mag_dev, CUFFT_FORWARD);
+//     //fftresult = cufftExecZ2Z(plan1, mag_dev, mag_dev, CUFFT_INVERSE);
+//     if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
 
-    //normalize<<<size_y, size_x>>>(mag_dev, mag_dev, size_y, size_x);  
+//     //normalize<<<size_y, size_x>>>(mag_dev, mag_dev, size_y, size_x);  
 
-    cufftDestroy(plan1);
+//     cufftDestroy(plan1);
 
-    CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
+//     dim3 block(size_y, size_x);
+//     get_column_major<<<block, 1>>>(mag_dev, mag_dev2, size_y, size_x);  
 
-    py::array_t<complex<double>> image_x_2d =  py::array(dimension, ptrMag2);
-    return image_x_2d;
+//     CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev2, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
 
-}
+//     py::array_t<complex<double>> image_x_2d =  py::array(dimension, ptrMag2);
+//     image_x_2d.resize({Y, X});
+//     return image_x_2d;
+
+// }

@@ -14,7 +14,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(cuPhaseRet, m) 
 {
   m.def("fienup_phase_retrieval", &fienup_phase_retrieval);
-  m.def("test_fft", &test_fft);
+  // m.def("test_fft", &test_fft);
 }
 
 
