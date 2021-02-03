@@ -10,13 +10,13 @@
 #include <iostream>
 #include <complex>
 #include <string>
-#include <chrono>
 
 #define PI 3.1415926535897932384626433
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std;
-
+using namespace std::literals::complex_literals;
 namespace py = pybind11;
+
 
 __global__ void init_random(double seed, curandState_t *states, const int size_y, const int size_x);
 __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex arg);
@@ -30,7 +30,7 @@ __global__ void get_column_major(double *row_major, double *column_major, const 
 
 py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py::array_t<double> masks, int steps, bool verbose, string mode, double beta)
 {
-  using namespace std::literals::complex_literals;
+    //asserting inputs
     assert(beta > 0);
     assert(steps > 0);
     assert(mode == "input-output" || mode == "output-output" || mode == "hybrid");
@@ -56,43 +56,39 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
     int size_y = static_cast<int>(Y);
     int dimension = size_x*size_y;
 
-    //allocating arrays, all arrays bellow are 1D representation of 2D array
-    //double *mask = new double[dimension]; //mask array, same size as magnitude
+    //allocating arraysin host, all arrays bellow are 1D representation of 2D array
     double *image_x = new double[dimension]; //initial image x, same size as magnitude
     double *image_x_p = new double[dimension]; //previous image for steps
     complex<double> *y_hat = new complex<double>[dimension]; //sample random phase
     complex<double> *x_hat = new complex<double>[dimension];
 
-    auto begin = chrono::high_resolution_clock::now();
-
-    //allocating inital values to arrays
-    //fill_n(&mask[0], dimension, 1.0); //fill mask with 1.0
-    fill_n(&image_x[0], dimension, 0.0); //fill image_x with 0.0 for initial data
-    fill_n(&image_x_p[0], dimension, 0.0); //fill image_x_p with 0.0 for initial data
-
-    double *y_dev_res;
-    cufftDoubleComplex *y_dev_start, *mag_dev;
+    //initialize arrays for GPU
+    double *y_dev_res, *mask_dev, *image_x_device, *image_x_p_device;
+    cufftDoubleComplex *y_dev_start, *mag_dev , *image_x_dev_comp;
     CUDA_CHECK(cudaMalloc((void **) &y_dev_res, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc((void **) &y_dev_start, dimension * sizeof(cufftDoubleComplex)));
     CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(cufftDoubleComplex)));
+    CUDA_CHECK(cudaMalloc((void **) &mask_dev, dimension * sizeof(double)));
+    CUDA_CHECK(cudaMalloc((void **) &image_x_device, dimension * sizeof(double)));
+    CUDA_CHECK(cudaMalloc((void **) &image_x_p_device, dimension * sizeof(double)));
+    CUDA_CHECK(cudaMalloc((void **) &image_x_dev_comp, dimension * sizeof(cufftDoubleComplex)));
 
+    //allocating inital values to host arrays
+    fill_n(&image_x[0], dimension, 0.0); //fill image_x with 0.0 for initial data
+    fill_n(&image_x_p[0], dimension, 0.0); //fill image_x_p with 0.0 for initial data
+
+    //states for random
     curandState_t* states;
     cudaMalloc((void**) &states, dimension * sizeof(curandState_t));
     init_random<<<size_y, size_x>>>(static_cast<double>(time(0)), states, size_y, size_x);
 
+    //copy input magnitudes to gpu
     CUDA_CHECK(cudaMemcpy(mag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
     //sample random phase
     get_yhat_dev1<<<size_y, size_x>>>(states, y_dev_start, mag_dev, size_y, size_x);
-    
-    double *mask_dev, *image_x_device, *image_x_p_device;
-    CUDA_CHECK(cudaMalloc((void **) &mask_dev, dimension * sizeof(double)));
-    CUDA_CHECK(cudaMalloc((void **) &image_x_device, dimension * sizeof(double)));
-    CUDA_CHECK(cudaMalloc((void **) &image_x_p_device, dimension * sizeof(double)));
-
-    cufftDoubleComplex *image_x_dev_comp;
-    CUDA_CHECK(cudaMalloc((void **) &image_x_dev_comp, dimension * sizeof(cufftDoubleComplex)));
-
+     
+    //copy mask, image_x, and image_x_p to GPU
     CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(image_x_device, image_x, dimension * sizeof(double), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(image_x_p_device, image_x_p, dimension * sizeof(double), cudaMemcpyHostToDevice));
@@ -100,17 +96,15 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
     //iteration with number of steps------------------------------------------------------------------------------------------------------
     for(int iter = 0; iter < steps; iter++)
     {
+        //printing steps if verbose is true
         if(verbose == true)
         {
             printf("step %d of %d\n", iter+1, steps);
         }
-
-        //cufft error checking
-        cufftResult fftresult;
-
-        //create cufft plan
+       
+        cufftResult fftresult; //cufft error checking
+        cufftHandle plan; //create cufft plan
         //use Z2Z for complex double to complex double, use Z2Z because Z2D has no inverse option
-        cufftHandle plan;
         fftresult = cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z); //I need to switch up the size_x and size_y to get right results
         if(fftresult != CUFFT_SUCCESS) cout<<iter<<"\t"<<fftresult<<endl;
 
@@ -122,11 +116,11 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
 
         //change temp_y to y, which is a real number version of temp_y
         get_real<<<size_y, size_x>>>(y_dev_start, y_dev_res, size_y, size_x);
-
+        
         //processing image_x
         process_arrays<<<size_y, size_x>>>(mask_dev, y_dev_res, image_x_device, image_x_p_device, beta, int_mode, iter, size_y, size_x);
 
-        //fourier transform---------------------------------------------------------------------------------------------------------
+        //fourier transform
         //convert real to complex (using 0 as imaginary)
         get_complex<<<size_y, size_x>>>(image_x_device, image_x_dev_comp, size_y, size_x);
 
@@ -149,9 +143,10 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
     dim3 block(size_y, size_x);
     get_column_major<<<block, 1>>>(image_x_device, image_x_device_f, size_y, size_x);  
 
-    //copy image_x column majorfrom device to host
+    //copy image_x column major from device to host
     CUDA_CHECK(cudaMemcpy(image_x, image_x_device_f, dimension * sizeof(double), cudaMemcpyDeviceToHost));
     
+    //free CUDA usages
     cudaFree(states);
     cudaFree(y_dev_start);
     cudaFree(mag_dev);
@@ -161,15 +156,11 @@ py::array_t<double> fienup_phase_retrieval(py::array_t<complex<double>> mag, py:
     cudaFree(image_x_p_device);
     cudaFree(image_x_dev_comp);
 
-    auto end = chrono::high_resolution_clock::now();
-    auto elapsed = chrono::duration_cast<chrono::nanoseconds>(end - begin);
-
-    printf("Time measured: %.3f seconds.\n", elapsed.count() * 1e-9);
-
     //free all arrays
     delete[] image_x_p;
     delete[] y_hat;
 
+    //send to python
     py::array_t<double> image_x_2d =  py::array(dimension, image_x);
      image_x_2d.resize({Y, X});
     return image_x_2d;
@@ -314,48 +305,3 @@ __global__ void process_arrays(double *mask, double *y, double *image_x, double 
         }
     }
 }
-
-
-// py::array_t<complex<double>> test_fft(py::array_t<complex<double>> mag)
-// {
-//     py::buffer_info bufMag = mag.request();
-//     complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
-//     size_t X = bufMag.shape[1]; //width of magnitude
-//     size_t Y = bufMag.shape[0]; //height of magnitude
-//     int size_x = static_cast<int>(X); 
-//     int size_y = static_cast<int>(Y);
-//     int dimension = size_x*size_y;
-//     complex<double> *ptrMag2 = new complex<double>[dimension];
-//     complex<double> *ptrMag3 = new complex<double>[dimension];
-
-//     cufftDoubleComplex *mag_dev;
-//     CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(cufftDoubleComplex)));
-//     CUDA_CHECK(cudaMemcpy(mag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
-
-//     cufftDoubleComplex *mag_dev2;
-//     CUDA_CHECK(cudaMalloc((void **) &mag_dev2, dimension * sizeof(cufftDoubleComplex)));
-
-//     cufftHandle plan1;
-//     cufftResult fftresult;
-
-//     fftresult = cufftPlan2d(&plan1, size_x, size_y, CUFFT_Z2Z);
-//     if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-    
-//     fftresult = cufftExecZ2Z(plan1, mag_dev, mag_dev, CUFFT_FORWARD);
-//     //fftresult = cufftExecZ2Z(plan1, mag_dev, mag_dev, CUFFT_INVERSE);
-//     if(fftresult != CUFFT_SUCCESS) cout<<fftresult<<endl;
-
-//     //normalize<<<size_y, size_x>>>(mag_dev, mag_dev, size_y, size_x);  
-
-//     cufftDestroy(plan1);
-
-//     dim3 block(size_y, size_x);
-//     get_column_major<<<block, 1>>>(mag_dev, mag_dev2, size_y, size_x);  
-
-//     CUDA_CHECK(cudaMemcpy(ptrMag2, mag_dev2, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
-
-//     py::array_t<complex<double>> image_x_2d =  py::array(dimension, ptrMag2);
-//     image_x_2d.resize({Y, X});
-//     return image_x_2d;
-
-// }
