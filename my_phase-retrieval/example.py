@@ -7,7 +7,7 @@ from time import perf_counter
 
 
 np.random.seed(1)
-image = imageio.imread('a.png', as_gray=True)
+image = imageio.imread('b.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 mask = np.ones(magnitudes.shape) #default mask
 
