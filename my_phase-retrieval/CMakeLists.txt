@@ -44,3 +44,11 @@ add_custom_command(TARGET pyTestScript PRE_BUILD
 
 install(TARGETS cuPhaseRet DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py DESTINATION bin)
+
+add_custom_command(TARGET pyTestScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/test.py $<TARGET_FILE_DIR:cuPhaseRet>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
+
+install(TARGETS cuPhaseRet DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test.py DESTINATION bin)

@@ -43,10 +43,10 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<compl
     else if(mode.compare("input-output") == 0) int_mode = 2;
     else if(mode.compare("output-output") == 0) int_mode = 3;
 
-    complex<double> *ptrMag = (complex<double> *) bufMag.ptr; //magnitude 1D
+    complex<double> *ptrMag = static_cast<complex<double>*>(bufMag.ptr); //magnitude 1D
     size_t X = bufMag.shape[0]; //width of magnitude
     size_t Y = bufMag.shape[1]; //height of magnitude
-    double *mask = (double *) bufMask.ptr; //mask array, same size as magnitude
+    double *mask = static_cast<double*>(bufMask.ptr); //mask array, same size as magnitude
     
     //alternative fot saving mag size, prevent warning while using CUFFT 
     //( warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data)"
@@ -55,18 +55,15 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<compl
     int size_y = static_cast<int>(Y);
     int dimension = size_x*size_y;
 
-    //allocating image x
-    double *image_x = new double[dimension]; //initial image x, same size as magnitude
-
     //initialize arrays for GPU
     double *mask_dev, *image_x_device, *image_x_p_device;
     cufftDoubleComplex *y_hat_dev, *mag_dev , *image_x_dev_comp;
-    CUDA_CHECK(cudaMalloc((void **) &y_hat_dev, dimension * sizeof(cufftDoubleComplex))); //sample random phase
-    CUDA_CHECK(cudaMalloc((void **) &mag_dev, dimension * sizeof(cufftDoubleComplex))); //device magnitudes
-    CUDA_CHECK(cudaMalloc((void **) &mask_dev, dimension * sizeof(double))); //device mask
-    CUDA_CHECK(cudaMalloc((void **) &image_x_device, dimension * sizeof(double))); //image x in device
-    CUDA_CHECK(cudaMalloc((void **) &image_x_p_device, dimension * sizeof(double))); //image x_p in device
-    CUDA_CHECK(cudaMalloc((void **) &image_x_dev_comp, dimension * sizeof(cufftDoubleComplex))); //complex version if image x
+    CUDA_CHECK(cudaMalloc(&y_hat_dev, dimension * sizeof(cufftDoubleComplex))); //sample random phase
+    CUDA_CHECK(cudaMalloc(&mag_dev, dimension * sizeof(cufftDoubleComplex))); //device magnitudes
+    CUDA_CHECK(cudaMalloc(&mask_dev, dimension * sizeof(double))); //device mask
+    CUDA_CHECK(cudaMalloc(&image_x_device, dimension * sizeof(double))); //image x in device
+    CUDA_CHECK(cudaMalloc(&image_x_p_device, dimension * sizeof(double))); //image x_p in device
+    CUDA_CHECK(cudaMalloc(&image_x_dev_comp, dimension * sizeof(cufftDoubleComplex))); //complex version if image x
 
     //allocating inital values to device
     cudaMemset(image_x_device,  0, dimension * sizeof(double));
@@ -78,7 +75,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<compl
 
     //states for random
     curandState_t* states;
-    cudaMalloc((void**) &states, dimension * sizeof(curandState_t));
+    cudaMalloc(&states, dimension * sizeof(curandState_t));
     init_random<<<8*numSMs, 256>>>(static_cast<double>(time(0)), states, dimension);
 
     //copy input magnitudes and mask to gpu
@@ -111,9 +108,9 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<compl
         cufftDestroy(plan);
     }
 
-    py::array_t<double> result = py::array_t<double>(bufMag.size);
+    py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(bufMag.size);
     py::buffer_info bufRes = result.request();
-    double *ptrRes = (double *) bufRes.ptr;
+    double *ptrRes = static_cast<double*>(bufRes.ptr);
     CUDA_CHECK(cudaMemcpy(ptrRes, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
 
     //free CUDA usages
@@ -141,11 +138,11 @@ __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex arg)
 }
 
 //Normalize the results of CUFFT_INVERSE
-__device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int size)
+__device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int dimension)
 {
     cufftDoubleComplex norm_data;
-    norm_data.x = comp_data.x / static_cast<double>(size);
-    norm_data.y = comp_data.y / static_cast<double>(size);
+    norm_data.x = comp_data.x / static_cast<double>(dimension);
+    norm_data.y = comp_data.y / static_cast<double>(dimension);
     
     return norm_data;
 }
