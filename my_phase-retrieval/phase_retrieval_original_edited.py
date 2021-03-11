@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import matplotlib.pyplot as plt
 
 def fienup_phase_retrieval(mag, mask=None, beta=0.8, 
                            steps=200, mode='hybrid', verbose=True):
@@ -87,5 +89,12 @@ def fienup_phase_retrieval(mag, mask=None, beta=0.8,
         # satisfy fourier domain constraints
         # (replace magnitude with input magnitude)
         y_hat = mag*np.exp(1j*np.angle(x_hat))
+
+        if(verbose):
+            current_directory = os.getcwd()
+            final_directory = os.path.join(current_directory, r'original_python_result')
+            if not os.path.exists(final_directory):
+                os.makedirs(final_directory)
+            plt.imsave(final_directory + "/image_" + str(i) + ".png", x, cmap='gray')
         
     return x

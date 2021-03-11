@@ -137,7 +137,7 @@ __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex arg)
    return res;
 }
 
-//Normalize the results of CUFFT_INVERSE
+//Normalize every result elements of CUFFT_INVERSE
 __device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int dimension)
 {
     cufftDoubleComplex norm_data;
@@ -172,7 +172,7 @@ __global__ void init_random(double seed, curandState_t *states, int dimension)
     }
 }
 
-////sample random phase
+//sample random phase using curandState_t as random value
 __global__ void random_phase(curandState_t *states, cufftDoubleComplex *y_hat, cufftDoubleComplex *ptrMag, int dimension ) 
 {
     cufftDoubleComplex complex1i, exp_target;

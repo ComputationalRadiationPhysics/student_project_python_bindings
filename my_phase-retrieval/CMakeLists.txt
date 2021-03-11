@@ -6,12 +6,20 @@ find_package(PythonLibs 3.6 REQUIRED)
 list(APPEND CMAKE_PREFIX_PATH "D:/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11")
 find_package(pybind11 REQUIRED)
 
+
+list(APPEND CMAKE_PREFIX_PATH "D:/opencv/build")
+set(OpenCV_STATIC ON)
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
 add_library(cuPhaseRet SHARED phase_retrieval.cu)
 target_link_libraries(cuPhaseRet
   ${PYTHON_LIBRARIES}
+  ${OpenCV_LIBS}
   cudart
   cufft
   curand)
