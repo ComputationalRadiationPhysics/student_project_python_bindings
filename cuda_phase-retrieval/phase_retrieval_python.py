@@ -2,8 +2,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-def fienup_phase_retrieval(mag, mask=None, beta=0.8, 
-                           steps=200, mode='hybrid', verbose=True):
+def fienup_phase_retrieval(mag, mask=None, steps=20, verbose=True, mode='hybrid', beta=0.8, array_random = None):
     """
     Implementation of Fienup's phase-retrieval methods. This function
     implements the input-output, the output-output and the hybrid method.
@@ -43,11 +42,15 @@ def fienup_phase_retrieval(mag, mask=None, beta=0.8,
     
     if mask is None:
         mask = np.ones(mag.shape)
+
+    if array_random is None:
+        array_random = np.random.rand(*mag.shape)
         
-    assert mag.shape == mask.shape, 'mask and mag must have same shape'
+    assert mask.shape == mag.shape, 'mask and mag must have same shape'
+    assert array_random.shape == mag.shape, 'mask and mag must have same shape'
     
     # sample random phase and initialize image x 
-    y_hat = mag*np.exp(1j*2*np.pi*np.random.rand(*mag.shape))
+    y_hat = mag*np.exp(1j*2*np.pi*array_random)
     x = np.zeros(mag.shape)
     
     # previous iterate
@@ -92,7 +95,7 @@ def fienup_phase_retrieval(mag, mask=None, beta=0.8,
 
         if(verbose):
             current_directory = os.getcwd()
-            final_directory = os.path.join(current_directory, r'original_python_result')
+            final_directory = os.path.join(current_directory, r'result_python')
             if not os.path.exists(final_directory):
                 os.makedirs(final_directory)
             plt.imsave(final_directory + "/image_" + str(i) + ".png", x, cmap='gray')
