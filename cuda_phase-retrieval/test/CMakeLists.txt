@@ -1,14 +1,6 @@
-cmake_minimum_required(VERSION 3.11)
-project(cuPhaseRet_Test LANGUAGES CXX CUDA)
-
-find_package(PythonInterp 3.6 REQUIRED)
-find_package(PythonLibs 3.6 REQUIRED)
-find_package(pybind11 REQUIRED)
-
 set(OpenCV_STATIC ON)
 find_package( OpenCV 4.5.1 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-
 
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
@@ -46,6 +38,3 @@ add_custom_command(TARGET pyTestScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/test.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
-
-install(TARGETS cuPhaseRet_Test DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test.py DESTINATION bin)

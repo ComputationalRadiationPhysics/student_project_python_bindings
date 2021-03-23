@@ -5,6 +5,9 @@ find_package(PythonInterp 3.6 REQUIRED)
 find_package(PythonLibs 3.6 REQUIRED)
 find_package(pybind11 REQUIRED)
 
+# copy example images to build folder
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/example_images/ )
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
@@ -36,19 +39,19 @@ endif()
 
 # add a custom target for the test.py script, which will copy test.py
 # to the installation folder and update every time there is a change
-add_custom_target(pyTestScript ALL)
-add_custom_command(TARGET pyTestScript PRE_BUILD
+add_custom_target(pyExampleScript ALL)
+add_custom_command(TARGET pyExampleScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/example.py $<TARGET_FILE_DIR:cuPhaseRet>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/example.py)
 
-install(TARGETS cuPhaseRet DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py DESTINATION bin)
-
-add_custom_command(TARGET pyTestScript PRE_BUILD
+add_custom_command(TARGET pyExampleScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py $<TARGET_FILE_DIR:cuPhaseRet>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py)
 
 install(TARGETS cuPhaseRet DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py DESTINATION bin)
+
+add_subdirectory("test/")
