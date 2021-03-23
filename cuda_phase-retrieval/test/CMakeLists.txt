@@ -2,34 +2,22 @@ set(OpenCV_STATIC ON)
 find_package( OpenCV 4.5.1 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-include_directories(${PYTHON_INCLUDE_DIRS})
-include_directories(${pybind11_INCLUDE_DIR})
-
 add_library(cuPhaseRet_Test SHARED test_binding.cu)
+
+target_include_directories(cuPhaseRet_Test
+  PUBLIC
+  ${PYTHON_INCLUDE_DIRS}
+  ${pybind11_INCLUDE_DIR})
+
 target_link_libraries(cuPhaseRet_Test
+  msvcHelper
   ${PYTHON_LIBRARIES}
   ${OpenCV_LIBS}
   cudart
   cufft
   curand)
 
-set_target_properties(cuPhaseRet_Test PROPERTIES CUDA_STANDARD 14)
 set_target_properties(cuPhaseRet_Test PROPERTIES PREFIX "")
-
-if(MSVC)
-  set_target_properties(cuPhaseRet_Test PROPERTIES SUFFIX ".pyd")
-endif()
-
-# on windows, the build can be done with the Visual Studio or ninja generator
-# this configuration is Visual Studio specific
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio*")
-  set_target_properties(cuPhaseRet_Test PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-  set_target_properties(cuPhaseRet_Test PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR} )
-  set_target_properties(cuPhaseRet_Test PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
-endif()
 
 # add a custom target for the test.py script, which will copy test.py
 # to the installation folder and update every time there is a change
