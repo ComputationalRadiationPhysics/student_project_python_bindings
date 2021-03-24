@@ -7,16 +7,15 @@ from time import perf_counter
 
 #np.random.seed(1)
 image = imageio.imread('../../example_images/a.png', as_gray=True)
-magnitudes = np.abs(np.fft.fft2(image)) #input must be an fft of the image
-array_random = np.random.rand(*magnitudes.shape) #uniform random
-mask = np.ones(magnitudes.shape) #default mask
+array_random = np.random.rand(*image.shape) #uniform random
+mask = np.ones(image.shape) #default mask
 
 print("Running phase retrieval...")
 
 # t1_start = perf_counter()
 
-result_original = phase_retrieval_python.fienup_phase_retrieval(magnitudes, mask, 20, True, "hybrid", 0.8, array_random)
-result_cuda =  cuPhaseRet.fienup_phase_retrieval(magnitudes, mask, 20, True, "hybrid", 0.8, array_random)
+result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, 20, "hybrid", 0.8, array_random)
+result_cuda =  cuPhaseRet.fienup_phase_retrieval(image, mask, 20, "hybrid", 0.8, array_random)
 
 # t1_stop = perf_counter() 
 # print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)

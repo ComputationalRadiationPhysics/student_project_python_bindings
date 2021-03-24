@@ -2,7 +2,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
-def fienup_phase_retrieval(mag, mask=None, steps=20, verbose=True, mode='hybrid', beta=0.8, array_random = None):
+def fienup_phase_retrieval(image, mask=None, steps=20, mode='hybrid', beta=0.8, array_random = None):
     """
     Implementation of Fienup's phase-retrieval methods. This function
     implements the input-output, the output-output and the hybrid method.
@@ -11,14 +11,13 @@ def fienup_phase_retrieval(mag, mask=None, steps=20, verbose=True, mode='hybrid'
     the Gerchberg-Saxton algorithm.
     
     Parameters:
-        mag: Measured magnitudes of Fourier transform
+        image : input image
         mask: Binary array indicating where the image should be
               if padding is known
         beta: Positive step size
         steps: Number of iterations
         mode: Which algorithm to use
               (can be 'input-output', 'output-output' or 'hybrid')
-        verbose: If True, progress is shown
     
     Returns:
         x: Reconstructed image
@@ -39,6 +38,8 @@ def fienup_phase_retrieval(mag, mask=None, steps=20, verbose=True, mode='hybrid'
     assert mode == 'input-output' or mode == 'output-output'\
         or mode == 'hybrid',\
     'mode must be \'input-output\', \'output-output\' or \'hybrid\''
+
+    mag = np.abs(np.fft.fft2(image)) #Measured magnitudes of Fourier transform
     
     if mask is None:
         mask = np.ones(mag.shape)
@@ -58,10 +59,6 @@ def fienup_phase_retrieval(mag, mask=None, steps=20, verbose=True, mode='hybrid'
         
     # main loop
     for i in range(1, steps+1):
-        # show progress
-        if i % 100 == 0 and verbose: 
-            print("step", i, "of", steps)
-        
         # inverse fourier transform
         y = np.real(np.fft.ifft2(y_hat))
         
@@ -92,12 +89,5 @@ def fienup_phase_retrieval(mag, mask=None, steps=20, verbose=True, mode='hybrid'
         # satisfy fourier domain constraints
         # (replace magnitude with input magnitude)
         y_hat = mag*np.exp(1j*np.angle(x_hat))
-
-        if(verbose):
-            current_directory = os.getcwd()
-            final_directory = os.path.join(current_directory, r'result_python')
-            if not os.path.exists(final_directory):
-                os.makedirs(final_directory)
-            plt.imsave(final_directory + "/image_" + str(i) + ".png", x, cmap='gray')
         
     return x

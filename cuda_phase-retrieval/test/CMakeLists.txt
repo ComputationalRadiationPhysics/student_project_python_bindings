@@ -6,7 +6,7 @@ find_package(PythonLibs 3.6 REQUIRED)
 find_package(pybind11 REQUIRED)
 
 set(OpenCV_STATIC ON)
-find_package( OpenCV REQUIRED )
+find_package( OpenCV 4.5.1 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 
