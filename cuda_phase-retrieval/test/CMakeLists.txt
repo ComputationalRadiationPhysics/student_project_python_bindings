@@ -10,12 +10,13 @@ target_include_directories(cuPhaseRet_Test
   ${pybind11_INCLUDE_DIR})
 
 target_link_libraries(cuPhaseRet_Test
-  msvcHelper
   ${PYTHON_LIBRARIES}
   ${OpenCV_LIBS}
   cudart
   cufft
   curand)
+
+add_msvc_poperties(cuPhaseRet_Test)
 
 set_target_properties(cuPhaseRet_Test PROPERTIES PREFIX "")
 
