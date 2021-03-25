@@ -1,0 +1,24 @@
+\hypertarget{example__original_8py}{}\doxysection{example\+\_\+original.\+py File Reference}
+\label{example__original_8py}\index{example\_original.py@{example\_original.py}}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespaceexample__original}{example\+\_\+original}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespaceexample__original_a2f2cf2886fe0c63e2097f63f31538cb2}{example\+\_\+original.\+image}} = imageio.\+imread(\textquotesingle{}a.\+png\textquotesingle{}, as\+\_\+gray=True)
+\item 
+\mbox{\hyperlink{namespaceexample__original_aa03b3125ff2e208af98129f16ca2102d}{example\+\_\+original.\+magnitudes}} = np.\+abs(np.\+fft.\+fft2(image))
+\item 
+\mbox{\hyperlink{namespaceexample__original_ad695da7f07570b13fb0b60ee664d97d1}{example\+\_\+original.\+mask}} = np.\+ones(magnitudes.\+shape)
+\item 
+\mbox{\hyperlink{namespaceexample__original_abca7ef50125824aace147507b2fa5c23}{example\+\_\+original.\+t1\+\_\+start}} = perf\+\_\+counter()
+\item 
+\mbox{\hyperlink{namespaceexample__original_a2659d4ff9c3e0b1ff04040c37b3502e2}{example\+\_\+original.\+result}} = \mbox{\hyperlink{phase__algo_8hpp_abaeefe77f3cf7d052b5ede628b1b471b}{fienup\+\_\+phase\+\_\+retrieval}}(magnitudes, mask, beta=0.\+8, steps=20, mode=\textquotesingle{}hybrid\textquotesingle{}, verbose=True)
+\item 
+\mbox{\hyperlink{namespaceexample__original_a7029d237d402e20dcfef162d83ad9de4}{example\+\_\+original.\+t1\+\_\+stop}} = perf\+\_\+counter()
+\item 
+\mbox{\hyperlink{namespaceexample__original_a22466bf6466a8fe918afbf478a5aa383}{example\+\_\+original.\+cmap}}
+\end{DoxyCompactItemize}

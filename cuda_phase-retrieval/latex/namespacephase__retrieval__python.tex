@@ -1,0 +1,45 @@
+\hypertarget{namespacephase__retrieval__python}{}\doxysection{phase\+\_\+retrieval\+\_\+python Namespace Reference}
+\label{namespacephase__retrieval__python}\index{phase\_retrieval\_python@{phase\_retrieval\_python}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacephase__retrieval__python_a379a7b99e518b5d6c0c2a36f508d0a8a}{fienup\+\_\+phase\+\_\+retrieval}} (image, mask=None, steps=20, mode=\textquotesingle{}hybrid\textquotesingle{}, beta=0.\+8, array\+\_\+random=None)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacephase__retrieval__python_a379a7b99e518b5d6c0c2a36f508d0a8a}\label{namespacephase__retrieval__python_a379a7b99e518b5d6c0c2a36f508d0a8a}} 
+\index{phase\_retrieval\_python@{phase\_retrieval\_python}!fienup\_phase\_retrieval@{fienup\_phase\_retrieval}}
+\index{fienup\_phase\_retrieval@{fienup\_phase\_retrieval}!phase\_retrieval\_python@{phase\_retrieval\_python}}
+\doxysubsubsection{\texorpdfstring{fienup\_phase\_retrieval()}{fienup\_phase\_retrieval()}}
+{\footnotesize\ttfamily def phase\+\_\+retrieval\+\_\+python.\+fienup\+\_\+phase\+\_\+retrieval (\begin{DoxyParamCaption}\item[{}]{image,  }\item[{}]{mask = {\ttfamily None},  }\item[{}]{steps = {\ttfamily 20},  }\item[{}]{mode = {\ttfamily \textquotesingle{}hybrid\textquotesingle{}},  }\item[{}]{beta = {\ttfamily 0.8},  }\item[{}]{array\+\_\+random = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Implementation of Fienup's phase-retrieval methods. This function
+implements the input-output, the output-output and the hybrid method.
+
+Note: Mode 'output-output' and beta=1 results in 
+the Gerchberg-Saxton algorithm.
+
+Parameters:
+    image : input image
+    mask: Binary array indicating where the image should be
+          if padding is known
+    beta: Positive step size
+    steps: Number of iterations
+    mode: Which algorithm to use
+          (can be 'input-output', 'output-output' or 'hybrid')
+
+Returns:
+    x: Reconstructed image
+
+Author: Tobias Uelwer
+Date: 30.12.2018
+
+References:
+[1] E. Osherovich, Numerical methods for phase retrieval, 2012,
+    https://arxiv.org/abs/1203.4756
+[2] J. R. Fienup, Phase retrieval algorithms: a comparison, 1982,
+    https://www.osapublishing.org/ao/abstract.cfm?uri=ao-21-15-2758
+[3] https://github.com/cwg45/Image-Reconstruction
+\end{DoxyVerb}
+ 

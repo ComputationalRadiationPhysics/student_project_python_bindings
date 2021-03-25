@@ -1,0 +1,243 @@
+\hypertarget{phase__algo_8hpp}{}\doxysection{phase\+\_\+algo.\+hpp File Reference}
+\label{phase__algo_8hpp}\index{phase\_algo.hpp@{phase\_algo.hpp}}
+{\ttfamily \#include $<$pybind11/numpy.\+h$>$}\newline
+{\ttfamily \#include $<$pybind11/pybind11.\+h$>$}\newline
+{\ttfamily \#include $<$cufft.\+h$>$}\newline
+{\ttfamily \#include $<$cu\+Complex.\+h$>$}\newline
+{\ttfamily \#include $<$curand.\+h$>$}\newline
+{\ttfamily \#include $<$curand\+\_\+kernel.\+h$>$}\newline
+{\ttfamily \#include $<$cmath$>$}\newline
+{\ttfamily \#include $<$cstdio$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$random$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{phase__algo_8hpp_a598a3330b3c21701223ee0ca14316eca}{PI}}~3.\+1415926535897932384626433
+\item 
+\#define \mbox{\hyperlink{phase__algo_8hpp_aeaf2b8792be9f99ad11147059ef5079d}{CUDA\+\_\+\+CHECK}}(call)~\{cuda\+Error\+\_\+t error = call; if(error!=cuda\+Success)\{printf(\char`\"{}$<$\%s$>$\+:\%i \char`\"{},\+\_\+\+\_\+\+FILE\+\_\+\+\_\+,\+\_\+\+\_\+\+LINE\+\_\+\+\_\+); printf(\char`\"{}\mbox{[}CUDA\mbox{]} Error\+: \%s\textbackslash{}n\char`\"{}, cuda\+Get\+Error\+String(error));\}\}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ cufft\+Double\+Complex \mbox{\hyperlink{phase__algo_8hpp_a48b6d381bdf7e7f422c48767d028c91f}{gpu\+\_\+exp}} (cufft\+Double\+Complex arg)
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ cufft\+Double\+Complex \mbox{\hyperlink{phase__algo_8hpp_a897e039e2f0572f7660954195545e1c9}{normalize}} (cufft\+Double\+Complex comp\+\_\+data, int size)
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ cufft\+Double\+Complex \mbox{\hyperlink{phase__algo_8hpp_a19c934623d29bce09d5c599b701e0e11}{get\+\_\+complex}} (double real\+\_\+data)
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ double \mbox{\hyperlink{phase__algo_8hpp_a182f10c5d939ae0f7e67c4d822216e3b}{get\+\_\+real}} (cufft\+Double\+Complex comp\+\_\+data)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_aa0c4f0a12a8dc2b3de7af0e8a8b54447}{get\+\_\+complex\+\_\+array}} (double $\ast$real\+\_\+array, cufft\+Double\+Complex $\ast$complex\+\_\+array, int dimension)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_a85b84741ca71c56b9a0766108e92bb4c}{get\+\_\+absolute\+\_\+array}} (cufft\+Double\+Complex $\ast$complex\+\_\+array, double $\ast$real\+\_\+array, int dimension)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_a2d028d41a0612f76efd71e8ab35ad3f9}{init\+\_\+random}} (double seed, curand\+State\+\_\+t $\ast$states, int dimension)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_a585835ae6298812fae3e0d13e10a6cb8}{random\+\_\+phase}} (double $\ast$random, cufft\+Double\+Complex $\ast$y\+\_\+hat, double $\ast$ptr\+Mag, int dimension)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_a0164dab2d8f7634c5e1e0802e2d3a7d1}{random\+\_\+phase\+\_\+cudastate}} (curand\+State\+\_\+t $\ast$states, cufft\+Double\+Complex $\ast$y\+\_\+hat, double $\ast$ptr\+Mag, int dimension)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_a2f7f3b762a78fafb43d0243fd9381a91}{satisfy\+\_\+fourier}} (cufft\+Double\+Complex $\ast$y\+\_\+hat, cufft\+Double\+Complex $\ast$x\+\_\+hat, double $\ast$ptr\+Mag, int dimension)
+\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{phase__algo_8hpp_ab931575201ebc55b60c58fc55ad2223b}{process\+\_\+arrays}} (double $\ast$mask, cufft\+Double\+Complex $\ast$y\+\_\+hat, double $\ast$image\+\_\+x, double $\ast$image\+\_\+x\+\_\+p, cufft\+Double\+Complex $\ast$image\+\_\+x\+\_\+comp, double beta, int mode, int iter, int dimension)
+\item 
+void \mbox{\hyperlink{phase__algo_8hpp_a4e0404195afc6eca1973e90ff75a1b6f}{CUFFT\+\_\+\+CHECK}} (cufft\+Result cufft\+\_\+process)
+\item 
+py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ \mbox{\hyperlink{phase__algo_8hpp_a38defc003021ab94f873d776bb851e54}{fienup\+\_\+phase\+\_\+retrieval}} (py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ image, py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ masks, int steps, string mode, double beta, py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ randoms)
+\item 
+py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ \mbox{\hyperlink{phase__algo_8hpp_abaeefe77f3cf7d052b5ede628b1b471b}{fienup\+\_\+phase\+\_\+retrieval}} (py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ image, py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$ masks, int steps, string mode, double beta)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{phase__algo_8hpp_aeaf2b8792be9f99ad11147059ef5079d}\label{phase__algo_8hpp_aeaf2b8792be9f99ad11147059ef5079d}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!CUDA\_CHECK@{CUDA\_CHECK}}
+\index{CUDA\_CHECK@{CUDA\_CHECK}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{CUDA\_CHECK}{CUDA\_CHECK}}
+{\footnotesize\ttfamily \#define CUDA\+\_\+\+CHECK(\begin{DoxyParamCaption}\item[{}]{call }\end{DoxyParamCaption})~\{cuda\+Error\+\_\+t error = call; if(error!=cuda\+Success)\{printf(\char`\"{}$<$\%s$>$\+:\%i \char`\"{},\+\_\+\+\_\+\+FILE\+\_\+\+\_\+,\+\_\+\+\_\+\+LINE\+\_\+\+\_\+); printf(\char`\"{}\mbox{[}CUDA\mbox{]} Error\+: \%s\textbackslash{}n\char`\"{}, cuda\+Get\+Error\+String(error));\}\}}
+
+\mbox{\Hypertarget{phase__algo_8hpp_a598a3330b3c21701223ee0ca14316eca}\label{phase__algo_8hpp_a598a3330b3c21701223ee0ca14316eca}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!PI@{PI}}
+\index{PI@{PI}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{PI}{PI}}
+{\footnotesize\ttfamily \#define PI~3.\+1415926535897932384626433}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{phase__algo_8hpp_a4e0404195afc6eca1973e90ff75a1b6f}\label{phase__algo_8hpp_a4e0404195afc6eca1973e90ff75a1b6f}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!CUFFT\_CHECK@{CUFFT\_CHECK}}
+\index{CUFFT\_CHECK@{CUFFT\_CHECK}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{CUFFT\_CHECK()}{CUFFT\_CHECK()}}
+{\footnotesize\ttfamily void CUFFT\+\_\+\+CHECK (\begin{DoxyParamCaption}\item[{cufft\+Result}]{cufft\+\_\+process }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{phase__algo_8hpp_abaeefe77f3cf7d052b5ede628b1b471b}\label{phase__algo_8hpp_abaeefe77f3cf7d052b5ede628b1b471b}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!fienup\_phase\_retrieval@{fienup\_phase\_retrieval}}
+\index{fienup\_phase\_retrieval@{fienup\_phase\_retrieval}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{fienup\_phase\_retrieval()}{fienup\_phase\_retrieval()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily py\+::array\+\_\+t$<$double, py\+::array\+::c\+\_\+style$>$ fienup\+\_\+phase\+\_\+retrieval (\begin{DoxyParamCaption}\item[{py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$}]{image,  }\item[{py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$}]{masks,  }\item[{int}]{steps,  }\item[{string}]{mode,  }\item[{double}]{beta }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{phase__algo_8hpp_a38defc003021ab94f873d776bb851e54}\label{phase__algo_8hpp_a38defc003021ab94f873d776bb851e54}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!fienup\_phase\_retrieval@{fienup\_phase\_retrieval}}
+\index{fienup\_phase\_retrieval@{fienup\_phase\_retrieval}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{fienup\_phase\_retrieval()}{fienup\_phase\_retrieval()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily py\+::array\+\_\+t$<$double, py\+::array\+::c\+\_\+style$>$ fienup\+\_\+phase\+\_\+retrieval (\begin{DoxyParamCaption}\item[{py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$}]{image,  }\item[{py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$}]{masks,  }\item[{int}]{steps,  }\item[{string}]{mode,  }\item[{double}]{beta,  }\item[{py\+::array\+\_\+t$<$ double, py\+::array\+::c\+\_\+style $>$}]{randoms }\end{DoxyParamCaption})}
+
+CUDA Phase Retrieval primary function with random array as parameter Asserting inputs
+
+$<$ Generate image array from pybind array
+
+$<$ Generate mask array from pybind array
+
+$<$ Generate array of uniform random from pybind array
+
+$<$ use integer instead of string for mode
+
+$<$ Get 1D image array
+
+$<$ Width of image
+
+$<$ Height of image
+
+$<$ Mask array, same size as image
+
+$<$ Array of uniform random number, same size as image
+
+$<$ Convert X to integer to prevent getting warning from CUFFT
+
+$<$ Convert Y to integer to prevent getting warning from CUFFT
+
+$<$ Area or dimension of image, mask, and array of random
+
+Initialize arrays in GPU
+
+$<$ Source image in GPU
+
+$<$ Magnitudes in GPU
+
+$<$ Mask in GPU
+
+$<$ Image output in GPU
+
+$<$ Save previous image output in GPU for iteration
+
+$<$ Array of random in GPU
+
+$<$ Sample random phase in GPU
+
+$<$ complex number version of source image in GPU
+
+$<$ Complex number version of image output in GPU
+
+Allocating memories in GPU
+
+Allocating inital values of output image to 0 in GPU
+
+Set number of SM for CUDA Kernel
+
+Convert the source image array into array of complex number After that, do CUFFT first time to the complex source image, then get the absolute value of the result The absolute result is called magnitude
+
+Copy mask and array of random to GPU
+
+Do initial random phase
+
+For every iteration \+:
+\begin{DoxyEnumerate}
+\item Create 2D CUFFT plan using complex double to complex double
+\item Do CUFFT Inverse to the random phase array
+\item Process arrays, generating 2 version result image array, complex version and real version
+\item The real version of result image array is the result used as output
+\item Do normal FFT to the complex version of result image array
+\item Combine the FFT\textquotesingle{}ed result with the random phase array
+\item Use the combined array is used as random phase array fo the next iterarion
+\end{DoxyEnumerate}
+
+Create a pybind array to store the final image result
+
+Free CUDA arrays
+
+Return the final result image\mbox{\Hypertarget{phase__algo_8hpp_a85b84741ca71c56b9a0766108e92bb4c}\label{phase__algo_8hpp_a85b84741ca71c56b9a0766108e92bb4c}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!get\_absolute\_array@{get\_absolute\_array}}
+\index{get\_absolute\_array@{get\_absolute\_array}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{get\_absolute\_array()}{get\_absolute\_array()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void get\+\_\+absolute\+\_\+array (\begin{DoxyParamCaption}\item[{cufft\+Double\+Complex $\ast$}]{complex\+\_\+array,  }\item[{double $\ast$}]{real\+\_\+array,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Get array of absolute value from array of complex number \mbox{\Hypertarget{phase__algo_8hpp_a19c934623d29bce09d5c599b701e0e11}\label{phase__algo_8hpp_a19c934623d29bce09d5c599b701e0e11}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!get\_complex@{get\_complex}}
+\index{get\_complex@{get\_complex}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{get\_complex()}{get\_complex()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ cufft\+Double\+Complex get\+\_\+complex (\begin{DoxyParamCaption}\item[{double}]{real\+\_\+data }\end{DoxyParamCaption})}
+
+Convert real number to CUFFT complex number using 0 as imaginary part \mbox{\Hypertarget{phase__algo_8hpp_aa0c4f0a12a8dc2b3de7af0e8a8b54447}\label{phase__algo_8hpp_aa0c4f0a12a8dc2b3de7af0e8a8b54447}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!get\_complex\_array@{get\_complex\_array}}
+\index{get\_complex\_array@{get\_complex\_array}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{get\_complex\_array()}{get\_complex\_array()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void get\+\_\+complex\+\_\+array (\begin{DoxyParamCaption}\item[{double $\ast$}]{real\+\_\+array,  }\item[{cufft\+Double\+Complex $\ast$}]{complex\+\_\+array,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Convert array of real number into array of complex number \mbox{\Hypertarget{phase__algo_8hpp_a182f10c5d939ae0f7e67c4d822216e3b}\label{phase__algo_8hpp_a182f10c5d939ae0f7e67c4d822216e3b}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!get\_real@{get\_real}}
+\index{get\_real@{get\_real}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{get\_real()}{get\_real()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ double get\+\_\+real (\begin{DoxyParamCaption}\item[{cufft\+Double\+Complex}]{comp\+\_\+data }\end{DoxyParamCaption})}
+
+Get real number part of a CUFFT complex number \mbox{\Hypertarget{phase__algo_8hpp_a48b6d381bdf7e7f422c48767d028c91f}\label{phase__algo_8hpp_a48b6d381bdf7e7f422c48767d028c91f}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!gpu\_exp@{gpu\_exp}}
+\index{gpu\_exp@{gpu\_exp}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{gpu\_exp()}{gpu\_exp()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ cufft\+Double\+Complex gpu\+\_\+exp (\begin{DoxyParamCaption}\item[{cufft\+Double\+Complex}]{arg }\end{DoxyParamCaption})}
+
+Calculate exponential of a double complex in GPU \mbox{\Hypertarget{phase__algo_8hpp_a2d028d41a0612f76efd71e8ab35ad3f9}\label{phase__algo_8hpp_a2d028d41a0612f76efd71e8ab35ad3f9}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!init\_random@{init\_random}}
+\index{init\_random@{init\_random}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{init\_random()}{init\_random()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void init\+\_\+random (\begin{DoxyParamCaption}\item[{double}]{seed,  }\item[{curand\+State\+\_\+t $\ast$}]{states,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Create states for random values \mbox{\Hypertarget{phase__algo_8hpp_a897e039e2f0572f7660954195545e1c9}\label{phase__algo_8hpp_a897e039e2f0572f7660954195545e1c9}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!normalize@{normalize}}
+\index{normalize@{normalize}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{normalize()}{normalize()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ cufft\+Double\+Complex normalize (\begin{DoxyParamCaption}\item[{cufft\+Double\+Complex}]{comp\+\_\+data,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Normalize every result elements of CUFFT\+\_\+\+INVERSE \mbox{\Hypertarget{phase__algo_8hpp_ab931575201ebc55b60c58fc55ad2223b}\label{phase__algo_8hpp_ab931575201ebc55b60c58fc55ad2223b}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!process\_arrays@{process\_arrays}}
+\index{process\_arrays@{process\_arrays}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{process\_arrays()}{process\_arrays()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void process\+\_\+arrays (\begin{DoxyParamCaption}\item[{double $\ast$}]{mask,  }\item[{cufft\+Double\+Complex $\ast$}]{y\+\_\+hat,  }\item[{double $\ast$}]{image\+\_\+x,  }\item[{double $\ast$}]{image\+\_\+x\+\_\+p,  }\item[{cufft\+Double\+Complex $\ast$}]{image\+\_\+x\+\_\+comp,  }\item[{double}]{beta,  }\item[{int}]{mode,  }\item[{int}]{iter,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Processing magnitudes with mask $<$ Get real version of normalized complex number
+
+Get previous image based on current iteration
+
+Updates for elements that satisfy object domain constraint
+
+find elements that violate object domain constraints or are not masked
+
+check if any element y is less than zero
+
+use \char`\"{}and\char`\"{} logical to check the \char`\"{}less than zero y\char`\"{} and the mask
+
+Determine indices value
+
+updates for elements that violate object domain constraints\mbox{\Hypertarget{phase__algo_8hpp_a585835ae6298812fae3e0d13e10a6cb8}\label{phase__algo_8hpp_a585835ae6298812fae3e0d13e10a6cb8}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!random\_phase@{random\_phase}}
+\index{random\_phase@{random\_phase}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{random\_phase()}{random\_phase()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void random\+\_\+phase (\begin{DoxyParamCaption}\item[{double $\ast$}]{random,  }\item[{cufft\+Double\+Complex $\ast$}]{y\+\_\+hat,  }\item[{double $\ast$}]{ptr\+Mag,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Sample random phase using array of random from input \mbox{\Hypertarget{phase__algo_8hpp_a0164dab2d8f7634c5e1e0802e2d3a7d1}\label{phase__algo_8hpp_a0164dab2d8f7634c5e1e0802e2d3a7d1}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!random\_phase\_cudastate@{random\_phase\_cudastate}}
+\index{random\_phase\_cudastate@{random\_phase\_cudastate}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{random\_phase\_cudastate()}{random\_phase\_cudastate()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void random\+\_\+phase\+\_\+cudastate (\begin{DoxyParamCaption}\item[{curand\+State\+\_\+t $\ast$}]{states,  }\item[{cufft\+Double\+Complex $\ast$}]{y\+\_\+hat,  }\item[{double $\ast$}]{ptr\+Mag,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Sample random phase using curand\+State\+\_\+t as random value \mbox{\Hypertarget{phase__algo_8hpp_a2f7f3b762a78fafb43d0243fd9381a91}\label{phase__algo_8hpp_a2f7f3b762a78fafb43d0243fd9381a91}} 
+\index{phase\_algo.hpp@{phase\_algo.hpp}!satisfy\_fourier@{satisfy\_fourier}}
+\index{satisfy\_fourier@{satisfy\_fourier}!phase\_algo.hpp@{phase\_algo.hpp}}
+\doxysubsubsection{\texorpdfstring{satisfy\_fourier()}{satisfy\_fourier()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void satisfy\+\_\+fourier (\begin{DoxyParamCaption}\item[{cufft\+Double\+Complex $\ast$}]{y\+\_\+hat,  }\item[{cufft\+Double\+Complex $\ast$}]{x\+\_\+hat,  }\item[{double $\ast$}]{ptr\+Mag,  }\item[{int}]{dimension }\end{DoxyParamCaption})}
+
+Satisfy fourier domain constraints $<$ arg = atan2(imag, real)

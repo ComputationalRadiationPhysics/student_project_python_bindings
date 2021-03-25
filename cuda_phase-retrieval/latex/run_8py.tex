@@ -1,0 +1,48 @@
+\hypertarget{run_8py}{}\doxysection{run.\+py File Reference}
+\label{run_8py}\index{run.py@{run.py}}
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \mbox{\hyperlink{namespacerun}{run}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacerun_ac8b1ab13688587a5f150e701d55012c2}{run.\+parser}} = argparse.\+Argument\+Parser()
+\item 
+\mbox{\hyperlink{namespacerun_a5c375c72ca2802b9dd62e41ae1e5514c}{run.\+help}}
+\item 
+\mbox{\hyperlink{namespacerun_a83b2aea7adc97ab3a19d1dda70752aa2}{run.\+type}} = args.\+type.\+lower()
+\item 
+\mbox{\hyperlink{namespacerun_a7210008209d582d543a005003a885f2b}{run.\+int}}
+\item 
+\mbox{\hyperlink{namespacerun_a3447a2f24be13222f369da774cfb5627}{run.\+default}}
+\item 
+\mbox{\hyperlink{namespacerun_a4c784269ae283406295d670cbdee6047}{run.\+float}}
+\item 
+\mbox{\hyperlink{namespacerun_ae17d16e2bd9faf979c9dd957577f67a2}{run.\+args}} = parser.\+parse\+\_\+args()
+\item 
+\mbox{\hyperlink{namespacerun_a59646916582708b1c0f2fdab14dd9ddd}{run.\+image}} = imageio.\+imread(args.\+image, as\+\_\+gray=True)
+\item 
+\mbox{\hyperlink{namespacerun_a3725035006b6731d65d6ccbb1005ebe5}{run.\+array\+\_\+random}} = np.\+random.\+rand($\ast$image.\+shape)
+\item 
+\mbox{\hyperlink{namespacerun_a6121270e4574908ed192fe53c1769245}{run.\+mask}} = np.\+ones(image.\+shape)
+\item 
+\mbox{\hyperlink{namespacerun_a145ce4747156778ee1e71ade1ebde03d}{run.\+step}} = args.\+step
+\item 
+\mbox{\hyperlink{namespacerun_ae93567a0728712ca1434bbdcda02cd9b}{run.\+beta}} = args.\+beta
+\item 
+\mbox{\hyperlink{namespacerun_aa2cb49410bee92bab5958f37cf31660d}{run.\+verbose}} = args.\+verbose
+\item 
+\mbox{\hyperlink{namespacerun_a04d8e7068496e4baed833210ea00f16e}{run.\+t1\+\_\+start}} = perf\+\_\+counter()
+\item 
+\mbox{\hyperlink{namespacerun_a0f8f363ea56e8d4cc0ed6d78d3e34a88}{run.\+result\+\_\+original}} = \mbox{\hyperlink{namespacephase__retrieval__python_a379a7b99e518b5d6c0c2a36f508d0a8a}{phase\+\_\+retrieval\+\_\+python.\+fienup\+\_\+phase\+\_\+retrieval}}(image, mask, 20, \char`\"{}hybrid\char`\"{}, 0.\+8, array\+\_\+random)
+\item 
+\mbox{\hyperlink{namespacerun_a304b35f7b6967b33de8c2fbdf4954d09}{run.\+result\+\_\+cuda}} = \mbox{\hyperlink{phase__algo_8hpp_abaeefe77f3cf7d052b5ede628b1b471b}{cu\+Phase\+Ret.\+fienup\+\_\+phase\+\_\+retrieval}}(image, mask, 20, \char`\"{}hybrid\char`\"{}, 0.\+8, array\+\_\+random)
+\item 
+\mbox{\hyperlink{namespacerun_a7f7a6a3ccb011770abe74507502f5321}{run.\+t1\+\_\+stop}} = perf\+\_\+counter()
+\item 
+\mbox{\hyperlink{namespacerun_a6ef0c28c3962b350f237a5e6c8daea39}{run.\+cmap}}
+\item 
+\mbox{\hyperlink{namespacerun_ac092b5a76b0b3741e0b7aa05c5f25aa4}{run.\+fig\+Manager}} = plt.\+get\+\_\+current\+\_\+fig\+\_\+manager()
+\end{DoxyCompactItemize}
