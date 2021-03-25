@@ -30,6 +30,11 @@ plt.title('Original Phase Retrieval')
 plt.subplot(223)
 plt.imshow(result_cuda, cmap='gray')
 plt.title('CUDA Phase Retrieval')
-figManager = plt.get_current_fig_manager()
-figManager.window.showMaximized()
+# on headless systems, maximizing the window could be a problem
+try:
+    figManager = plt.get_current_fig_manager()
+    figManager.window.showMaximized()
+except:
+    # simply ignore it, if maximizing is not possible
+    pass
 plt.show()

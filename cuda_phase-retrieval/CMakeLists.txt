@@ -14,6 +14,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
 set(CMAKE_CUDA_ARCHITECTURES 35 CACHE STRING "CUDA architectures")
+set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
 
 set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
@@ -59,4 +60,6 @@ install(TARGETS cuPhaseRet DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py DESTINATION bin)
 
-add_subdirectory("test/")
+if(ENABLE_TEST)
+  add_subdirectory("test/")
+endif()
