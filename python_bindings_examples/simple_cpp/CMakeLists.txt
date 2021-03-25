@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.4...3.18)
 project(cppBinding)
 
-#this is from my local pybind installation
-list(APPEND CMAKE_PREFIX_PATH "D:/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11")
 find_package(pybind11 REQUIRED)
 
 pybind11_add_module(cppBinding binding.cpp)

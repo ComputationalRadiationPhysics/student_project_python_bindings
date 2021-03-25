@@ -1,19 +1,14 @@
-cmake_minimum_required(VERSION 3.11)
-project(cuPhaseRet_Test LANGUAGES CXX CUDA)
-
-find_package(PythonInterp 3.6 REQUIRED)
-find_package(PythonLibs 3.6 REQUIRED)
-find_package(pybind11 REQUIRED)
-
 set(OpenCV_STATIC ON)
 find_package( OpenCV 4.5.1 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-
-include_directories(${PYTHON_INCLUDE_DIRS})
-include_directories(${pybind11_INCLUDE_DIR})
-
 add_library(cuPhaseRet_Test SHARED test_binding.cu)
+
+target_include_directories(cuPhaseRet_Test
+  PUBLIC
+  ${PYTHON_INCLUDE_DIRS}
+  ${pybind11_INCLUDE_DIR})
+
 target_link_libraries(cuPhaseRet_Test
   ${PYTHON_LIBRARIES}
   ${OpenCV_LIBS}
@@ -21,23 +16,9 @@ target_link_libraries(cuPhaseRet_Test
   cufft
   curand)
 
-set_target_properties(cuPhaseRet_Test PROPERTIES CUDA_STANDARD 14)
+add_msvc_poperties(cuPhaseRet_Test)
+
 set_target_properties(cuPhaseRet_Test PROPERTIES PREFIX "")
-
-if(MSVC)
-  set_target_properties(cuPhaseRet_Test PROPERTIES SUFFIX ".pyd")
-endif()
-
-# on windows, the build can be done with the Visual Studio or ninja generator
-# this configuration is Visual Studio specific
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio*")
-  set_target_properties(cuPhaseRet_Test PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-  set_target_properties(cuPhaseRet_Test PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR} )
-  set_target_properties(cuPhaseRet_Test PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
-endif()
 
 # add a custom target for the test.py script, which will copy test.py
 # to the installation folder and update every time there is a change
@@ -46,6 +27,3 @@ add_custom_command(TARGET pyTestScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/test.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
-
-install(TARGETS cuPhaseRet_Test DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test.py DESTINATION bin)

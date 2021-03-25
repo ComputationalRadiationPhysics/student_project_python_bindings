@@ -4,7 +4,7 @@ import imageio
 import matplotlib.pyplot as plt
 
 #still cannot find a way to use pytest with numpy, so I do it manually
-image = imageio.imread('../../../example_images/a.png', as_gray=True)
+image = imageio.imread('../example_images/a.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 mask = np.ones(magnitudes.shape) #default mask
 array_random = np.random.rand(*magnitudes.shape)
