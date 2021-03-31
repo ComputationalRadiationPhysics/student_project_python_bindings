@@ -37,7 +37,7 @@ void CUFFT_CHECK(cufftResult cufft_process);
  */
 py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<double, py::array::c_style> image, py::array_t<double, py::array::c_style> masks, int steps, string mode, double beta, py::array_t<double, py::array::c_style> randoms)
 {
-     /**
+    /**
     * Asserting inputs
     */
     assert(beta > 0);
@@ -53,9 +53,20 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     else if(mode.compare("input-output") == 0) int_mode = 2;
     else if(mode.compare("output-output") == 0) int_mode = 3;
 
-    double *ptrImg = static_cast<double*>(bufImg.ptr);          //!< Get 1D image array
     size_t X = bufImg.shape[0];                                 //!< Width of image
     size_t Y = bufImg.shape[1];                                 //!< Height of image
+
+    /**
+    * Asserting array size, make sure all arrays are using the same size
+    */
+    size_t mask_X = bufMask.shape[0];                                 //!< Width of mask
+    size_t mask_Y = bufMask.shape[1];                                 //!< Height of mask
+    size_t rand_X = bufRand.shape[0];                                 //!< Width of random array
+    size_t rand_Y = bufRand.shape[1];                                 //!< Height of random array
+    assert(mask_X == X && rand_X == X);
+    assert(mask_Y == Y && rand_Y == Y);
+
+    double *ptrImg = static_cast<double*>(bufImg.ptr);          //!< Get 1D image array
     double *mask = static_cast<double*>(bufMask.ptr);           //!< Mask array, same size as image 
     double *random_value = static_cast<double*>(bufRand.ptr);   //!< Array of uniform random number, same size as image
 
@@ -77,7 +88,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
                        *src_img_dev_comp,   //!< complex number version of source image in GPU
                        *image_x_dev_comp;   //!< Complex number version of image output in GPU
 
-     /**
+    /**
     * Allocating memories in GPU
     */                   
     CUDA_CHECK(cudaMalloc(&y_hat_dev, dimension * sizeof(cufftDoubleComplex)));
@@ -175,39 +186,57 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     return result;
 }
 
-//for this function doxygen style will be applied later if
-//the documentation of above fienup_phase_retrieval is acceptable
-//becasue it is almost identical
+
 py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<double, py::array::c_style> image, py::array_t<double, py::array::c_style> masks, int steps, string mode, double beta)
 {
-    //asserting inputs
+    /**
+    * Asserting inputs
+    */
     assert(beta > 0);
     assert(steps > 0);
     assert(mode == "input-output" || mode == "output-output" || mode == "hybrid");
 
-    py::buffer_info bufImg = image.request();
-    py::buffer_info bufMask = masks.request();
+    py::buffer_info bufImg = image.request();       //!< Generate image array from pybind array
+    py::buffer_info bufMask = masks.request();      //!< Generate mask array from pybind array 
 
-    int int_mode;
+    int int_mode; //!< use integer instead of string for mode
     if(mode.compare("hybrid") == 0) int_mode = 1;
     else if(mode.compare("input-output") == 0) int_mode = 2;
     else if(mode.compare("output-output") == 0) int_mode = 3;
 
-    double *ptrImg = static_cast<double*>(bufImg.ptr); //input image array
-    size_t X = bufImg.shape[0]; //width of image
-    size_t Y = bufImg.shape[1]; //height of image
-    double *mask = static_cast<double*>(bufMask.ptr); //mask array, same size as image
+    size_t X = bufImg.shape[0];                                 //!< Width of image
+    size_t Y = bufImg.shape[1];                                 //!< Height of image
 
-    //alternative fot saving image size, prevent warning while using CUFFT 
-    //( warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data)"
-    //get int version of size instead of size_t, then create dimension (image size)
-    int size_x = static_cast<int>(X); 
-    int size_y = static_cast<int>(Y);
-    int dimension = size_x*size_y;
+    /**
+    * Asserting array size, make sure all arrays are using the same size
+    */
+    size_t mask_X = bufMask.shape[0];                                 //!< Width of mask
+    size_t mask_Y = bufMask.shape[1];                                 //!< Height of mask
+    assert(mask_X == X);
+    assert(mask_Y == Y);
 
-    //initialize arrays for GPU
-    double *src_img_dev, *mag_dev, *mask_dev, *image_x_device, *image_x_p_device;
-    cufftDoubleComplex *y_hat_dev, *src_img_dev_comp, *image_x_dev_comp;
+    double *ptrImg = static_cast<double*>(bufImg.ptr);          //!< Get 1D image array
+    double *mask = static_cast<double*>(bufMask.ptr);           //!< Mask array, same size as image 
+
+    int size_x = static_cast<int>(X); //!< Convert X to integer to prevent getting warning from CUFFT
+    int size_y = static_cast<int>(Y); //!< Convert Y to integer to prevent getting warning from CUFFT
+    int dimension = size_x*size_y;    //!< Area or dimension of image, mask, and array of random 
+
+    /**
+    * Initialize arrays in GPU
+    */
+    double *src_img_dev,        //!< Source image in GPU 
+           *mag_dev,            //!< Magnitudes in GPU
+           *mask_dev,           //!< Mask in GPU
+           *image_x_device,     //!< Image output in GPU 
+           *image_x_p_device;   //!< Save previous image output in GPU for iteration
+    cufftDoubleComplex *y_hat_dev,          //!< Sample random phase in GPU
+                       *src_img_dev_comp,   //!< complex number version of source image in GPU
+                       *image_x_dev_comp;   //!< Complex number version of image output in GPU
+                       
+    /**
+    * Allocating memories in GPU
+    */                   
     CUDA_CHECK(cudaMalloc(&y_hat_dev, dimension * sizeof(cufftDoubleComplex))); //sample random phase
     CUDA_CHECK(cudaMalloc(&src_img_dev_comp, dimension * sizeof(cufftDoubleComplex))); //complex version of source image in device
     CUDA_CHECK(cudaMalloc(&mag_dev, dimension * sizeof(double))); //device magnitudes
@@ -217,23 +246,32 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     CUDA_CHECK(cudaMalloc(&image_x_p_device, dimension * sizeof(double))); //image x_p in device
     CUDA_CHECK(cudaMalloc(&image_x_dev_comp, dimension * sizeof(cufftDoubleComplex))); //complex version if image x in device
 
-    //allocating inital values to device
+    /**
+    * Allocating inital values of output image to 0 in GPU
+    */
     cudaMemset(image_x_device,  0, dimension * sizeof(double));
     cudaMemset(image_x_p_device, 0, dimension * sizeof(double));
 
-    //get number of SM on GPU
+    /**
+    * Set number of SM for CUDA Kernel
+    */
     int devId, numSMs;
     cudaGetDevice(&devId);
     cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
 
-    //get states for curand
+    /**
+    * Get curand state to generate random number
+    */
     srand( (unsigned)time( NULL ) );
     curandState_t* states;
     cudaMalloc(&states, dimension * sizeof(curandState_t));
     init_random<<<8*numSMs, 256>>>(static_cast<double>(time(0)), states, dimension);
 
-    //do CUFFT first time to image, then get the absolute value of the result
-    // the absolute result is called magnitude
+    /**
+    * Convert the source image array into array of complex number
+    * After that, do CUFFT first time to the complex source image, then get the absolute value of the result
+    * The absolute result is called magnitude
+    */ 
     CUDA_CHECK(cudaMemcpy(src_img_dev, ptrImg, dimension * sizeof(double), cudaMemcpyHostToDevice));
     get_complex_array<<<8*numSMs, 256>>>(src_img_dev, src_img_dev_comp, dimension);
     cufftHandle plan;
@@ -242,13 +280,26 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     cufftDestroy(plan);
     get_absolute_array<<<8*numSMs, 256>>>(src_img_dev_comp, mag_dev, dimension);
 
-    //copy mask to gpu
+    /**
+    * Copy mask to GPU
+    */
     CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
-    //initial random phase
+    /**
+    * Do initial random phase
+    */
     random_phase_cudastate<<<8*numSMs, 256>>>(states, y_hat_dev, mag_dev, dimension);
 
-    //iteration with number of steps------------------------------------------------------------------------------------------------------
+    /**
+    * For every iteration :
+    * 1. Create 2D CUFFT plan using complex double to complex double
+    * 2. Do CUFFT Inverse to the random phase array
+    * 3. Process arrays, generating 2 version result image array, complex version and real version
+    * 4. The real version of result image array is the result used as output
+    * 5. Do normal FFT to the complex version of result image array
+    * 6. Combine the FFT'ed result with the random phase array
+    * 7. Use the combined array is used as random phase array fo the next iterarion
+    */
     for(int iter = 0; iter < steps; iter++)
     {   
         cufftHandle plan; //create cufft plan
@@ -260,12 +311,17 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
         cufftDestroy(plan);
     }
 
+     /**
+    * Create a pybind array to store the final image result
+    */
     py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(bufImg.size);
     py::buffer_info bufRes = result.request();
     double *ptrRes = static_cast<double*>(bufRes.ptr);
     CUDA_CHECK(cudaMemcpy(ptrRes, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
 
-    //free CUDA usage
+    /**
+    * Free CUDA arrays
+    */
     cudaFree(y_hat_dev);
     cudaFree(src_img_dev);
     cudaFree(mag_dev);
@@ -274,6 +330,9 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     cudaFree(image_x_p_device);
     cudaFree(image_x_dev_comp);
 
+    /**
+    * Return the final result image
+    */
     result.resize({X, Y});
     return result;
 }
