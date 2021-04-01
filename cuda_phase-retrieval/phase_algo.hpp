@@ -32,64 +32,71 @@ __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *
 void CUFFT_CHECK(cufftResult cufft_process);
 
 /**
- * CUDA Phase Retrieval primary function
- * with random array as parameter
+ * \brief CUDA Phase Retrieval primary function with random array as parameter
+ * \param image Input image
+ * \param masks Input mask
+ * \param steps Number of iteration
+ * \param mode Input mode
+ * \param beta Input beta
+ * \param randoms Input array of random
+ * \return Image result
  */
 py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<double, py::array::c_style> image, py::array_t<double, py::array::c_style> masks, int steps, string mode, double beta, py::array_t<double, py::array::c_style> randoms)
 {
     /**
-    * Asserting inputs
+    * \b Process
+    * 1. Asserting inputs
     */
     assert(beta > 0);
     assert(steps > 0);
     assert(mode == "input-output" || mode == "output-output" || mode == "hybrid");
 
-    py::buffer_info bufImg = image.request();       //!< Generate image array from pybind array
-    py::buffer_info bufMask = masks.request();      //!< Generate mask array from pybind array 
-    py::buffer_info bufRand = randoms.request();    //!< Generate array of uniform random from pybind array
+    py::buffer_info bufImg = image.request();       //Generate image array from pybind array
+    py::buffer_info bufMask = masks.request();      //Generate mask array from pybind array 
+    py::buffer_info bufRand = randoms.request();    //Generate array of uniform random from pybind array
 
-    int int_mode;   //!< use integer instead of string for mode 
+    int int_mode;   //use integer instead of string for mode 
     if(mode.compare("hybrid") == 0) int_mode = 1;
     else if(mode.compare("input-output") == 0) int_mode = 2;
     else if(mode.compare("output-output") == 0) int_mode = 3;
 
-    size_t X = bufImg.shape[0];                                 //!< Width of image
-    size_t Y = bufImg.shape[1];                                 //!< Height of image
+    size_t X = bufImg.shape[0];               //Width of image
+    size_t Y = bufImg.shape[1];               //Height of image
 
     /**
-    * Asserting array size, make sure all arrays are using the same size
+    * 2. Asserting array size, make sure all arrays are using the same size
     */
-    size_t mask_X = bufMask.shape[0];                                 //!< Width of mask
-    size_t mask_Y = bufMask.shape[1];                                 //!< Height of mask
-    size_t rand_X = bufRand.shape[0];                                 //!< Width of random array
-    size_t rand_Y = bufRand.shape[1];                                 //!< Height of random array
+    size_t mask_X = bufMask.shape[0];               //Width of mask
+    size_t mask_Y = bufMask.shape[1];               //Height of mask
+    size_t rand_X = bufRand.shape[0];               //Width of random array
+    size_t rand_Y = bufRand.shape[1];               //Height of random array
     assert(mask_X == X && rand_X == X);
     assert(mask_Y == Y && rand_Y == Y);
 
-    double *ptrImg = static_cast<double*>(bufImg.ptr);          //!< Get 1D image array
-    double *mask = static_cast<double*>(bufMask.ptr);           //!< Mask array, same size as image 
-    double *random_value = static_cast<double*>(bufRand.ptr);   //!< Array of uniform random number, same size as image
+    double *ptrImg = static_cast<double*>(bufImg.ptr);          //Get 1D image array
+    double *mask = static_cast<double*>(bufMask.ptr);           //Mask array, same size as image 
+    double *random_value = static_cast<double*>(bufRand.ptr);   //Array of uniform random number, same size as image
 
-    int size_x = static_cast<int>(X); //!< Convert X to integer to prevent getting warning from CUFFT
-    int size_y = static_cast<int>(Y); //!< Convert Y to integer to prevent getting warning from CUFFT
-    int dimension = size_x*size_y;    //!< Area or dimension of image, mask, and array of random 
+    int size_x = static_cast<int>(X); //Convert X to integer to prevent getting warning from CUFFT
+    int size_y = static_cast<int>(Y); //Convert Y to integer to prevent getting warning from CUFFT
+    int dimension = size_x*size_y;    //Area or dimension of image, mask, and array of random 
 
     /**
-    * Initialize arrays in GPU
+    * 3. Initialize arrays in GPU
     */
-    double *src_img_dev,        //!< Source image in GPU 
-           *mag_dev,            //!< Magnitudes in GPU
-           *mask_dev,           //!< Mask in GPU
-           *image_x_device,     //!< Image output in GPU 
-           *image_x_p_device,   //!< Save previous image output in GPU for iteration
-           *random_value_dev;   //!< Array of random in GPU
+    double *src_img_dev,        //Source image in GPU 
+           *mag_dev,            //Magnitudes in GPU
+           *mask_dev,           //Mask in GPU
+           *image_x_device,     //Image output in GPU 
+           *image_x_p_device,   //Save previous image output in GPU for iteration
+           *random_value_dev;   //Array of random in GPU
 
-    cufftDoubleComplex *y_hat_dev,          //!< Sample random phase in GPU
-                       *src_img_dev_comp,   //!< complex number version of source image in GPU
-                       *image_x_dev_comp;   //!< Complex number version of image output in GPU
+    cufftDoubleComplex *y_hat_dev,          //Sample random phase in GPU
+                       *src_img_dev_comp,   //complex number version of source image in GPU
+                       *image_x_dev_comp;   //Complex number version of image output in GPU
 
     /**
-    * Allocating memories in GPU
+    * 4. Allocating memories in GPU
     */                   
     CUDA_CHECK(cudaMalloc(&y_hat_dev, dimension * sizeof(cufftDoubleComplex)));
     CUDA_CHECK(cudaMalloc(&src_img_dev_comp, dimension * sizeof(cufftDoubleComplex)));
@@ -102,51 +109,52 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     CUDA_CHECK(cudaMalloc(&random_value_dev, dimension * sizeof(double)));
 
     /**
-    * Allocating inital values of output image to 0 in GPU
+    * 5. Allocating inital values of output image to 0 in GPU
     */
     cudaMemset(image_x_device,  0, dimension * sizeof(double));
     cudaMemset(image_x_p_device, 0, dimension * sizeof(double));
 
     /**
-    * Set number of SM for CUDA Kernel
+    * 6. Set number of SM for CUDA Kernel
     */
     int devId, numSMs;
     cudaGetDevice(&devId);
     cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
 
     /**
-    * Convert the source image array into array of complex number
-    * After that, do CUFFT first time to the complex source image, then get the absolute value of the result
-    * The absolute result is called magnitude
-    */ 
+    * 7. Get magntitudes
+    */   
     CUDA_CHECK(cudaMemcpy(src_img_dev, ptrImg, dimension * sizeof(double), cudaMemcpyHostToDevice));
+    //Convert the source image array into array of complex number
     get_complex_array<<<8*numSMs, 256>>>(src_img_dev, src_img_dev_comp, dimension);
+    //After that, do CUFFT first time to the complex source image,
     cufftHandle plan;
     CUFFT_CHECK(cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z));
     CUFFT_CHECK(cufftExecZ2Z(plan, src_img_dev_comp, src_img_dev_comp, CUFFT_FORWARD));
     cufftDestroy(plan);
+    //Then get the absolute value of the result, the absolute result is called magnitude
     get_absolute_array<<<8*numSMs, 256>>>(src_img_dev_comp, mag_dev, dimension);
 
     /**
-    * Copy mask and array of random to GPU
+    * 8. Copy mask and array of random to GPU
     */
     CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(random_value_dev, random_value, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
     /**
-    * Do initial random phase
+    * 9. Do initial random phase
     */
     random_phase<<<8*numSMs, 256>>>(random_value_dev, y_hat_dev, mag_dev, dimension);
 
     /**
-    * For every iteration :
-    * 1. Create 2D CUFFT plan using complex double to complex double
-    * 2. Do CUFFT Inverse to the random phase array
-    * 3. Process arrays, generating 2 version result image array, complex version and real version
-    * 4. The real version of result image array is the result used as output
-    * 5. Do normal FFT to the complex version of result image array
-    * 6. Combine the FFT'ed result with the random phase array
-    * 7. Use the combined array is used as random phase array fo the next iterarion
+    * 10. For every iteration :\n
+    * a. Create 2D CUFFT plan using complex double to complex double\n
+    * b. Do CUFFT Inverse to the random phase array\n
+    * c. Process arrays, generating 2 version result image array, complex version and real version\n
+    * d. The real version of result image array is the result used as output\n
+    * e. Do normal FFT to the complex version of result image array\n
+    * f. Combine the FFT'ed result with the random phase array\n
+    * g. Use the combined array is used as random phase array fo the next iterarion\n
     */
     for(int iter = 0; iter < steps; iter++)
     {   
@@ -160,7 +168,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     }
 
     /**
-    * Create a pybind array to store the final image result
+    * 11. Create a pybind array to store the final image result
     */
     py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(bufImg.size);
     py::buffer_info bufRes = result.request();
@@ -168,7 +176,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     CUDA_CHECK(cudaMemcpy(ptrRes, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
 
     /**
-    * Free CUDA arrays
+    * 12. Free CUDA arrays
     */
     cudaFree(y_hat_dev);
     cudaFree(src_img_dev);
@@ -180,62 +188,71 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     cudaFree(image_x_dev_comp);
 
     /**
-    * Return the final result image
+    * 13. Return the final result image
     */
     result.resize({X, Y});
     return result;
 }
 
-
+/**
+ * \brief CUDA Phase Retrieval primary with auto generated array of random (CURAND)
+ * \param image Input image
+ * \param masks Input mask
+ * \param steps Number of iteration
+ * \param mode Input mode
+ * \param beta Input beta
+ * \return Image result
+ */
 py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<double, py::array::c_style> image, py::array_t<double, py::array::c_style> masks, int steps, string mode, double beta)
 {
     /**
-    * Asserting inputs
+    * \b Process
+    * 1. Asserting inputs
     */
     assert(beta > 0);
     assert(steps > 0);
     assert(mode == "input-output" || mode == "output-output" || mode == "hybrid");
 
-    py::buffer_info bufImg = image.request();       //!< Generate image array from pybind array
-    py::buffer_info bufMask = masks.request();      //!< Generate mask array from pybind array 
+    py::buffer_info bufImg = image.request();       //Generate image array from pybind array
+    py::buffer_info bufMask = masks.request();      //Generate mask array from pybind array 
 
-    int int_mode; //!< use integer instead of string for mode
+    int int_mode; //use integer instead of string for mode
     if(mode.compare("hybrid") == 0) int_mode = 1;
     else if(mode.compare("input-output") == 0) int_mode = 2;
     else if(mode.compare("output-output") == 0) int_mode = 3;
 
-    size_t X = bufImg.shape[0];                                 //!< Width of image
-    size_t Y = bufImg.shape[1];                                 //!< Height of image
+    size_t X = bufImg.shape[0];                                 //Width of image
+    size_t Y = bufImg.shape[1];                                 //Height of image
 
     /**
-    * Asserting array size, make sure all arrays are using the same size
+    * 2. Asserting array size, make sure all arrays are using the same size
     */
-    size_t mask_X = bufMask.shape[0];                                 //!< Width of mask
-    size_t mask_Y = bufMask.shape[1];                                 //!< Height of mask
+    size_t mask_X = bufMask.shape[0];                                 //Width of mask
+    size_t mask_Y = bufMask.shape[1];                                 //Height of mask
     assert(mask_X == X);
     assert(mask_Y == Y);
 
-    double *ptrImg = static_cast<double*>(bufImg.ptr);          //!< Get 1D image array
-    double *mask = static_cast<double*>(bufMask.ptr);           //!< Mask array, same size as image 
+    double *ptrImg = static_cast<double*>(bufImg.ptr);          //Get 1D image array
+    double *mask = static_cast<double*>(bufMask.ptr);           //Mask array, same size as image 
 
-    int size_x = static_cast<int>(X); //!< Convert X to integer to prevent getting warning from CUFFT
-    int size_y = static_cast<int>(Y); //!< Convert Y to integer to prevent getting warning from CUFFT
-    int dimension = size_x*size_y;    //!< Area or dimension of image, mask, and array of random 
+    int size_x = static_cast<int>(X); //Convert X to integer to prevent getting warning from CUFFT
+    int size_y = static_cast<int>(Y); //Convert Y to integer to prevent getting warning from CUFFT
+    int dimension = size_x*size_y;    //Area or dimension of image, mask, and array of random 
 
     /**
-    * Initialize arrays in GPU
+    * 3. Initialize arrays in GPU
     */
-    double *src_img_dev,        //!< Source image in GPU 
-           *mag_dev,            //!< Magnitudes in GPU
-           *mask_dev,           //!< Mask in GPU
-           *image_x_device,     //!< Image output in GPU 
-           *image_x_p_device;   //!< Save previous image output in GPU for iteration
-    cufftDoubleComplex *y_hat_dev,          //!< Sample random phase in GPU
-                       *src_img_dev_comp,   //!< complex number version of source image in GPU
-                       *image_x_dev_comp;   //!< Complex number version of image output in GPU
+    double *src_img_dev,        //Source image in GPU 
+           *mag_dev,            //Magnitudes in GPU
+           *mask_dev,           //Mask in GPU
+           *image_x_device,     //Image output in GPU 
+           *image_x_p_device;   //Save previous image output in GPU for iteration
+    cufftDoubleComplex *y_hat_dev,          //Sample random phase in GPU
+                       *src_img_dev_comp,   //complex number version of source image in GPU
+                       *image_x_dev_comp;   //Complex number version of image output in GPU
                        
     /**
-    * Allocating memories in GPU
+    * 4. Allocating memories in GPU
     */                   
     CUDA_CHECK(cudaMalloc(&y_hat_dev, dimension * sizeof(cufftDoubleComplex))); //sample random phase
     CUDA_CHECK(cudaMalloc(&src_img_dev_comp, dimension * sizeof(cufftDoubleComplex))); //complex version of source image in device
@@ -247,20 +264,20 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     CUDA_CHECK(cudaMalloc(&image_x_dev_comp, dimension * sizeof(cufftDoubleComplex))); //complex version if image x in device
 
     /**
-    * Allocating inital values of output image to 0 in GPU
+    * 5. Allocating inital values of output image to 0 in GPU
     */
     cudaMemset(image_x_device,  0, dimension * sizeof(double));
     cudaMemset(image_x_p_device, 0, dimension * sizeof(double));
 
     /**
-    * Set number of SM for CUDA Kernel
+    * 6. Set number of SM for CUDA Kernel
     */
     int devId, numSMs;
     cudaGetDevice(&devId);
     cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
 
     /**
-    * Get curand state to generate random number
+    * 7. Generate curand state to generate random number
     */
     srand( (unsigned)time( NULL ) );
     curandState_t* states;
@@ -268,37 +285,38 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     init_random<<<8*numSMs, 256>>>(static_cast<double>(time(0)), states, dimension);
 
     /**
-    * Convert the source image array into array of complex number
-    * After that, do CUFFT first time to the complex source image, then get the absolute value of the result
-    * The absolute result is called magnitude
-    */ 
+    * 8. Get magntitudes
+    */   
     CUDA_CHECK(cudaMemcpy(src_img_dev, ptrImg, dimension * sizeof(double), cudaMemcpyHostToDevice));
+    //Convert the source image array into array of complex number
     get_complex_array<<<8*numSMs, 256>>>(src_img_dev, src_img_dev_comp, dimension);
+    //After that, do CUFFT first time to the complex source image,
     cufftHandle plan;
     CUFFT_CHECK(cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z));
     CUFFT_CHECK(cufftExecZ2Z(plan, src_img_dev_comp, src_img_dev_comp, CUFFT_FORWARD));
     cufftDestroy(plan);
+    //Then get the absolute value of the result, the absolute result is called magnitude
     get_absolute_array<<<8*numSMs, 256>>>(src_img_dev_comp, mag_dev, dimension);
 
     /**
-    * Copy mask to GPU
+    * 9. Copy mask to GPU
     */
     CUDA_CHECK(cudaMemcpy(mask_dev, mask, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
     /**
-    * Do initial random phase
+    * 10. Do initial random phase
     */
     random_phase_cudastate<<<8*numSMs, 256>>>(states, y_hat_dev, mag_dev, dimension);
 
     /**
-    * For every iteration :
-    * 1. Create 2D CUFFT plan using complex double to complex double
-    * 2. Do CUFFT Inverse to the random phase array
-    * 3. Process arrays, generating 2 version result image array, complex version and real version
-    * 4. The real version of result image array is the result used as output
-    * 5. Do normal FFT to the complex version of result image array
-    * 6. Combine the FFT'ed result with the random phase array
-    * 7. Use the combined array is used as random phase array fo the next iterarion
+    * 11. For every iteration :\n
+    * a. Create 2D CUFFT plan using complex double to complex double\n
+    * b. Do CUFFT Inverse to the random phase array\n
+    * c. Process arrays, generating 2 version result image array, complex version and real version\n
+    * d. The real version of result image array is the result used as output\n
+    * e. Do normal FFT to the complex version of result image array\n
+    * f. Combine the FFT'ed result with the random phase array\n
+    * g. Use the combined array is used as random phase array fo the next iterarion\n
     */
     for(int iter = 0; iter < steps; iter++)
     {   
@@ -311,8 +329,8 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
         cufftDestroy(plan);
     }
 
-     /**
-    * Create a pybind array to store the final image result
+    /**
+    * 12. Create a pybind array to store the final image result
     */
     py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(bufImg.size);
     py::buffer_info bufRes = result.request();
@@ -320,7 +338,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     CUDA_CHECK(cudaMemcpy(ptrRes, image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
 
     /**
-    * Free CUDA arrays
+    * 13. Free CUDA arrays
     */
     cudaFree(y_hat_dev);
     cudaFree(src_img_dev);
@@ -331,14 +349,16 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     cudaFree(image_x_dev_comp);
 
     /**
-    * Return the final result image
+    * 14. Return the final result image
     */
     result.resize({X, Y});
     return result;
 }
 
 /**
- * Calculate exponential of a double complex in GPU
+ * \brief Calculate exponential of a double complex in GPU
+ * \param arg A single double complex number, implemented using CUFFT library
+ * \return Exponential value of the complex number
  */
 __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex arg)
 {
@@ -352,7 +372,10 @@ __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex arg)
 }
 
 /**
- * Normalize every result elements of CUFFT_INVERSE
+ * \brief Normalize every result elements of after doing CUFFT_INVERSE
+ * \param comp_data A single double complex number, implemented using CUFFT library
+ * \param dimension Size of all arrays
+ * \return normalized complex number
  */
 __device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int dimension)
 {
@@ -364,7 +387,9 @@ __device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int dimens
 }
 
 /**
- * Convert real number to CUFFT complex number using 0 as imaginary part
+ * \brief Convert real number to CUFFT complex number, using 0 as imaginary part
+ * \param real_data A single double value
+ * \return Complex version of the double value, implemented using CUFFT
  */
 __device__ cufftDoubleComplex get_complex(double real_data)
 {
@@ -376,16 +401,21 @@ __device__ cufftDoubleComplex get_complex(double real_data)
 }
 
 /**
- * Get real number part of a CUFFT complex number
- */ 
+ * \brief Get real number part of a CUFFT complex number
+ * \param comp_data A single double complex number, implemented using CUFFT library
+ * \return real number part of the complex number
+ */
 __device__ double get_real(cufftDoubleComplex comp_data)
 {
     return comp_data.x;
 }
 
 /**
- * Convert array of real number into array of complex number
- */ 
+ * \brief Convert array of real number into array of complex number
+ * \param real_array Array of double real number
+ * \param complex_array Array of double complex number, implemented using CUFFT library
+ * \param dimension Size of all arrays
+ */
 __global__ void get_complex_array(double *real_array, cufftDoubleComplex *complex_array, int dimension)
 {
    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
@@ -398,8 +428,11 @@ __global__ void get_complex_array(double *real_array, cufftDoubleComplex *comple
 }
 
 /**
- * Get array of absolute value from array of complex number
- */ 
+ * \brief Get array of absolute value from array of complex number
+ * \param complex_array Array of double complex number, implemented using CUFFT library
+ * \param real_array Array of absolute value of the complex number
+ * \param dimension Size of all arrays
+ */
 __global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *real_array , int dimension)
 {
    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
@@ -409,7 +442,10 @@ __global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *re
 }
 
 /**
- * Create states for random values
+ * \brief Create states for random values
+ * \param seed Current time in seconds (seed for randomizer)
+ * \param states Random states generated by for CURAND
+ * \param dimension Size of all arrays
  */
 __global__ void init_random(double seed, curandState_t *states, int dimension)
 {
@@ -420,7 +456,11 @@ __global__ void init_random(double seed, curandState_t *states, int dimension)
 }
 
 /**
- * Sample random phase using array of random from input
+ * \brief Sample random phase using array of random from input
+ * \param random Array of random numbers with the size of dimension
+ * \param y_hat Random phase data with size of dimension
+ * \param ptrMag Array of magnitudes, which is the absoulte value of the initial FFT result of input image
+ * \param dimension Size of all arrays
  */
 __global__ void random_phase(double *random, cufftDoubleComplex *y_hat, double *ptrMag, int dimension ) 
 {
@@ -437,7 +477,11 @@ __global__ void random_phase(double *random, cufftDoubleComplex *y_hat, double *
 }
 
 /**
- * Sample random phase using curandState_t as random value
+ * \brief Sample random phase using curandState_t as random value
+ * \param states Random states generated by for CURAND
+ * \param y_hat Random phase data with size of dimension
+ * \param ptrMag Array of magnitudes, which is the absoulte value of the initial FFT result of input image
+ * \param dimension Size of all arrays
  */
 __global__ void random_phase_cudastate(curandState_t *states, cufftDoubleComplex *y_hat, double *ptrMag, int dimension ) 
 {
@@ -454,7 +498,11 @@ __global__ void random_phase_cudastate(curandState_t *states, cufftDoubleComplex
 }
 
 /**
- * Satisfy fourier domain constraints
+ * \brief Satisfy fourier domain constraints
+ * \param y_hat Random phase data with size of dimension
+ * \param x_hat Complex version of image result in an iteration
+ * \param ptrMag Array of magnitudes, which is the absoulte value of the initial FFT result of input image
+ * \param dimension Size of all arrays
  */
 __global__ void satisfy_fourier(cufftDoubleComplex *y_hat, cufftDoubleComplex *x_hat, double *ptrMag, int dimension ) 
 {
@@ -464,14 +512,23 @@ __global__ void satisfy_fourier(cufftDoubleComplex *y_hat, cufftDoubleComplex *x
     {
         mag_comp.x = ptrMag[idx];
         mag_comp.y = 0;
-        exp_target.x = atan2(x_hat[idx].y, x_hat[idx].x); //!< arg = atan2(imag, real)
+        exp_target.x = atan2(x_hat[idx].y, x_hat[idx].x); //arg = atan2(imag, real)
         exp_target.y = 0;
         y_hat[idx] = cuCmul(mag_comp, gpu_exp(cuCmul(complex1i, exp_target)));
     }
 }
 
 /**
- * Processing magnitudes with mask
+ * \brief Processing random phase array with mask, generating image result
+ * \param mask Input mask
+ * \param y_hat Random phase data with size of dimension
+ * \param image_x Image result
+ * \param image_x_p Image result from previous iteration
+ * \param image_x_comp Complex version of image result in an iteration
+ * \param beta Input beta
+ * \param mode Input mode (int version)
+ * \param iter current iteration
+ * \param dimension Size of all arrays
  */
 __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *image_x, double *image_x_p, cufftDoubleComplex *image_x_comp, double beta, int mode, int iter, int dimension)
 {
@@ -482,45 +539,46 @@ __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *
         bool logical_and;
         bool indices;
 
-        double y = get_real(normalize(y_hat[idx], dimension)); //!< Get real version of normalized complex number
+        double y = get_real(normalize(y_hat[idx], dimension)); //Get real version of normalized complex number
 
         /**
-         * Get previous image based on current iteration
-         */
+        * \b Process
+        * 1. Get previous image based on current iteration
+        */
         if(iter == 0) image_x_p[idx] = y;
         else image_x_p[idx] = image_x[idx];
 
         /**
-         * Updates for elements that satisfy object domain constraint
+         * 2. Updates for elements that satisfy object domain constraint
          */
         if(mode == 3 || mode == 1) image_x[idx] = y;
 
         /**
-         * find elements that violate object domain constraints or are not masked 
+         * 3. Find elements that violate object domain constraints or are not masked 
          */
         if(mask[idx] <= 0) logical_not_mask = true;
         else if(mask[idx] >= 1) logical_not_mask = false;
 
         /**
-         * check if any element y is less than zero 
+         * 4. Check if any element y is less than zero 
          */
         if(y < 0) y_less_than_zero = true;
         else if(y >= 0) y_less_than_zero = false;
 
         /**
-         * use "and" logical to check the "less than zero y" and the mask
+         * 5. Use "and" logical to check the "less than zero y" and the mask
          */   
         if(y_less_than_zero == true && mask[idx] >= 1) logical_and = true;
         else logical_and = false;
 
         /**
-         * Determine indices value
+         * 6. Determine indices value
          */  
         if(logical_and == false && logical_not_mask == false) indices = false;
         else indices = true;
 
         /**
-         * updates for elements that violate object domain constraints
+         * 7. Updates for elements that violate object domain constraints
          */ 
         if(indices == true)
         {
@@ -538,7 +596,10 @@ __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *
     }
 }
 
-//CUFFT error checking
+/**
+ * \brief CUFFT error checking
+ * \param cufft_process Result of a CUFFT operation
+ */ 
 void CUFFT_CHECK(cufftResult cufft_process)
 {
     if(cufft_process != CUFFT_SUCCESS) cout<<cufft_process<<endl;
