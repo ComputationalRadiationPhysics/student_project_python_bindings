@@ -8,7 +8,7 @@ from time import perf_counter
 #np.random.seed(1)
 image = imageio.imread('example_images/a.png', as_gray=True)
 array_random = np.random.rand(*image.shape) #uniform random
-mask = np.ones(image.shape) #default mask
+mask = np.ones(image.shape) #default mask, must have the same size as input image
 
 print("Running phase retrieval...")
 

@@ -32,12 +32,12 @@ __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *
 void CUFFT_CHECK(cufftResult cufft_process);
 
 /**
- * \brief CUDA Phase Retrieval primary function with random array as parameter
+ * \brief CUDA Phase Retrieval primary function with random array as an additional parameter
  * \param image Input image
- * \param masks Input mask
+ * \param masks Input mask (default 1)
  * \param steps Number of iteration
- * \param mode Input mode
- * \param beta Input beta
+ * \param mode Input mode ("input-ouput", "output-output", or "hybrid")
+ * \param beta Input beta (default 0.8)
  * \param randoms Input array of random
  * \return Image result
  */
@@ -150,11 +150,11 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     * 10. For every iteration :\n
     * a. Create 2D CUFFT plan using complex double to complex double\n
     * b. Do CUFFT Inverse to the random phase array\n
-    * c. Process arrays, generating 2 version result image array, complex version and real version\n
-    * d. The real version of result image array is the result used as output\n
+    * c. Processing the arrays. This will generate 2 version of result, complex version and real version\n
+    * d. The real version of result image array will be used as output after the final iteration\n
     * e. Do normal FFT to the complex version of result image array\n
     * f. Combine the FFT'ed result with the random phase array\n
-    * g. Use the combined array is used as random phase array fo the next iterarion\n
+    * g. The combined array is used as random phase array for the next iterarion\n
     */
     for(int iter = 0; iter < steps; iter++)
     {   
@@ -195,12 +195,12 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
 }
 
 /**
- * \brief CUDA Phase Retrieval primary with auto generated array of random (CURAND)
+ * \brief CUDA Phase Retrieval primary with auto generated array of random using CURAND
  * \param image Input image
- * \param masks Input mask
+ * \param masks Input mask (default 1)
  * \param steps Number of iteration
- * \param mode Input mode
- * \param beta Input beta
+ * \param mode Input mode ("input-ouput", "output-output", or "hybrid")
+ * \param beta Input beta (default 0.8)
  * \return Image result
  */
 py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<double, py::array::c_style> image, py::array_t<double, py::array::c_style> masks, int steps, string mode, double beta)
@@ -312,11 +312,11 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     * 11. For every iteration :\n
     * a. Create 2D CUFFT plan using complex double to complex double\n
     * b. Do CUFFT Inverse to the random phase array\n
-    * c. Process arrays, generating 2 version result image array, complex version and real version\n
-    * d. The real version of result image array is the result used as output\n
+    * c. Processing the arrays. This will generate 2 version of result, complex version and real version\n
+    * d. The real version of result image array will be used as output after the final iteration\n
     * e. Do normal FFT to the complex version of result image array\n
     * f. Combine the FFT'ed result with the random phase array\n
-    * g. Use the combined array is used as random phase array fo the next iterarion\n
+    * g. The combined array is used as random phase array for the next iterarion\n
     */
     for(int iter = 0; iter < steps; iter++)
     {   
@@ -526,7 +526,7 @@ __global__ void satisfy_fourier(cufftDoubleComplex *y_hat, cufftDoubleComplex *x
  * \param image_x_p Image result from previous iteration
  * \param image_x_comp Complex version of image result in an iteration
  * \param beta Input beta
- * \param mode Input mode (int version)
+ * \param mode Integer version of Input mode (hybrid = 1, input-output = 2, output-output = 3)
  * \param iter current iteration
  * \param dimension Size of all arrays
  */
