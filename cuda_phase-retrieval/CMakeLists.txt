@@ -56,9 +56,15 @@ add_custom_command(TARGET pyExampleScript PRE_BUILD
   ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py $<TARGET_FILE_DIR:cuPhaseRet>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py)
 
+add_custom_command(TARGET pyExampleScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/run.py $<TARGET_FILE_DIR:cuPhaseRet>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/run.py)
+
 install(TARGETS cuPhaseRet DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/run.py DESTINATION bin)
 
 if(ENABLE_TEST)
   add_subdirectory("test/")
