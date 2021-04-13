@@ -9,31 +9,38 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--image", help="Image path")
-parser.add_argument("--step", help="number of iterations (default 20)", type=int, default=20)
-parser.add_argument("--beta", help="beta (default 0.8)", type=float, default=0.8)
-parser.add_argument("--type", help="Hybrid, Input-Ouput, or Output-Output", default="hybrid")
+parser.add_argument("--mask", help="Mask value (default 1). This will automatically create array of the specified value with the same size of the input image", type=float, default=1)
+parser.add_argument("--step", help="Number of iterations (default 20)", type=int, default=20)
+parser.add_argument("--beta", help="Beta (default 0.8)", type=float, default=0.8)
+parser.add_argument("--mode", help="Hybrid, Input-Ouput, or Output-Output", default="hybrid")
+parser.add_argument("--type", help="Language used to run phase retrieval. CUDA (default) or Python. ", default="cuda")
 args = parser.parse_args()
 
 if(args.image is None):
     print("Please input image path using --image")
     print("Use -h for help")
     exit()
-    
 
 #np.random.seed(1)
 image = imageio.imread(args.image, as_gray=True)
-array_random = np.random.rand(*image.shape) #uniform random
-mask = np.ones(image.shape) #default mask
 step = args.step
 beta = args.beta
-type = args.type.lower()
+type = args.type.lower() 
+mode = args.mode.lower()
+mask = np.full(image.shape, args.mask)
+array_random = np.random.rand(*image.shape) #uniform random
+
+assert type == 'python' or type == 'cuda'
+assert mode == 'input-output' or mode == 'output-output' or mode == 'hybrid'
 
 print("Running phase retrieval...")
 
 t1_start = perf_counter()
 
-result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, 20, "hybrid", 0.8, array_random)
-result_cuda =  cuPhaseRet.fienup_phase_retrieval(image, mask, 20, "hybrid", 0.8, array_random)
+if(type == "python"):
+    result = phase_retrieval_python.fienup_phase_retrieval(image, mask, mode, type, beta, array_random)
+elif(type == "cuda"):
+    result =  cuPhaseRet.fienup_phase_retrieval(image, mask, step, mode, beta, array_random)
 
 t1_stop = perf_counter() 
 print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)
@@ -41,13 +48,10 @@ print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)
 plt.show()
 plt.subplot(221)
 plt.imshow(image, cmap='gray')
-plt.title('Image')
+plt.title('Imput Image')
 plt.subplot(222)
-plt.imshow(result_original, cmap='gray')
-plt.title('Original Phase Retrieval')
-plt.subplot(223)
-plt.imshow(result_cuda, cmap='gray')
-plt.title('CUDA Phase Retrieval')
+plt.imshow(result, cmap='gray')
+plt.title('Phase Retrieval')
 # on headless systems, maximizing the window could be a problem
 try:
     figManager = plt.get_current_fig_manager()
