@@ -9,11 +9,11 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--image", help="Image path")
-parser.add_argument("--mask", help="Mask value (default 1). This will automatically create array of the specified value with the same size of the input image", type=float, default=1)
-parser.add_argument("--step", help="Number of iterations (default 20)", type=int, default=20)
-parser.add_argument("--beta", help="Beta (default 0.8)", type=float, default=0.8)
-parser.add_argument("--mode", help="Hybrid, Input-Ouput, or Output-Output", default="hybrid")
-parser.add_argument("--type", help="Language used to run phase retrieval. CUDA (default) or Python. ", default="cuda")
+parser.add_argument("--mask",  help="Initial mask value (default 1). The mask is created automatically and has the size of the input image. All values of the mask are initialized with this value.", type=float, default=1)
+parser.add_argument("--step",  help="Number of iterations (default 20)", type=int, default=20)
+parser.add_argument("--beta",  help="Beta (default 0.8)", type=float, default=0.8)
+parser.add_argument("--mode",  help="hybrid, input-ouput, or output-output", default="hybrid", choices=['hybrid', 'input-ouput', 'output-output'])
+parser.add_argument("--type",  help="Language used to run phase retrieval. cuda (default) or python. ", default="cuda", choices=['cuda', 'python'])
 args = parser.parse_args()
 
 if(args.image is None):
@@ -30,15 +30,15 @@ mode = args.mode.lower()
 mask = np.full(image.shape, args.mask)
 array_random = np.random.rand(*image.shape) #uniform random
 
-assert type == 'python' or type == 'cuda'
-assert mode == 'input-output' or mode == 'output-output' or mode == 'hybrid'
+assert step > 0
+assert beta > 0
 
 print("Running phase retrieval...")
 
 t1_start = perf_counter()
 
 if(type == "python"):
-    result = phase_retrieval_python.fienup_phase_retrieval(image, mask, mode, type, beta, array_random)
+    result = phase_retrieval_python.fienup_phase_retrieval(image, mask, step, mode, beta, array_random)
 elif(type == "cuda"):
     result =  cuPhaseRet.fienup_phase_retrieval(image, mask, step, mode, beta, array_random)
 
