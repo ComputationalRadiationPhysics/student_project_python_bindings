@@ -5,7 +5,7 @@ from phase_retrieval_original_edited import fienup_phase_retrieval
 from time import perf_counter 
 
 #np.random.seed(1)
-image = imageio.imread('a.png', as_gray=True)
+image = imageio.imread('../../example_images/a.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 
 print("Running phase retrieval...")
