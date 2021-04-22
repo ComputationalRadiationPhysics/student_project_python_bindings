@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from phase_retrieval import fienup_phase_retrieval
 
 np.random.seed(12345)
-image = imageio.imread('cameraman.png', as_gray=True)
+image = imageio.imread('../../example_images/a.png', as_gray=True)
 magnitudes = np.abs(np.fft.fft2(image))
 result = fienup_phase_retrieval(magnitudes,
                                 steps=1000,

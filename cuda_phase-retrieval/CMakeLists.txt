@@ -10,6 +10,7 @@ find_package(pybind11 REQUIRED)
 # copy example images to build folder
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/example_images/ )
+
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
@@ -20,10 +21,6 @@ set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CUDA_STANDARD ${CXX_STANDARD})
-
-# copy example images to build folder
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
-  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/example_images/ )
 
 add_library(cuPhaseRet SHARED phase_retrieval.cu)
 
