@@ -55,12 +55,18 @@ if __name__ == "__main__":
   print("Number of Device : ", number_of_gpus)
   # alloc_gpu_memory(parted_images, number_of_gpus)
 
-  #1st try, become sequential------------------------------------------------------------------------------
-  print("1st try")
+  #2nd try, sampe approach as run_cupy.py, separating variables in c++ -------------------------------------------
+  #problem : not flexible, still finding another approach for this part
+  partial_update = np.array_split(np.zeros(number_of_elements), number_of_gpus)
+  print("2nd try")
   print(partial_update)
+
   for i in range(0, number_of_gpus):
-    partial_update[i] = gpuMemManagement.update_images(parted_images[i], update[i], parted_images[i].size, i)
-  
+    gpuMemManagement.copy_parted_image_to_device(parted_images[i], parted_images[i].size, i)
+
+  for i in range(0, number_of_gpus):
+    partial_update[i] = gpuMemManagement.update_images_v2(update[i], parted_images[i].size, i)
+
   print(partial_update)
 
   free_gpu_memory(number_of_gpus)

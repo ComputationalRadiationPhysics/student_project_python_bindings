@@ -50,7 +50,21 @@ add_custom_command(TARGET pyExampleScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py $<TARGET_FILE_DIR:gpuMemManagement>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py)
+  
+add_custom_command(TARGET pyExampleScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind2.py $<TARGET_FILE_DIR:gpuMemManagement>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind2.py)
 
+add_custom_command(TARGET pyExampleScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind3.py $<TARGET_FILE_DIR:gpuMemManagement>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind3.py)
+
+  add_custom_command(TARGET pyExampleScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind4.py $<TARGET_FILE_DIR:gpuMemManagement>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind4.py)
 # add_custom_command(TARGET pyExampleScript PRE_BUILD
 #   COMMAND ${CMAKE_COMMAND} -E copy
 #   ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py $<TARGET_FILE_DIR:gpuMemManagement>
@@ -63,6 +77,9 @@ add_custom_command(TARGET pyExampleScript PRE_BUILD
 
 install(TARGETS gpuMemManagement DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind2.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind3.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind4.py DESTINATION bin)
 # install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py DESTINATION bin)
 # install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/run.py DESTINATION bin)
 

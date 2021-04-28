@@ -55,13 +55,12 @@ if __name__ == "__main__":
   print("Number of Device : ", number_of_gpus)
   # alloc_gpu_memory(parted_images, number_of_gpus)
 
-  #1st try, become sequential------------------------------------------------------------------------------
-  print("1st try")
+  #4th try, fail
+  partial_update = np.array_split(np.zeros(number_of_elements), number_of_gpus)
+  print("4th try")
   print(partial_update)
-  for i in range(0, number_of_gpus):
-    partial_update[i] = gpuMemManagement.update_images(parted_images[i], update[i], parted_images[i].size, i)
-  
-  print(partial_update)
+
+  thrust = gpuMemManagement.get_thrust(parted_images[0], parted_images[0].size, 0)
 
   free_gpu_memory(number_of_gpus)
 

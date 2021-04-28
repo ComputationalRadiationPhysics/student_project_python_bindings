@@ -1,5 +1,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
 #include <cmath>
 #include <cstdio>
 #include <time.h>
@@ -61,21 +63,7 @@ py::array_t<double, py::array::c_style> update_images(py::array_t<double, py::ar
     return result;
 }
 
-//2nd try, segmentation fault-------------------------------------------------------
-double * copy_to_device(py::array_t<double, py::array::c_style> parted_image, int size, int device_number)
-{
-    py::buffer_info bufImg = parted_image.request();
-    double *ptrImg = static_cast<double*>(bufImg.ptr);
-    
-    cudaSetDevice(device_number);
-    double *parted_image_dev;
-    CUDA_CHECK(cudaMalloc(&parted_image_dev, size * sizeof(double)));
-    CUDA_CHECK(cudaMemcpy(parted_image_dev, ptrImg, size * sizeof(double), cudaMemcpyHostToDevice));
-    return parted_image_dev;
-}
-
-
-//3rd try-----------------------------------
+//2nd try-----------------------------------
 void copy_parted_image_to_device(py::array_t<double, py::array::c_style> parted_image, int size, int device_number)
 {
     py::buffer_info bufImg = parted_image.request();
@@ -95,7 +83,7 @@ void copy_parted_image_to_device(py::array_t<double, py::array::c_style> parted_
     }
 }
 
-py::array_t<double, py::array::c_style> update_images_v3(double update, int size, int device_number)
+py::array_t<double, py::array::c_style> update_images_v2(double update, int size, int device_number)
 {
     cudaSetDevice(device_number);
     int devId, numSMs;
@@ -129,7 +117,7 @@ py::array_t<double, py::array::c_style> update_images_v3(double update, int size
     return result;
 }
 
-//4th try--------------------------------------
+//3rd try--------------------------------------
 //similiar to 1st try, learning cudastream with multi-GPU
 py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double, py::array::c_style> images, py::array_t<double, py::array::c_style> update, int size)
 {
@@ -194,5 +182,19 @@ py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double,
     cudaFree(partial_images_dev_1);
 
     return result;
+}
+
+//4th try, fail-----------------------------------------------------------------------------------
+//return thrust vector
+
+auto get_thrust(py::array_t<double, py::array::c_style> parted_image, int size, int device_number)
+{
+    py::buffer_info bufImg = parted_image.request();
+    double *ptrImg = static_cast<double*>(bufImg.ptr);
+    
+    cudaSetDevice(device_number);
+    thrust::device_vector<double> vectors;
+    thrust::copy(vectors.begin(), vectors.end(), ptrImg);
+    return vectors;
 }
 

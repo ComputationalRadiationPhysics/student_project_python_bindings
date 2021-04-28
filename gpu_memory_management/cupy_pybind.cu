@@ -17,14 +17,14 @@ PYBIND11_MODULE(gpuMemManagement, m)
   m.def("update_images", &update_images);
 
   //2nd try
-  m.def("copy_to_device", &copy_to_device, py::return_value_policy::reference);
+  m.def("copy_parted_image_to_device", &copy_parted_image_to_device);
+  m.def("update_images_v2", &update_images_v2);
 
   //3rd try
-  m.def("copy_parted_image_to_device", &copy_parted_image_to_device);
-  m.def("update_images_v3", &update_images_v3);
-
-  //4th try
   m.def("update_images_stream", &update_images_stream);
+
+  //4th try, fail
+  m.def("get_thrust", &get_thrust, py::return_value_policy::reference);
 }
 
 

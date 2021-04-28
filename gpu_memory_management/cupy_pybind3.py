@@ -55,12 +55,21 @@ if __name__ == "__main__":
   print("Number of Device : ", number_of_gpus)
   # alloc_gpu_memory(parted_images, number_of_gpus)
 
-  #1st try, become sequential------------------------------------------------------------------------------
-  print("1st try")
+  #3rd try, do evrything in C++, while learning CUDA stream ---------------------------------------------------------------------------------
+  #Problem : The plan is to send splitted array immages without iteration.
+  #          But if the split is uneven, it is very difficult to convert send the partial image to c++ as numpy. 
+  #          For example : (parted_images = parted_images.split(2), with total size 23)
+  #          It split to 2 part with size 12 and 11. After that, it is very difficult to convert it to numpy. The function "def padding" in line 25 works,
+  #          but after sending it to c++, it become a single one dimensional array with size 23. So it is like the splitting never happened
+  #          Maybe pybind has a way to handle this (?)
+  #          For now, the split happened in c++. CUDA stream is implemented here
+        
+  partial_update = np.zeros(number_of_elements)
+  print("3rd try")
   print(partial_update)
-  for i in range(0, number_of_gpus):
-    partial_update[i] = gpuMemManagement.update_images(parted_images[i], update[i], parted_images[i].size, i)
-  
+
+  partial_update = gpuMemManagement.update_images_stream(images, update, number_of_elements)
+
   print(partial_update)
 
   free_gpu_memory(number_of_gpus)
