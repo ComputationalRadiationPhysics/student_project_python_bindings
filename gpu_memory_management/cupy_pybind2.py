@@ -48,15 +48,15 @@ if __name__ == "__main__":
 
   assert(np.shape(partial_update) == np.shape(parted_images))
 
-  print(partial_update)
+  # print(partial_update)
 
   # allocate memory for each GPU, the size is parted image size + update value size + parted update value size (?)
   # need to know how to properly set the size
   print("Number of Device : ", number_of_gpus)
   # alloc_gpu_memory(parted_images, number_of_gpus)
 
-  #2nd try, sampe approach as run_cupy.py, separating variables in c++ -------------------------------------------
-  #problem : not flexible, still finding another approach for this part
+
+  # 2nd try, sampe approach as run_cupy.py, separating variables in c++ -------------------------------------------
   partial_update = np.array_split(np.zeros(number_of_elements), number_of_gpus)
   print("2nd try")
   print(partial_update)
@@ -68,6 +68,7 @@ if __name__ == "__main__":
     partial_update[i] = gpuMemManagement.update_images_v2(update[i], parted_images[i].size, i)
 
   print(partial_update)
+  
 
   free_gpu_memory(number_of_gpus)
 

@@ -117,6 +117,11 @@ py::array_t<double, py::array::c_style> update_images_v2(double update, int size
     return result;
 }
 
+py::array_t<double, py::array::c_style> allocate_device(py::array_t<double, py::array::c_style> images, int size)
+{
+    return images;
+}
+
 //3rd try--------------------------------------
 //similiar to 1st try, learning cudastream with multi-GPU
 py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double, py::array::c_style> images, py::array_t<double, py::array::c_style> update, int size)
@@ -185,16 +190,18 @@ py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double,
 }
 
 //4th try, fail-----------------------------------------------------------------------------------
-//return thrust vector
+//trying to use unified memory so CPU and GPU can access
+// but how to return a simple array of double via pybind?
 
-auto get_thrust(py::array_t<double, py::array::c_style> parted_image, int size, int device_number)
+double * copy_to_device(py::array_t<double, py::array::c_style> image, int size)
 {
-    py::buffer_info bufImg = parted_image.request();
+    py::buffer_info bufImg = image.request();
     double *ptrImg = static_cast<double*>(bufImg.ptr);
-    
-    cudaSetDevice(device_number);
-    thrust::device_vector<double> vectors;
-    thrust::copy(vectors.begin(), vectors.end(), ptrImg);
-    return vectors;
+
+    double *image_dev;
+    CUDA_CHECK(cudaMallocManaged(&image_dev, size * sizeof(double))); //unified memory
+    // CUDA_CHECK(cudaMemcpy(image_dev, ptrImg, size * sizeof(double), cudaMemcpyHostToDevice));
+    image_dev = ptrImg;
+    return image_dev;
 }
 

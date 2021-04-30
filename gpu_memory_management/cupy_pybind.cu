@@ -19,12 +19,13 @@ PYBIND11_MODULE(gpuMemManagement, m)
   //2nd try
   m.def("copy_parted_image_to_device", &copy_parted_image_to_device);
   m.def("update_images_v2", &update_images_v2);
+  m.def("allocate_device", &allocate_device);
 
   //3rd try
   m.def("update_images_stream", &update_images_stream);
 
   //4th try, fail
-  m.def("get_thrust", &get_thrust, py::return_value_policy::reference);
+  m.def("copy_to_device", &copy_to_device, py::return_value_policy::reference);
 }
 
 

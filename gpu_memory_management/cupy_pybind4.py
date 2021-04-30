@@ -56,11 +56,9 @@ if __name__ == "__main__":
   # alloc_gpu_memory(parted_images, number_of_gpus)
 
   #4th try, fail
-  partial_update = np.array_split(np.zeros(number_of_elements), number_of_gpus)
-  print("4th try")
-  print(partial_update)
-
-  thrust = gpuMemManagement.get_thrust(parted_images[0], parted_images[0].size, 0)
+  gpu_image = gpuMemManagement.copy_to_device(images, number_of_elements)
+  print(type(gpu_image)) #this become a single float instead of array??
+  print(gpu_image)
 
   free_gpu_memory(number_of_gpus)
 
