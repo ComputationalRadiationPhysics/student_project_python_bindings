@@ -1,7 +1,6 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
-#include <thrust/host_vector.h>
-#include <thrust/device_vector.h>
+#include <pybind11/stl.h>
 #include <cmath>
 #include <cstdio>
 #include <time.h>
@@ -32,6 +31,14 @@ int getDeviceNumber()
     int num;
     cudaGetDeviceCount(&num);
     return num;
+}
+
+int getNumberofSM()
+{
+    int devId, numSMs;
+    cudaGetDevice(&devId);
+    cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
+    return numSMs;
 }
 
 //1st try---------------------------------------
@@ -189,19 +196,19 @@ py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double,
     return result;
 }
 
-//4th try, fail-----------------------------------------------------------------------------------
-//trying to use unified memory so CPU and GPU can access
-// but how to return a simple array of double via pybind?
-
-double * copy_to_device(py::array_t<double, py::array::c_style> image, int size)
+//4th try, second part
+//fail, c++ doesnt know cupy
+void update_images_v4(double *image, double *partial_update, double update, int size)
 {
-    py::buffer_info bufImg = image.request();
-    double *ptrImg = static_cast<double*>(bufImg.ptr);
+    double *ptrImg = reinterpret_cast<double*>(image);
+    double *ptrUpd = reinterpret_cast<double*>(partial_update);
 
-    double *image_dev;
-    CUDA_CHECK(cudaMallocManaged(&image_dev, size * sizeof(double))); //unified memory
-    // CUDA_CHECK(cudaMemcpy(image_dev, ptrImg, size * sizeof(double), cudaMemcpyHostToDevice));
-    image_dev = ptrImg;
-    return image_dev;
+    int devId, numSMs;
+    cudaGetDevice(&devId);
+    cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
+    
+    partial_image_update<<<8*numSMs, 256>>>(ptrImg, ptrUpd, update, size);
+
+    cudaDeviceSynchronize();
 }
 
