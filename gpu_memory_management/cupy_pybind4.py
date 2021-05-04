@@ -27,19 +27,22 @@ if __name__ == "__main__":
 
   #4th try, 
   # first part (allocate gpu memory to python without cupy) still fail
+  print("---part 1---")
   gpu_image = gpuMemManagement.copy_to_device(images, number_of_elements)
-  # print(type(gpu_image)) #this become a single float instead of array??
-  # print(gpu_image)
+  print(type(gpu_image)) #this become a single float instead of array??
+  print(gpu_image)
 
-  #second part (but with cupy array for now until first part works)
-  #still not working because illegal access
-  gpu_image = cp.asarray(images)
-  gpu_partial_update = cp.asarray(partial_update)
-  print(gpu_partial_update) #not illegal
+  print("---part 2---")
+  #second part, send a cupy to c++ via pybind (the cupy will be replaced by part 1 variables if part 1 worked)
+  #for this part I send the adress of cupy image and partial update as integer
+  #this part still dont use any variables from part 1
+  gpu_image = cp.asarray(images) #this part will removed if part 1 is working
+  gpu_partial_update = cp.asarray(partial_update) #this part will removed if part 1 is working
+  print(type(gpu_partial_update), gpu_partial_update)
 
   gpuMemManagement.update_images_v4(gpu_image.data.ptr, gpu_partial_update.data.ptr, update, number_of_elements)
-  print(type(gpu_partial_update))
-  print(gpu_partial_update) #suddenly become illegal
+
+  print(type(gpu_partial_update), gpu_partial_update)
 
   free_gpu_memory(number_of_gpus)
 

@@ -196,19 +196,4 @@ py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double,
     return result;
 }
 
-//4th try, second part
-//fail, c++ doesnt know cupy
-void update_images_v4(double *image, double *partial_update, double update, int size)
-{
-    double *ptrImg = reinterpret_cast<double*>(image);
-    double *ptrUpd = reinterpret_cast<double*>(partial_update);
-
-    int devId, numSMs;
-    cudaGetDevice(&devId);
-    cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
-    
-    partial_image_update<<<8*numSMs, 256>>>(ptrImg, ptrUpd, update, size);
-
-    cudaDeviceSynchronize();
-}
 
