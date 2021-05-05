@@ -32,34 +32,29 @@ PYBIND11_MODULE(gpuMemManagement, m)
   //4th try, 
   //first part still return a float, not an array
   // m.def("copy_to_device", &copy_to_device, py::return_value_policy::copy);
-  m.def("copy_to_device", [=](py::array_t<double, py::array::c_style> image, int size)
+  m.def("copy_to_device", [](size_t gpu_image, py::array_t<double, py::array::c_style> image, int size)
     {
       py::buffer_info bufImg = image.request();
-      double *ptrImg = static_cast<double*>(bufImg.ptr);
 
-      vector<double> img_vec(ptrImg, ptrImg+size);
+      double *host_image = static_cast<double*>(bufImg.ptr);
+      double *device_image = reinterpret_cast<double*>(gpu_image);
 
-      double *image_dev;
-      CUDA_CHECK(cudaMallocManaged(&image_dev, size * sizeof(double))); //unified memory
-    
-      image_dev = img_vec.data();
-      
-      return image_dev;
+      cudaMemcpy(device_image, host_image, size * sizeof(double), cudaMemcpyHostToDevice);
     } 
   );
   
   //4th try, second part, somehow without any return, it is working
-  m.def("update_images_v4", [&](size_t image, size_t partial_update, double update, int size) 
+  m.def("update_images_v4", [](size_t gpu_image, size_t gpu_partial_update, double update, int size) 
     {
       //get the value of the address
-      double *ptrImg = reinterpret_cast<double*>(image);
-      double *ptrUpd = reinterpret_cast<double*>(partial_update);
+      double *device_image = reinterpret_cast<double*>(gpu_image);
+      double *device_partial_update = reinterpret_cast<double*>(gpu_partial_update);
 
       int devId, numSMs;
       cudaGetDevice(&devId);
       cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
       
-      partial_image_update<<<8*numSMs, 256>>>(ptrImg, ptrUpd, update, size);
+      partial_image_update<<<8*numSMs, 256>>>(device_image, device_partial_update, update, size);
 
       cudaDeviceSynchronize();
     }
