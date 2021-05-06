@@ -14,9 +14,6 @@ using namespace std;
 using namespace std::literals::complex_literals;
 namespace py = pybind11;
 
-double *global_parted_image_0_dev;
-double *global_parted_image_1_dev;
-
 
 __global__ void partial_image_update(double *parted_image, double *partial_update, double update, int size)
 {
@@ -41,96 +38,41 @@ int getNumberofSM()
     return numSMs;
 }
 
-//1st try---------------------------------------
-py::array_t<double, py::array::c_style> update_images(py::array_t<double, py::array::c_style> parted_image, double update, int size, int device_number)
+void copy_to_device(size_t gpu_image, py::array_t<double, py::array::c_style> image, int size, int device)
 {
-    py::buffer_info bufImg = parted_image.request();
-    double *ptrImg = static_cast<double*>(bufImg.ptr);
+    py::buffer_info bufImg = image.request();
 
-    cudaSetDevice(device_number);
+    cudaSetDevice(device);
+    double *host_image = static_cast<double*>(bufImg.ptr);
+    double *device_image = reinterpret_cast<double*>(gpu_image);
+
+    cudaMemcpy(device_image, host_image, size * sizeof(double), cudaMemcpyHostToDevice);
+}
+
+void update_images(size_t gpu_image, size_t gpu_partial_update, double update, int size, int device) 
+{
+    cudaSetDevice(device);
+    double *device_image = reinterpret_cast<double*>(gpu_image);
+    double *device_partial_update = reinterpret_cast<double*>(gpu_partial_update);
+
     int devId, numSMs;
     cudaGetDevice(&devId);
     cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
-
-    double *parted_image_dev, *partial_update_dev;
-    CUDA_CHECK(cudaMalloc(&parted_image_dev, size * sizeof(double)));
-    CUDA_CHECK(cudaMalloc(&partial_update_dev, size * sizeof(double)));
-    CUDA_CHECK(cudaMemcpy(parted_image_dev, ptrImg, size * sizeof(double), cudaMemcpyHostToDevice));
     
-    partial_image_update<<<8*numSMs, 256>>>(parted_image_dev, partial_update_dev, update, size);
+    partial_image_update<<<8*numSMs, 256>>>(device_image, device_partial_update, update, size);
 
-    py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(bufImg.size);
-    py::buffer_info bufRes = result.request();
-    double *ptrRes = static_cast<double*>(bufRes.ptr);
-    CUDA_CHECK(cudaMemcpy(ptrRes, partial_update_dev, size * sizeof(double), cudaMemcpyDeviceToHost));
-    
-    cudaFree(parted_image_dev);
-    cudaFree(partial_update_dev);
-
-    return result;
+    cudaDeviceSynchronize();
 }
 
-//2nd try-----------------------------------
-void copy_parted_image_to_device(py::array_t<double, py::array::c_style> parted_image, int size, int device_number)
+void free_gpu_memory(size_t device_array, int device) 
 {
-    py::buffer_info bufImg = parted_image.request();
-    double *ptrImg = static_cast<double*>(bufImg.ptr);
-    
-    if(device_number == 0)
-    {
-        cudaSetDevice(device_number);
-        CUDA_CHECK(cudaMalloc(&global_parted_image_0_dev, size * sizeof(double)));
-        CUDA_CHECK(cudaMemcpy(global_parted_image_0_dev, ptrImg, size * sizeof(double), cudaMemcpyHostToDevice));
-    }
-    else if(device_number == 1)
-    {
-        cudaSetDevice(device_number);
-        CUDA_CHECK(cudaMalloc(&global_parted_image_1_dev, size * sizeof(double)));
-        CUDA_CHECK(cudaMemcpy(global_parted_image_1_dev, ptrImg, size * sizeof(double), cudaMemcpyHostToDevice));
-    }
+    cudaSetDevice(device);
+    double *gpu_array = reinterpret_cast<double*>(device_array);
+
+    cudaFree(gpu_array);
 }
 
-py::array_t<double, py::array::c_style> update_images_v2(double update, int size, int device_number)
-{
-    cudaSetDevice(device_number);
-    int devId, numSMs;
-    cudaGetDevice(&devId);
-    cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
-
-    double *partial_update_dev;
-    CUDA_CHECK(cudaMalloc(&partial_update_dev, size * sizeof(double)));
-  
-    py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(size);
-    py::buffer_info bufRes = result.request();
-    double *ptrRes = static_cast<double*>(bufRes.ptr);
-
-    if(device_number == 0)
-    {
-        partial_image_update<<<8*numSMs, 256>>>(global_parted_image_0_dev, partial_update_dev, update, size);
-        CUDA_CHECK(cudaMemcpy(ptrRes, partial_update_dev, size * sizeof(double), cudaMemcpyDeviceToHost));
-        
-        cudaFree(global_parted_image_0_dev);
-        cudaFree(partial_update_dev);
-    }
-    else if(device_number == 1)
-    {
-        partial_image_update<<<8*numSMs, 256>>>(global_parted_image_1_dev, partial_update_dev, update, size);
-        CUDA_CHECK(cudaMemcpy(ptrRes, partial_update_dev, size * sizeof(double), cudaMemcpyDeviceToHost));
-        
-        cudaFree(global_parted_image_1_dev);
-        cudaFree(partial_update_dev);
-    }
-
-    return result;
-}
-
-py::array_t<double, py::array::c_style> allocate_device(py::array_t<double, py::array::c_style> images, int size)
-{
-    return images;
-}
-
-//3rd try--------------------------------------
-//similiar to 1st try, learning cudastream with multi-GPU
+//cuda stream test
 py::array_t<double, py::array::c_style> update_images_stream(py::array_t<double, py::array::c_style> images, py::array_t<double, py::array::c_style> update, int size)
 {
     py::buffer_info bufImg = images.request();

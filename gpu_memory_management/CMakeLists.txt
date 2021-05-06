@@ -7,9 +7,6 @@ find_package(PythonInterp 3.6 REQUIRED)
 find_package(PythonLibs 3.6 REQUIRED)
 find_package(pybind11 REQUIRED)
 
-# copy example images to build folder
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
-#   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/example_images/ )
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
@@ -53,35 +50,12 @@ add_custom_command(TARGET pyExampleScript PRE_BUILD
   
 add_custom_command(TARGET pyExampleScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind2.py $<TARGET_FILE_DIR:gpuMemManagement>
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind2.py)
-
-add_custom_command(TARGET pyExampleScript PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind3.py $<TARGET_FILE_DIR:gpuMemManagement>
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind3.py)
-
-  add_custom_command(TARGET pyExampleScript PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind4.py $<TARGET_FILE_DIR:gpuMemManagement>
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind4.py)
-# add_custom_command(TARGET pyExampleScript PRE_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E copy
-#   ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py $<TARGET_FILE_DIR:gpuMemManagement>
-#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py)
-
-# add_custom_command(TARGET pyExampleScript PRE_BUILD
-#   COMMAND ${CMAKE_COMMAND} -E copy
-#   ${CMAKE_CURRENT_SOURCE_DIR}/run.py $<TARGET_FILE_DIR:gpuMemManagement>
-#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/run.py)
+  ${CMAKE_CURRENT_SOURCE_DIR}/cuda_stream_test.py $<TARGET_FILE_DIR:gpuMemManagement>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cuda_stream_test.py)
 
 install(TARGETS gpuMemManagement DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind2.py DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind3.py DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind4.py DESTINATION bin)
-# install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py DESTINATION bin)
-# install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/run.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cuda_stream_test.py DESTINATION bin)
 
 # if(ENABLE_TEST)
 #   add_subdirectory("test/")

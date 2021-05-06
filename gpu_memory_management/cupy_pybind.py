@@ -1,33 +1,14 @@
 import cupy as cp
 import numpy as np
+import random
+import asyncio
 import gpuMemManagement
 
-mempool = cp.get_default_memory_pool()
-      
-# def alloc_gpu_memory(parted_images, number_of_gpus):
-#   for x in range(0,number_of_gpus):
-#     cp.cuda.Device(x).use()
-#     limit  = parted_images[x].nbytes + 1024**2 #some extra for other variables
-#     if(limit < 1024**3): limit = 1024**3 #minimum 1GB
-#     mempool.set_limit(size=limit)
-#     print("Device ", x, " ready, size limit ", limit/(1024**3), " GB")
-
-# def alloc_gpu_memory(parted_images, number_of_gpus):
-#   for x in range(0,number_of_gpus):
-#     cp.cuda.Device(x).use()
-#     cp.cuda.Memory(parted_images[x].size) #what about memory for another variables?
-
-def free_gpu_memory(number_of_gpus):
-  for x in range(0,number_of_gpus):
-    cp.cuda.Device(x).use()
-    mempool.free_all_blocks()
-
-# def padding(v, fillval=np.nan):
-#   lens = np.array([len(item) for item in v])
-#   mask = lens[:,None] > np.arange(lens.max())
-#   out = np.full(mask.shape,fillval)
-#   out[mask] = np.concatenate(v)
-#   return out
+async def run_partial_update(gpu_image, parted_image, partial_update, update, size, device):
+  cp.cuda.Device(device).use()
+  gpuMemManagement.copy_to_device(gpu_image.data.ptr, parted_image, size, device)   
+  gpuMemManagement.update_images(gpu_image.data.ptr, partial_update.data.ptr, update, size, device)
+  print(type(partial_update), partial_update)
 
 if __name__ == "__main__":
 
@@ -39,31 +20,41 @@ if __name__ == "__main__":
     images[i] = i
 
   #cpu initial data
-  update = np.random.rand(number_of_gpus)
-  partial_update = np.zeros(number_of_elements)
+  update = random.random()
 
-  #split the input image
-  parted_images = np.array_split(images, number_of_gpus)
-  partial_update = np.array_split(partial_update, number_of_gpus)
-
-  assert(np.shape(partial_update) == np.shape(parted_images))
-
-  print(partial_update)
-
-  # allocate memory for each GPU, the size is parted image size + update value size + parted update value size (?)
-  # need to know how to properly set the size
   print("Number of Device : ", number_of_gpus)
-  # alloc_gpu_memory(parted_images, number_of_gpus)
 
-  #1st try, become sequential------------------------------------------------------------------------------
-  print("1st try")
-  print(partial_update)
-  for i in range(0, number_of_gpus):
-    partial_update[i] = gpuMemManagement.update_images(parted_images[i], update[i], parted_images[i].size, i)
-  
-  print(partial_update)
+  parted_image = np.array_split(images, number_of_gpus)
 
-  free_gpu_memory(number_of_gpus)
+  cp.cuda.Device(0).use()
+  gpu_image_0 = cp.zeros(parted_image[0].size)
+  gpu_partial_update_0 = cp.zeros(parted_image[0].size)
+
+  cp.cuda.Device(1).use()
+  gpu_image_1 = cp.zeros(parted_image[1].size)
+  gpu_partial_update_1 = cp.zeros(parted_image[1].size)
+
+  # run_partial_update(gpu_image_0, parted_image[0], gpu_partial_update_0, update, parted_image[0].size, 0)
+  # run_partial_update(gpu_image_1, parted_image[1], gpu_partial_update_1, update, parted_image[1].size, 1)
+
+  #I am not sure about this async part, but this give right outputs
+  loop = asyncio.get_event_loop()
+  tasks = [
+      loop.create_task(run_partial_update(gpu_image_0, parted_image[0], gpu_partial_update_0, update, parted_image[0].size, 0)),
+      loop.create_task(run_partial_update(gpu_image_1, parted_image[1], gpu_partial_update_1, update, parted_image[1].size, 1)),
+  ]
+  loop.run_until_complete(asyncio.wait(tasks))
+  loop.close()
+
+  cp.cuda.Device(0).use()
+  gpuMemManagement.free_gpu_memory(gpu_image_0.data.ptr, 0)
+  gpuMemManagement.free_gpu_memory(gpu_partial_update_0.data.ptr, 0)
+
+  cp.cuda.Device(1).use()
+  gpuMemManagement.free_gpu_memory(gpu_image_1.data.ptr, 1)
+  gpuMemManagement.free_gpu_memory(gpu_partial_update_1.data.ptr, 1)
+
+
 
   
 
