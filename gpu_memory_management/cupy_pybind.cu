@@ -21,11 +21,6 @@ PYBIND11_MODULE(gpuMemManagement, m)
   m.def("copy_to_device", &copy_to_device);
   m.def("update_images", &update_images);
   m.def("free_gpu_memory", &free_gpu_memory);
-
-  //cuda stream test
-  m.def("update_images_stream", &update_images_stream);
-
-  
 }
 
 

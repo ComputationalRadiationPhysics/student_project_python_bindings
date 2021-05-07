@@ -47,15 +47,9 @@ add_custom_command(TARGET pyExampleScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py $<TARGET_FILE_DIR:gpuMemManagement>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py)
-  
-add_custom_command(TARGET pyExampleScript PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/cuda_stream_test.py $<TARGET_FILE_DIR:gpuMemManagement>
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cuda_stream_test.py)
 
 install(TARGETS gpuMemManagement DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cuda_stream_test.py DESTINATION bin)
 
 # if(ENABLE_TEST)
 #   add_subdirectory("test/")
