@@ -48,6 +48,11 @@ if __name__ == "__main__":
 
   print("\n", type(combined_partial_update), combined_partial_update)
 
+  cp.cuda.Device(0).use()
+  a = cp.ones(3)
+  b = gpuMemManagement.cupy_array(a.data.ptr, cp.size(a))
+  gpuMemManagement.print_details(b)
+
 
 
   
