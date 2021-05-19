@@ -25,10 +25,10 @@ PYBIND11_MODULE(gpuMemManagement, m)
 
   //custom cupy type
   m.def("print_details", &print_details);
-  py::class_<cupy_array>(m, "cupy_array")
-  .def(py::init<size_t, size_t>())
-  .def("getAdress", &cupy_array::getAdress)
-  .def("getSize", &cupy_array::getSize);
+  // py::class_<cupy_array>(m, "cupy_array")
+  // .def(py::init<size_t, size_t>())
+  // .def("getAdress", &cupy_array::getAdress)
+  // .def("getSize", &cupy_array::getSize);
 }
 
 
