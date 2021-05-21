@@ -49,7 +49,8 @@ if __name__ == "__main__":
   print("\n", type(combined_partial_update), combined_partial_update)
 
   cp.cuda.Device(0).use()
-  a = cp.ones(3)
+  a = cp.full(3, 2.5)
+  # print(dir(a))
   gpuMemManagement.print_details(a)
 
 

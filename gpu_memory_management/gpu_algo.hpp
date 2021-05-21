@@ -81,23 +81,13 @@ void free_gpu_memory(size_t device_array, int device)
 
 void print_details(cupy_array b) 
 {    
-    // cout<<b.size<<endl;
-    // cout<<b.address<<endl;
-    double *cpu_data = new double[b.size];
+    // double *cpu_data = new double[b.size];
 
-    //why is this not working? device data become invalid according to CUDA
-    //maybe because cupy_array is on cpu?
-    //but why this technique is working in previous functions (update_images, free_gpu_memory, etc)?
-    double *device_data = reinterpret_cast<double*>(b.address); 
-    CUDA_CHECK(cudaMemcpy(cpu_data, device_data, b.size * sizeof(double), cudaMemcpyDeviceToHost));
+    // double *device_data = reinterpret_cast<double*>(b.address); 
+    // CUDA_CHECK(cudaMemcpy(cpu_data, device_data, b.size * sizeof(double), cudaMemcpyDeviceToHost));
 
-    for(size_t i = 0; i < b.size; i++)
-    {
-        cout<<cpu_data[i]<<endl; //print random things because of invalid cuda, instead of (1,1,1)
-    }
-
-    //try to create cupy here
-    py::object cp = py::module_::import("cupy");
-    py::object device_array = cp.attr("empty")(b.size);
-    device_array.attr("data").attr("ptr") = b.address; //not writtable error
+    // for(size_t i = 0; i < b.size; i++)
+    // {
+    //     cout<<cpu_data[i]<<endl; //print random things because of invalid cuda, instead of (1,1,1)
+    // }
 }
