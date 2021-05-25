@@ -33,7 +33,7 @@ namespace pybind11 { namespace detail {
         // python -> C++
         bool load(handle src, bool)
         {
-            //try 4 copying src
+            // try 4 copying src to local cupy
 
             py::object cp = py::module_::import("cupy");
             py::object a = cp.attr("asarray")(src);
@@ -45,7 +45,7 @@ namespace pybind11 { namespace detail {
             CUDA_CHECK(cudaMemcpy(cpu_data, device_data, a.attr("size").cast<size_t>() * sizeof(double), cudaMemcpyDeviceToHost));
 
 
-            //try 3 fail
+            //try 3 using reinterpret_borrow from pybind11 handle, fail
             // py::object address = reinterpret_borrow<py::object>(src.attr("data").attr("ptr"));
             // py::object size = reinterpret_borrow<py::object>(src.attr("size"));
 
@@ -55,8 +55,9 @@ namespace pybind11 { namespace detail {
 
             // CUDA_CHECK(cudaMemcpy(cpu_data, device_data, size.cast<size_t>() * sizeof(double), cudaMemcpyDeviceToHost));
 
-            //try 2 fail
+            // try 2 fail
             // PyObject *source = src.ptr();
+            
             // py::object cp = reinterpret_borrow<py::object>(source);
 
 
@@ -64,7 +65,6 @@ namespace pybind11 { namespace detail {
 
             // double *device_data = reinterpret_cast<double*>(cp.attr("data").attr("ptr").cast<size_t>()); //device data is not recognized by both cpu and gpu
 
-            // cout<<device_data<<endl;
 
             // CUDA_CHECK(cudaMemcpy(cpu_data, device_data, cp.attr("size").cast<size_t>() * sizeof(double), cudaMemcpyDeviceToHost));
 

@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
   cp.cuda.Device(0).use()
   a = cp.full(3, 2.5)
+  # print(type(a.cstruct), a.cstruct)
   # print(dir(a))
   gpuMemManagement.print_details(a)
 
