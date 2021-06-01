@@ -18,8 +18,15 @@ namespace pybind11 { namespace detail {
          */
         bool load(handle src, bool) {
 	    // TODO: implement cast function
-
-            return false;
+            if(!hasattr(src, "version") && !hasattr(src, "text"))
+            {
+                 return false;
+            }
+            
+            value.text = src.attr("text").cast<std::string>();
+            value.version = src.attr("version").cast<int>();
+           
+            return true;
         }
 
     };

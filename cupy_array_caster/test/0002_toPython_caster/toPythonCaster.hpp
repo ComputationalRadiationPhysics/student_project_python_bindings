@@ -22,10 +22,15 @@ namespace pybind11 { namespace detail {
          * ``return_value_policy::reference_internal``) and are generally
          * ignored by implicit casters.
          */
-        static handle cast(toPython src, return_value_policy /* policy */, handle /* parent */) {
-	  // TODO: implement the correct cast
-	  // The return value PyLong_FromLong is only used, that it compiles
-	  return PyLong_FromLong(1);
+        static handle cast(toPython src, return_value_policy /* policy */, handle /* parent */) 
+        {
+            // TODO: implement the correct cast
+            // The return value PyLong_FromLong is only used, that it compiles
+
+            auto topython = module::import("toPython").attr("toPython")(src.number, src.data);
+            return topython.release();
+
+	        //return PyLong_FromLong(1);
         }
 
     };
