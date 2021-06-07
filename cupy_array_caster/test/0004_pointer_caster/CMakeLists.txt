@@ -22,10 +22,10 @@ add_custom_command(TARGET ${testPointerScriptName} PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/test_pointerCaster.py $<TARGET_FILE_DIR:${bindingPointer}>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test_pointerCaster.py)
-add_custom_command(TARGET ${testPointerScriptName} PRE_BUILD
- COMMAND ${CMAKE_COMMAND} -E copy
- ${CMAKE_CURRENT_SOURCE_DIR}/bidirectCaster.hpp $<TARGET_FILE_DIR:${bindingPointer}>
- DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bidirectCaster.hpp)
+#add_custom_command(TARGET ${testPointerScriptName} PRE_BUILD
+#  COMMAND ${CMAKE_COMMAND} -E copy
+#  ${CMAKE_CURRENT_SOURCE_DIR}/container.py $<TARGET_FILE_DIR:${bindingPointer}>
+#  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/container.py)
 
 
 install(TARGETS ${bindingPointer} DESTINATION bin)
