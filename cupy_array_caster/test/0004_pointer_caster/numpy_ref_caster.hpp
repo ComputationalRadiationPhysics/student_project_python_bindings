@@ -19,7 +19,14 @@ namespace pybind11 { namespace detail {
         bool load(handle src, bool) {
 	    // TODO: implement
 
-            return false;
+           if(!hasattr(src, "ptr"))
+            {
+                 return false;
+            }
+            
+            value.ptr = reinterpret_cast<std::uint32_t *>(src.attr("ptr").cast<size_t>());
+           
+            return true;
         }
 
     };
@@ -43,7 +50,15 @@ namespace pybind11 { namespace detail {
         bool load(handle src, bool) {
 	    // TODO: implement
 
-            return false;
+           if(!hasattr(src, "ptr") && !hasattr(src, "size"))
+            {
+                 return false;
+            }
+            
+            value.ptr = reinterpret_cast<std::uint32_t *>(src.attr("ptr").cast<size_t>());
+            value.size = src.attr("size").cast<size_t>();
+           
+            return true;
         }
 
     };
