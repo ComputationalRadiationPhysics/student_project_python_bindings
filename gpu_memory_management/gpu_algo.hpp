@@ -1,7 +1,6 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "cupy_caster.hpp"
 #include <cmath>
 #include <cstdio>
 #include <time.h>
@@ -77,17 +76,4 @@ void free_gpu_memory(size_t device_array, int device)
     double *gpu_array = reinterpret_cast<double*>(device_array);
 
     CUDA_CHECK(cudaFree(gpu_array));
-}
-
-void print_details(cupy_array b) 
-{    
-    // double *cpu_data = new double[b.size];
-
-    // double *device_data = reinterpret_cast<double*>(b.address); 
-    // CUDA_CHECK(cudaMemcpy(cpu_data, device_data, b.size * sizeof(double), cudaMemcpyDeviceToHost));
-
-    // for(size_t i = 0; i < b.size; i++)
-    // {
-    //     cout<<cpu_data[i]<<endl; //print random things because of invalid cuda, instead of (1,1,1)
-    // }
 }

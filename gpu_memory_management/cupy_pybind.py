@@ -3,6 +3,7 @@ import numpy as np
 import random
 import asyncio
 import gpuMemManagement
+import cupy_ref
 
 async def run_partial_update(parted_image, update, device):
   cp.cuda.Device(device).use()
@@ -47,12 +48,6 @@ if __name__ == "__main__":
   assert(images.size ==  combined_partial_update.size)
 
   print("\n", type(combined_partial_update), combined_partial_update)
-
-  cp.cuda.Device(0).use()
-  a = cp.full(3, 2.5)
-  # print(type(a.cstruct), a.cstruct)
-  # print(dir(a))
-  gpuMemManagement.print_details(a)
 
 
 
