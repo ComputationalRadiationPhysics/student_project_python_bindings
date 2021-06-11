@@ -14,6 +14,13 @@ using namespace std;
 using namespace std::literals::complex_literals;
 namespace py = pybind11;
 
+
+__global__ void gpu_increment_all_data_by_1(double *gpu_data)
+{
+    int i = blockIdx.x*blockDim.x + threadIdx.x;
+    gpu_data[i] = gpu_data[i] + 1; 
+}
+
 //test if a pointer is a device/gpu pointer or not
 int is_device_pointer(const void *ptr)
 {
@@ -33,17 +40,17 @@ int is_device_pointer(const void *ptr)
 }
 
 //test 3 : test if reinterpret cast with real cupy and custom cupy will result a same value
-uint32_t test_if_reinterpret_ptr_is_the_same(size_t a_adress, Custom_Cupy_Ref b)
+uint32_t test_if_reinterpret_ptr_is_the_same(size_t a_address, Custom_Cupy_Ref b)
 {
-    double * ptr = reinterpret_cast<double *>(a_adress);
+    double * ptr = reinterpret_cast<double *>(a_address);
     if(b.ptr == ptr) return 1;
     else return 0;
 }
 
 //test 4 : test if the result of the  reinterpret cast of a real cupy pointer is a device pointer
-int test_if_real_cupy_reinterpret_ptr_is_a_gpu_array(size_t a_adress)
+int test_if_real_cupy_reinterpret_ptr_is_a_gpu_array(size_t a_address)
 {
-    double * ptr = reinterpret_cast<double *>(a_adress);
+    double * ptr = reinterpret_cast<double *>(a_address);
     int res = is_device_pointer(ptr);
     
     return res;
@@ -57,86 +64,95 @@ int test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array(Custom_Cupy_Ref b)
     return res;
 }
 
-//test 6 : copy array of ones from real cupy to cpu
-uint32_t test_copy_cupy_of_ones_to_cpu(size_t a_adress, size_t a_size)
+//test 6 : copy array of float from real cupy to cpu
+uint32_t test_copy_real_cupy_to_cpu(size_t a_address, size_t a_size)
 {
-    double *ptr = reinterpret_cast<double *>(a_adress); //altough cp.ones is used, the result of cp.ones is a float, not integer
+    double *gpu_data = reinterpret_cast<double *>(a_address);
 
-    double *cpu_data = (double*)malloc(a_size*sizeof(double));
+    vector<double> cpu_data(a_size);
 
-    CUDA_CHECK(cudaMemcpy(cpu_data, ptr, a_size*sizeof(double), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(cpu_data.data(), gpu_data, a_size*sizeof(double), cudaMemcpyDeviceToHost));
 
     uint32_t test = 1;
 
+    cout<<endl;
     for(uint32_t i = 0; i < a_size; i++)
     {
-        if(cpu_data[i] != 1) 
+        if(cpu_data[i] != 3.14) 
         {
             test = 0;
-            cout << cpu_data[i] << endl;
+            cout<<cpu_data[i]<<endl;
         }
     }
 
     return test;
 }
 
-//test 7 : copy array of ones from custom cupy to cpu
-uint32_t test_copy_custom_cupy_of_ones_to_cpu(Custom_Cupy_Ref b)
+//test 7 : copy array of float from custom cupy to cpu
+uint32_t test_copy_custom_cupy_to_cpu(Custom_Cupy_Ref b)
 {
-    double *cpu_data = (double*)malloc(b.size*sizeof(double));
+    vector<double> cpu_data(b.size);
 
-    CUDA_CHECK(cudaMemcpy(cpu_data, b.ptr, b.size*sizeof(double), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(cpu_data.data(), b.ptr, b.size*sizeof(double), cudaMemcpyDeviceToHost));
 
     uint32_t test = 1;
 
-    for(uint32_t i = 0; i < b.size; i++)
-    {
-        if(cpu_data[i] != 1) 
-        {
-            test = 0;
-        }
-    }
-    return test;
-}
-
-//test 8 : copy array of float from custom cupy to cpu
-uint32_t test_copy_custom_cupy_of_float_to_cpu(Custom_Cupy_Ref b)
-{
-    double *cpu_data = (double*)malloc(b.size*sizeof(double));
-
-    CUDA_CHECK(cudaMemcpy(cpu_data, b.ptr, b.size*sizeof(double), cudaMemcpyDeviceToHost));
-
-    uint32_t test = 1;
-
+    cout<<endl;
     for(uint32_t i = 0; i < b.size; i++)
     {
         if(cpu_data[i] != 3.14) 
         {
             test = 0;
+            cout<<cpu_data[i]<<endl;
         }
     }
 
     return test;
 }
 
-//test 9 : test 2 reinterpret cast with different data type and see if both has a same value
-//This is still not clear why different type return the same adress value
-uint32_t test_2_different_reiterpret_cast(size_t a_adress)
+//test 8 : increment all real cupy data by 1, and return the sum of all data
+double real_cupy_increment_all_data_by_1(size_t a_address, size_t a_size) 
 {
-    double *ptr1 = reinterpret_cast<double *>(a_adress);;
+    vector<double> cpu_data(a_size);
 
-    uint32_t *ptr2 = reinterpret_cast<uint32_t *>(a_adress);
+    double *gpu_data = reinterpret_cast<double*>(a_address);
+    
+    gpu_increment_all_data_by_1<<<a_size, 1>>>(gpu_data);
 
-    stringstream s1, s2;
-    s1 << ptr1;
-    s2 << ptr2;
+    CUDA_CHECK(cudaDeviceSynchronize());
 
-    if(s1.str() == s2.str()) 
+    CUDA_CHECK(cudaMemcpy(cpu_data.data(), gpu_data, a_size*sizeof(double), cudaMemcpyDeviceToHost));
+
+    double sum = 0;
+
+    for(uint32_t i = 0; i <  a_size; i++)
     {
-        cout<<endl;
-        cout<<s1.str()<<endl;
-        cout<<s2.str()<<endl;
-        return 1;
+        sum += cpu_data[i];
     }
-    else return 0;
+
+    return sum;
 }
+
+//test 8 : increment all custom cupy data by 1, and return the sum of all data
+double custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref b) 
+{
+    vector<double> cpu_data(b.size);
+    
+    gpu_increment_all_data_by_1<<<b.size, 1>>>(b.ptr);
+
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    CUDA_CHECK(cudaMemcpy(cpu_data.data(), b.ptr, b.size*sizeof(double), cudaMemcpyDeviceToHost));
+
+    double sum = 0;
+
+    for(uint32_t i = 0; i <  b.size; i++)
+    {
+        sum += cpu_data[i];
+    }
+
+    return sum;
+}
+
+
+//note: create test with integer

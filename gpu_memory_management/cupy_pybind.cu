@@ -30,10 +30,10 @@ PYBIND11_MODULE(gpuMemManagement, m)
   m.def("test_if_reinterpret_ptr_is_the_same", &test_if_reinterpret_ptr_is_the_same);
   m.def("test_if_real_cupy_reinterpret_ptr_is_a_gpu_array", &test_if_real_cupy_reinterpret_ptr_is_a_gpu_array);
   m.def("test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array", &test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array);
-  m.def("test_copy_cupy_of_ones_to_cpu", &test_copy_cupy_of_ones_to_cpu);
-  m.def("test_copy_custom_cupy_of_ones_to_cpu", &test_copy_custom_cupy_of_ones_to_cpu);
-  m.def("test_copy_custom_cupy_of_float_to_cpu", &test_copy_custom_cupy_of_float_to_cpu);
-  m.def("test_2_different_reiterpret_cast", &test_2_different_reiterpret_cast);
+  m.def("test_copy_custom_cupy_to_cpu", &test_copy_custom_cupy_to_cpu);
+  m.def("test_copy_real_cupy_to_cpu", &test_copy_real_cupy_to_cpu);
+  m.def("real_cupy_increment_all_data_by_1", &real_cupy_increment_all_data_by_1);
+  m.def("custom_cupy_increment_all_data_by_1", &custom_cupy_increment_all_data_by_1);
 }
 
 
