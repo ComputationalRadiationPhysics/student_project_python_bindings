@@ -9,6 +9,7 @@
 #include <string>
 #include <random>
 
+
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std;
 using namespace std::literals::complex_literals;
@@ -19,6 +20,13 @@ __global__ void gpu_increment_all_data_by_1(double *gpu_data)
 {
     int i = blockIdx.x;
     gpu_data[i] = gpu_data[i] + 1.0; 
+}
+
+
+bool AreVeryClose(double a, double b)
+{
+    //source : https://stackoverflow.com/questions/4548004/how-to-correctly-and-standardly-compare-floats
+    return (fabs(a - b) <= numeric_limits<double>::epsilon() * fmax(fabs(a), fabs(b)));
 }
 
 //test if a pointer is a device/gpu pointer or not
@@ -82,7 +90,7 @@ bool test_copy_custom_cupy_to_cpu(Custom_Cupy_Ref b)
     return (cpu_data[0] == 3.14 && cpu_data[1] == 4.25 && cpu_data[2] == 5.36);
 }
 
-//test 8 : increment all real cupy data by 1, and return the sum of all data
+//test 8 : increment all real cupy data by 1, and check if each element is true (or very close)
 bool real_cupy_increment_all_data_by_1(size_t a_address, size_t a_size) 
 {
     vector<double> cpu_data(a_size);
@@ -94,16 +102,11 @@ bool real_cupy_increment_all_data_by_1(size_t a_address, size_t a_size)
     CUDA_CHECK(cudaMemcpy(cpu_data.data(), gpu_data, a_size*sizeof(double), cudaMemcpyDeviceToHost));
 
     CUDA_CHECK(cudaDeviceSynchronize());
-
-    cout<<endl;
-    cout<<cpu_data[0]<<endl;
-    cout<<cpu_data[1]<<endl;
-    cout<<cpu_data[2]<<endl;
     
-    return (cpu_data[0] == 4.14 && cpu_data[1] == 5.25 && cpu_data[2] == 6.36);
+    return (AreVeryClose(cpu_data[0], 4.14) && AreVeryClose(cpu_data[1], 5.25) && AreVeryClose(cpu_data[2], 6.36));
 }
 
-//test 9 : increment all custom cupy data by 1, and return the sum of all data
+//test 9 : increment all custom cupy data by 1, and check if each element is true (or very close)
 bool custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref b) 
 {
     vector<double> cpu_data(b.size);
@@ -113,11 +116,6 @@ bool custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref b)
     CUDA_CHECK(cudaMemcpy(cpu_data.data(), b.ptr, b.size*sizeof(double), cudaMemcpyDeviceToHost));
 
     CUDA_CHECK(cudaDeviceSynchronize());
-
-    cout<<endl;
-    cout<<cpu_data[0]<<endl;
-    cout<<cpu_data[1]<<endl;
-    cout<<cpu_data[2]<<endl;
     
-    return (cpu_data[0] == 4.14 && cpu_data[1] == 5.25 && cpu_data[2] == 6.36);
+    return (AreVeryClose(cpu_data[0], 4.14) && AreVeryClose(cpu_data[1], 5.25) && AreVeryClose(cpu_data[2], 6.36));
 }
