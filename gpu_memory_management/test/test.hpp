@@ -77,7 +77,7 @@ bool test_copy_real_cupy_to_cpu(size_t a_address, size_t a_size)
 
     CUDA_CHECK(cudaMemcpy(cpu_data.data(), gpu_data, a_size*sizeof(double), cudaMemcpyDeviceToHost));
 
-    return (cpu_data[0] == 3.14 && cpu_data[1] == 4.25 && cpu_data[2] == 5.36);
+    return (AreVeryClose(cpu_data[0], 3.14) && AreVeryClose(cpu_data[1], 4.25) && AreVeryClose(cpu_data[2], 5.36));
 }
 
 //test 7 : copy array of float from custom cupy to cpu
@@ -87,7 +87,7 @@ bool test_copy_custom_cupy_to_cpu(Custom_Cupy_Ref b)
 
     CUDA_CHECK(cudaMemcpy(cpu_data.data(), b.ptr, b.size*sizeof(double), cudaMemcpyDeviceToHost));
 
-    return (cpu_data[0] == 3.14 && cpu_data[1] == 4.25 && cpu_data[2] == 5.36);
+    return (AreVeryClose(cpu_data[0], 3.14) && AreVeryClose(cpu_data[1], 4.25) && AreVeryClose(cpu_data[2], 5.36));
 }
 
 //test 8 : increment all real cupy data by 1, and check if each element is true (or very close)
