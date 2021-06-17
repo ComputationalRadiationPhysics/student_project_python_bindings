@@ -35,5 +35,16 @@ namespace pybind11 { namespace detail {
            
             return true;
         }
+
+        static handle cast(Custom_Cupy_Ref src, return_value_policy /* policy */, handle /* parent */) {
+            // TODO: implement the correct cast
+            // The return value PyLong_FromLong is only used, that it compiles
+
+            auto custom_cupy = module::import("cupy_ref").attr("Custom_Cupy_Ref")(src.ptr, src.size);
+            return custom_cupy.release();
+
+            //return PyLong_FromLong(1);
+
+        }
     };
 }}

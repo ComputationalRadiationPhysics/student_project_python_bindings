@@ -76,3 +76,18 @@ def test_custom_cupy_pointer_with_cuda_kernel():
     c = gpuMemManagement.custom_cupy_increment_all_data_by_1(b)
 
     assert(c == True)
+
+# #test 10 : create custom cupy in c++, return it to python
+# still segmentation fault for ptr, only size works
+def test_create_custom_cupy_from_c():
+    a = gpuMemManagement.test_create_custom_cupy_from_c()
+    assert(a.size == 3) #temporary until segmentation fault solved
+
+# #test 11 : test 10 : create custom cupy in python, send it to c++ and return it again
+# still segmentation fault for ptr, only size works
+def test_copy_custom_cupy_to_custom_cupy():
+    a = cp.array([3.14, 4.25, 5.36])
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size)
+    c = gpuMemManagement.test_copy_custom_cupy_to_custom_cupy(b)
+
+    assert(b.size == c.size) #temporary until segmentation fault solved

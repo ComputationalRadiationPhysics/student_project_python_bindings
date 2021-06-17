@@ -119,3 +119,29 @@ bool custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref b)
     
     return (AreVeryClose(cpu_data[0], 4.14) && AreVeryClose(cpu_data[1], 5.25) && AreVeryClose(cpu_data[2], 6.36));
 }
+
+Custom_Cupy_Ref test_create_custom_cupy_from_c()
+{
+    vector<double> v{3.14, 4.25, 5.36};
+    auto cp = py::module::import("cupy").attr("array")(v);
+
+    Custom_Cupy_Ref c;
+
+    size_t size  = cp.attr("size").cast<size_t>();
+    double * ptr = reinterpret_cast<double *>(cp.attr("data").attr("ptr").cast<size_t>());
+
+    // c.ptr = ptr; //segmentation fault
+    c.size = size;
+
+    return c;
+}
+
+Custom_Cupy_Ref test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref b)
+{
+    Custom_Cupy_Ref c;
+
+    //c.ptr = b.ptr; //segemtation fault
+    c.size = b.size;
+
+    return c;
+}
