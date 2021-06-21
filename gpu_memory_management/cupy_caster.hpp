@@ -37,14 +37,12 @@ namespace pybind11 { namespace detail {
         }
 
         static handle cast(Custom_Cupy_Ref src, return_value_policy /* policy */, handle /* parent */) {
-            // TODO: implement the correct cast
-            // The return value PyLong_FromLong is only used, that it compiles
 
-            auto custom_cupy = module::import("cupy_ref").attr("Custom_Cupy_Ref")(src.ptr, src.size);
+            //in the previous function "load" to convert python to c++, I need to reinterpret cast a size_t of the ptr to a double*.
+            //in this function, because I have to convert it from c++ to python, then I need to convert the ptr from double* to size_t 
+            size_t python_pointer = reinterpret_cast<size_t>(src.ptr);
+            auto custom_cupy = module::import("cupy_ref").attr("Custom_Cupy_Ref")(python_pointer, src.size);
             return custom_cupy.release();
-
-            //return PyLong_FromLong(1);
-
         }
     };
 }}

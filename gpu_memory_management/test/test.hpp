@@ -130,7 +130,7 @@ Custom_Cupy_Ref test_create_custom_cupy_from_c()
     size_t size  = cp.attr("size").cast<size_t>();
     double * ptr = reinterpret_cast<double *>(cp.attr("data").attr("ptr").cast<size_t>());
 
-    // c.ptr = ptr; //segmentation fault
+    c.ptr = ptr;
     c.size = size;
 
     return c;
@@ -140,7 +140,7 @@ Custom_Cupy_Ref test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref b)
 {
     Custom_Cupy_Ref c;
 
-    //c.ptr = b.ptr; //segemtation fault
+    c.ptr = b.ptr;
     c.size = b.size;
 
     return c;
