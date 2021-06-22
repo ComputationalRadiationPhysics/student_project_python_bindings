@@ -77,15 +77,28 @@ def test_custom_cupy_pointer_with_cuda_kernel():
 
     assert(c == True)
 
-# #test 10 : create custom cupy in c++, return it to python
-def test_create_custom_cupy_from_c():
-    a = gpuMemManagement.test_create_custom_cupy_from_c()
-    assert(a.size == 3 and a.ptr)
+#test 10 : create real cupy in c++, return it to python
+def test_create_real_cupy_from_c():
+    a = cp.array([3.14, 4.25, 5.36])
+    b = gpuMemManagement.test_create_real_cupy_from_c()
 
-# #test 11 : test 10 : create custom cupy in python, send it to c++ and return it again
+    assert(cp.array_equal(a, b))
+    assert(cp.asnumpy(b).sum() == b.sum()) #see if the normal cupy from c++ can be converted to numpy like a normal cupy
+                                           #and see if sum of b is equal to sum of numpy version of b
+
+
+#test 11 : create custom cupy in python, send it to c++ and return it again
 def test_copy_custom_cupy_to_custom_cupy():
+
     a = cp.array([3.14, 4.25, 5.36])
     b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size)
     c = gpuMemManagement.test_copy_custom_cupy_to_custom_cupy(b)
 
     assert(b.size == c.size and b.ptr == c.ptr)
+
+#test 12 : test memory usage, still not sure if this is a right way
+def test_memory():
+    assert(cp.get_default_memory_pool().used_bytes() == 0)
+    test_create_real_cupy_from_c()
+    assert(cp.get_default_memory_pool().used_bytes() == 0)
+

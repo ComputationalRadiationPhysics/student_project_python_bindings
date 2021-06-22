@@ -13,6 +13,7 @@
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std;
 using namespace std::literals::complex_literals;
+using namespace pybind11::literals;
 namespace py = pybind11;
 
 
@@ -120,22 +121,16 @@ bool custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref b)
     return (AreVeryClose(cpu_data[0], 4.14) && AreVeryClose(cpu_data[1], 5.25) && AreVeryClose(cpu_data[2], 6.36));
 }
 
-Custom_Cupy_Ref test_create_custom_cupy_from_c()
+//test 10 : create real cupy in c++, return it to python
+py::object test_create_real_cupy_from_c()
 {
     vector<double> v{3.14, 4.25, 5.36};
-    auto cp = py::module::import("cupy").attr("array")(v);
+    auto cp = py::module::import("cupy").attr("array")(v, "dtype"_a="float64");
 
-    Custom_Cupy_Ref c;
-
-    size_t size  = cp.attr("size").cast<size_t>();
-    double * ptr = reinterpret_cast<double *>(cp.attr("data").attr("ptr").cast<size_t>());
-
-    c.ptr = ptr;
-    c.size = size;
-
-    return c;
+    return cp;
 }
 
+//test 11 : test 10 : create custom cupy in python, send it to c++ and return it again
 Custom_Cupy_Ref test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref b)
 {
     Custom_Cupy_Ref c;

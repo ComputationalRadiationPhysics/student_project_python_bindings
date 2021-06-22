@@ -34,7 +34,7 @@ PYBIND11_MODULE(gpuMemManagement, m)
   m.def("test_copy_real_cupy_to_cpu", &test_copy_real_cupy_to_cpu);
   m.def("real_cupy_increment_all_data_by_1", &real_cupy_increment_all_data_by_1);
   m.def("custom_cupy_increment_all_data_by_1", &custom_cupy_increment_all_data_by_1);
-  m.def("test_create_custom_cupy_from_c", &test_create_custom_cupy_from_c);
+  m.def("test_create_real_cupy_from_c", &test_create_real_cupy_from_c, py::return_value_policy::move);
   m.def("test_copy_custom_cupy_to_custom_cupy", &test_copy_custom_cupy_to_custom_cupy);
 }
 
