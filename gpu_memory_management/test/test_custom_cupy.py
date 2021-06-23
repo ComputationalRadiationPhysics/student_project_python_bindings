@@ -69,6 +69,13 @@ def test_real_cupy_pointer_with_cuda_kernel():
 
     assert(b == True)
 
+    # python side test
+    # compare float with tolerance
+    # each element of "a" should be incremented by 1 at this point, but because of cuda kernel, there is a very very small value change, 
+    # so allclose is needed insteall of array_equal
+    a_inc = cp.array([4.14, 5.25, 6.36])
+    assert(cp.allclose(a, a_inc)) 
+
 #test 9 : test if custom cupy can run successfully in cuda kernel
 def test_custom_cupy_pointer_with_cuda_kernel():
     a = cp.array([3.14, 4.25, 5.36])
@@ -76,6 +83,13 @@ def test_custom_cupy_pointer_with_cuda_kernel():
     c = gpuMemManagement.custom_cupy_increment_all_data_by_1(b)
 
     assert(c == True)
+
+    # python side test
+    # compare float with tolerance
+    # By using "b", each element of "a" should be incremented by 1 at this point, same with test 8. But because of cuda kernel, there is a very very small value change, 
+    # so allclose is needed insteall of array_equal
+    a_inc = cp.array([4.14, 5.25, 6.36])
+    assert(cp.allclose(a, a_inc)) 
 
 #test 10 : create real cupy in c++, return it to python
 def test_create_real_cupy_from_c():
@@ -99,6 +113,12 @@ def test_copy_custom_cupy_to_custom_cupy():
 #test 12 : test memory usage, still not sure if this is a right way
 def test_memory():
     assert(cp.get_default_memory_pool().used_bytes() == 0)
-    test_create_real_cupy_from_c()
-    assert(cp.get_default_memory_pool().used_bytes() == 0)
+    a = gpuMemManagement.test_create_real_cupy_from_c()
 
+    b = a*2
+    assert(cp.array_equal(b.sum(), a.sum()*2))
+
+    a = None
+    b = None
+
+    assert(cp.get_default_memory_pool().used_bytes() == 0)
