@@ -142,4 +142,6 @@ Custom_Cupy_Ref<double> test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref<dou
     return c;
 }
 
-void test_wrong_type(Custom_Cupy_Ref<double> b){}
+void test_wrong_dtype_float(Custom_Cupy_Ref<double> b){}
+void test_wrong_dtype_int(Custom_Cupy_Ref<uint16_t> b){}
+void test_wrong_dtype_complex(Custom_Cupy_Ref<complex<double>> b){}

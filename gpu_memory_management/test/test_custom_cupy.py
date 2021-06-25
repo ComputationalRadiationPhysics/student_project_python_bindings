@@ -126,10 +126,22 @@ def test_memory():
 
     assert(cp.get_default_memory_pool().used_bytes() == 0)
 
-def test_wrong_dtype():
+def test_wrong_dtype_float():
     with pytest.raises(TypeError):
         a = cp.array([3.14, 4.25, 5.36], dtype=cp.float32) #this cupy is set to float32, but the c++ function is float64
         b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype))
-        gpuMemManagement.test_wrong_type(b) #this should raise an exception
+        gpuMemManagement.test_wrong_dtype_float(b) #this should raise an exception
+
+def test_wrong_dtype_int():
+    with pytest.raises(TypeError):
+        a = cp.array([3, 4, 5], dtype=cp.uint32) #this cupy is set to uint32, but the c++ function is uint16
+        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype))
+        gpuMemManagement.test_wrong_dtype_int(b) #this should raise an exception
+
+def test_wrong_dtype_complex():
+    with pytest.raises(TypeError):
+        a = cp.array([2.+3.j,  0.+0.j, 4.+1.j], dtype=cp.complex64) #this cupy is set to float32, but the c++ function is float64
+        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype))
+        gpuMemManagement.test_wrong_dtype_complex(b) #this should raise an exception
    
     
