@@ -45,7 +45,7 @@ bool is_device_pointer(const void *ptr)
 }
 
 //test 3 : test if reinterpret cast with real cupy and custom cupy will result a same value
-bool test_if_reinterpret_ptr_is_the_same(size_t a_address, Custom_Cupy_Ref b)
+bool test_if_reinterpret_ptr_is_the_same(size_t a_address, Custom_Cupy_Ref<double> b)
 {
     double * ptr = reinterpret_cast<double *>(a_address);
     if(b.ptr == ptr) return true;
@@ -62,7 +62,7 @@ bool test_if_real_cupy_reinterpret_ptr_is_a_gpu_array(size_t a_address)
 }
 
 //test 5 : test if the pointer of a custom cupy pointer attributes is a device pointer
-bool test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array(Custom_Cupy_Ref b)
+bool test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array(Custom_Cupy_Ref<double> b)
 {
     bool res = is_device_pointer(b.ptr);
     
@@ -82,7 +82,7 @@ bool test_copy_real_cupy_to_cpu(size_t a_address, size_t a_size)
 }
 
 //test 7 : copy array of float from custom cupy to cpu
-bool test_copy_custom_cupy_to_cpu(Custom_Cupy_Ref b)
+bool test_copy_custom_cupy_to_cpu(Custom_Cupy_Ref<double> b)
 {
     vector<double> cpu_data(b.size);
 
@@ -108,7 +108,7 @@ bool real_cupy_increment_all_data_by_1(size_t a_address, size_t a_size)
 }
 
 //test 9 : increment all custom cupy data by 1, and check if each element is true (or very close)
-bool custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref b) 
+bool custom_cupy_increment_all_data_by_1(Custom_Cupy_Ref<double> b) 
 {
     vector<double> cpu_data(b.size);
     
@@ -131,12 +131,15 @@ py::object test_create_real_cupy_from_c()
 }
 
 //test 11 : test 10 : create custom cupy in python, send it to c++ and return it again
-Custom_Cupy_Ref test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref b)
+Custom_Cupy_Ref<double> test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref<double> b)
 {
-    Custom_Cupy_Ref c;
+    Custom_Cupy_Ref<double> c;
 
     c.ptr = b.ptr;
     c.size = b.size;
+    c.dtype = b.dtype;
 
     return c;
 }
+
+void test_wrong_type(Custom_Cupy_Ref<double> b){}

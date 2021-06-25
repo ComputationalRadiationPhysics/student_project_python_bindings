@@ -1,6 +1,9 @@
 #pragma once
 
-struct Custom_Cupy_Ref {
-  double * ptr;
-  std::size_t size;
+template<typename TData>
+class Custom_Cupy_Ref {
+  public :
+    TData * ptr;
+    std::size_t size;
+    std::string dtype;
 };
