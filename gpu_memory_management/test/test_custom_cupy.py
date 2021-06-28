@@ -24,7 +24,7 @@ def test_getting_cupy_size():
 #test 3 : test if reinterpret cast with real cupy and custom cupy will result a same value
 def test_if_reinterpret_ptr_is_the_same():
     cp.cuda.Device(0).use()
-    a = cp.array([3.14, 4.25, 5.36], dtype=cp.float64)
+    a = cp.array([3, 4, 5], dtype=cp.float64)
     b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype)) # the type of a cupy type is a numpy type class, 
                                                                                         # so I need to convert the type to string first
     c = gpuMemManagement.test_if_reinterpret_ptr_is_the_same(a.data.ptr, b)
@@ -126,22 +126,36 @@ def test_memory():
 
     assert(cp.get_default_memory_pool().used_bytes() == 0)
 
+#test 13 : send wrong float types
 def test_wrong_dtype_float():
     with pytest.raises(TypeError):
         a = cp.array([3.14, 4.25, 5.36], dtype=cp.float32) #this cupy is set to float32, but the c++ function is float64
         b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype))
         gpuMemManagement.test_wrong_dtype_float(b) #this should raise an exception
 
+#test 14 : send wrong integer types
 def test_wrong_dtype_int():
     with pytest.raises(TypeError):
         a = cp.array([3, 4, 5], dtype=cp.uint32) #this cupy is set to uint32, but the c++ function is uint16
         b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype))
         gpuMemManagement.test_wrong_dtype_int(b) #this should raise an exception
 
+#test 15 : send wrong complex types
 def test_wrong_dtype_complex():
     with pytest.raises(TypeError):
         a = cp.array([2.+3.j,  0.+0.j, 4.+1.j], dtype=cp.complex64) #this cupy is set to float32, but the c++ function is float64
         b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype))
         gpuMemManagement.test_wrong_dtype_complex(b) #this should raise an exception
+
+#test 16 : test template function with pybind 11
+#there is a weird missmatch error happening 
+def test_custom_cupy_template_function():
+    cp.cuda.Device(0).use()
+    a = cp.array([3, 4, 5], dtype=cp.complex128)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype)) # the type of a cupy type is a numpy type class, 
+                                                                                        # so I need to convert the type to string first
+    c = gpuMemManagement.test_custom_cupy_template_function(a.data.ptr, b)
+
+    assert(c == True)
    
     

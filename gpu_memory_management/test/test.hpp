@@ -142,6 +142,19 @@ Custom_Cupy_Ref<double> test_copy_custom_cupy_to_custom_cupy(Custom_Cupy_Ref<dou
     return c;
 }
 
+//test 13 : send wrong float types
 void test_wrong_dtype_float(Custom_Cupy_Ref<double> b){}
+
+//test 14 : send wrong integer types
 void test_wrong_dtype_int(Custom_Cupy_Ref<uint16_t> b){}
+
+//test 15 : send wrong complex types
 void test_wrong_dtype_complex(Custom_Cupy_Ref<complex<double>> b){}
+
+//test 16 : template function with pybind11
+template <typename T>
+bool test_custom_cupy_template_function(size_t a_address, Custom_Cupy_Ref<T> b)
+{
+    T * ptr = reinterpret_cast<T *>(a_address);
+    return (is_device_pointer(ptr) && is_device_pointer(b.ptr) && ptr == b.ptr);
+}
