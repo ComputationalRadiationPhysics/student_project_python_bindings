@@ -3,6 +3,8 @@ project(cuPhaseRet LANGUAGES CXX CUDA)
 
 include("cmake/add_msvc_poperties.cmake")
 
+list(APPEND CMAKE_PREFIX_PATH "D:/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11")
+
 find_package(PythonInterp 3.6 REQUIRED)
 find_package(PythonLibs 3.6 REQUIRED)
 find_package(pybind11 REQUIRED)
@@ -15,7 +17,7 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
 set(CMAKE_CUDA_ARCHITECTURES 35 CACHE STRING "CUDA architectures")
-set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
+# set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
 
 set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
