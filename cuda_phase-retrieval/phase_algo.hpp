@@ -180,6 +180,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     */
     cudaFree(y_hat_dev);
     cudaFree(src_img_dev);
+    cudaFree(src_img_dev_comp);
     cudaFree(random_value_dev);
     cudaFree(mag_dev);
     cudaFree(mask_dev);
