@@ -33,7 +33,7 @@ Contains the Python implementation of the algorithm as `git submodule`. The orig
   #Linux
   cmake -DENABLE_TEST=ON ..
   #Windows
-  cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="D:/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11" -DENABLE_TEST=ON ..
+  cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="<Path to Anaconda>/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11" -DENABLE_TEST=ON ..
   cmake --build .
 ```
 
