@@ -4,6 +4,13 @@ Contains the Python implementation of the algorithm as `git submodule`. The orig
 
 # Install
 
+## Requirements
+
+1. Python 3 (This project is using [Anaconda 3](https://www.anaconda.com/)).
+2. [Pybind11](https://anaconda.org/conda-forge/pybind11).
+3. For Windows, [Microsoft Visual Studio](https://visualstudio.microsoft.com/vs/community/) is needed.
+4. (Optional) [OpenCV](https://opencv.org/opencv-4-5-1/) with minimum version 4.5.1 is required to build and run the optional test.
+
 ## Linux
 
 ```bash
@@ -17,7 +24,16 @@ Contains the Python implementation of the algorithm as `git submodule`. The orig
 
 ```bash
   mkdir build; cd build
-  cmake -G "Visual Studio 16 2019" -A x64 ..
+  cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="<Path to Anaconda>/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11" ..
+  cmake --build .
+```
+## Turn on TEST program
+
+```bash
+  #Linux
+  cmake -DENABLE_TEST=ON ..
+  #Windows
+  cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_PREFIX_PATH="<Path to Anaconda>/Anaconda3/Lib/site-packages/pybind11/share/cmake/pybind11" -DENABLE_TEST=ON ..
   cmake --build .
 ```
 
