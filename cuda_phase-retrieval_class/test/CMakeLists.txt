@@ -27,3 +27,14 @@ add_custom_command(TARGET pyTestScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_CURRENT_SOURCE_DIR}/test.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
+
+add_custom_command(TARGET pyTestScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_cupy.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test_cupy.py)
+
+add_custom_command(TARGET pyTestScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py)
+

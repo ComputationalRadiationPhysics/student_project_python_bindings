@@ -39,3 +39,5 @@ print("Test 5 Error : ", np.testing.assert_allclose(magnitudes, cuda_ifft_fft_ma
 abs_cufft_image = cuPhaseRet_Test.abs_cufft_forward(image)
 print("Test 6 Absolute value of complex number with CUDA FFT is very close to the initial python magnitudes value : ", np.allclose(magnitudes, abs_cufft_image, rtol=1e-5, atol=0))
 print("Test 6 Error : ", np.testing.assert_allclose(magnitudes, abs_cufft_image, rtol=1e-5, atol=0, err_msg="some elements are not close", verbose=True))
+
+
