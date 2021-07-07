@@ -30,6 +30,8 @@ PYBIND11_MODULE(cuPhaseRet_Test, m)
   m.def("test_send_cupy_complex_to_c_and_send_it_back", &test_send_cupy_complex_to_c_and_send_it_back);
   m.def("test_cupy_cufft_inverse_forward", &test_cupy_cufft_inverse_forward);
   m.def("test_cupy_cufft_inverse_forward_with_caster", &test_cupy_cufft_inverse_forward_with_caster<complex<double>>);
+  m.def("test_send_cupy_caster_to_c_and_get_it_back", &test_send_cupy_caster_to_c_and_get_it_back<complex<double>>);
+  m.def("test_cupy_from_c_memory", &test_cupy_from_c_memory);
 }
 
 

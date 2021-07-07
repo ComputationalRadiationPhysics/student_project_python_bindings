@@ -63,7 +63,7 @@ py::object test_cupy_cufft_inverse_forward(size_t a_address, size_t a_size, size
     cufftDoubleComplex *gpu_data_result = reinterpret_cast<cufftDoubleComplex *>(cp.attr("data").attr("ptr").cast<size_t>());
 
     //coopy data from source cupy to new cupy
-    CUDA_CHECK(cudaMemcpy(gpu_data_result, gpu_data, dimension*sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(gpu_data_result, gpu_data, dimension*sizeof(cufftDoubleComplex), cudaMemcpyDeviceToDevice));
 
     // ---------------CUFFT process---------------------------------
     cufftHandle plan; //create cufft plan
@@ -93,8 +93,8 @@ py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
     cudaGetDevice(&devId);
     cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
 
-    int size_x = static_cast<int>(b.shape_x); //Convert X to integer to prevent getting warning from CUFFT
-    int size_y = static_cast<int>(b.shape_y); //Convert Y to integer to prevent getting warning from CUFFT
+    int size_x = static_cast<int>(b.shape[0]); //Convert X to integer to prevent getting warning from CUFFT
+    int size_y = static_cast<int>(b.shape[1]); //Convert Y to integer to prevent getting warning from CUFFT
     int dimension = static_cast<int>(b.size); //Convert size to integer to prevent getting warning from CUFFT
 
     //convert source cupy from double complex to cufftDoubleComplex so CUFFT can use it
@@ -107,7 +107,7 @@ py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
     cufftDoubleComplex *gpu_data_result = reinterpret_cast<cufftDoubleComplex *>(cp.attr("data").attr("ptr").cast<size_t>());
 
     //coopy data from source cupy to new cupy
-    CUDA_CHECK(cudaMemcpy(gpu_data_result, gpu_data, dimension*sizeof(cufftDoubleComplex), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(gpu_data_result, gpu_data, dimension*sizeof(cufftDoubleComplex), cudaMemcpyDeviceToDevice));
 
     // ---------------CUFFT process---------------------------------
     cufftHandle plan; //create cufft plan
@@ -126,4 +126,25 @@ py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
     cufftDestroy(plan);
 
     return cp;    
+}
+
+//test 5. send cupy caster to c++ and send it back to python
+//although the result caster (c) doesnt have its own cupy, this test may be useful
+template <typename T>
+Custom_Cupy_Ref<T> test_send_cupy_caster_to_c_and_get_it_back(Custom_Cupy_Ref<T> b)
+{
+    Custom_Cupy_Ref<T> c = b;
+    return c;
+}
+
+//test 6. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
+void test_cupy_from_c_memory()
+{
+    vector<complex<double>> v{3.14, 4.25, 5.36};
+    auto cp = py::module::import("cupy").attr("array")(v, "dtype"_a="complex128");
+
+    //make sure cupy "cp" is really using a memory
+    assert(py::module::import("cupy").attr("get_default_memory_pool")().attr("used_bytes")().cast<size_t>() > 0 );
+
+    //cp removed automatically after the next closing bracket
 }

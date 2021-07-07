@@ -30,7 +30,7 @@ def test_cupy_cufft_inverse_forward():
 #test 4. same with test 3, but with cupy caster
 def test_cupy_cufft_inverse_forward_with_caster():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape_x = a.shape[0], shape_y = a.shape[1])
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
     c = cuPhaseRet_Test.test_cupy_cufft_inverse_forward_with_caster(b)
 
     print()
@@ -38,3 +38,20 @@ def test_cupy_cufft_inverse_forward_with_caster():
     print(c)
 
     assert(cp.allclose(a, c)) #array_uqual wont work because there is still a very very small difference
+
+#test 5. send cupy caster to c++ and send it back to python
+#although the result caster (c) doesnt have its own cupy, this test may be useful
+def test_send_cupy_caster_to_c_and_get_it_back():
+    a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    c = cuPhaseRet_Test.test_send_cupy_caster_to_c_and_get_it_back(b)
+
+    assert(a.data.ptr == c.ptr and a.size == c.size and a.dtype == c.dtype and a.shape == c.shape)
+
+#test 6. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
+def test_cupy_from_c_memory():
+    assert(cp.get_default_memory_pool().used_bytes() == 0)
+    
+    cuPhaseRet_Test.test_cupy_from_c_memory()
+
+    assert(cp.get_default_memory_pool().used_bytes() == 0)

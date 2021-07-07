@@ -29,7 +29,7 @@ namespace pybind11 { namespace detail {
         // python -> C++
         bool load(handle src, bool)
         {
-            if(!hasattr(src, "ptr") && !hasattr(src, "size") && !hasattr(src, "dtype") && !hasattr(src, "shape_x") && !hasattr(src, "shape_y"))
+            if(!hasattr(src, "ptr") && !hasattr(src, "size") && !hasattr(src, "dtype") && !hasattr(src, "shape"))
             {
                  return false;
             }
@@ -48,8 +48,7 @@ namespace pybind11 { namespace detail {
             value.ptr = reinterpret_cast<T *>(src.attr("ptr").cast<size_t>());
             value.size = src.attr("size").cast<size_t>();
             value.dtype = src.attr("dtype").cast<string>();
-            value.shape_x = src.attr("shape_x").cast<size_t>();
-            value.shape_y = src.attr("shape_y").cast<size_t>();
+            value.shape = src.attr("shape").cast<vector<size_t>>();
            
             return true;
         }
@@ -59,7 +58,7 @@ namespace pybind11 { namespace detail {
             //in the previous function "load" to convert python to c++, I need to reinterpret cast a size_t of the ptr to a double*.
             //in this function, because I have to convert it from c++ to python, then I need to convert the ptr from double* to size_t 
             size_t python_pointer = reinterpret_cast<size_t>(src.ptr);
-            auto custom_cupy = module::import("cupy_ref").attr("Custom_Cupy_Ref")(python_pointer, src.size, src.dtype, src.shape_x, src.shape_y);
+            auto custom_cupy = module::import("cupy_ref").attr("Custom_Cupy_Ref")(python_pointer, src.size, src.dtype, src.shape);
             return custom_cupy.release();
         }
     };
