@@ -21,7 +21,7 @@ template<> std::string cupy_ref_get_dtype<std::complex<float>>(){ return "comple
 template<> std::string cupy_ref_get_dtype<std::complex<double>>(){ return "complex128";}
 
 namespace pybind11 { namespace detail {
-    template <typename T> struct type_caster<Custom_Cupy_Ref<T>> 
+    template <typename T, int TDim> struct type_caster<Custom_Cupy_Ref<T, TDim>> 
     {
     public:
         PYBIND11_TYPE_CASTER(Custom_Cupy_Ref<T>, _("cupy_ref.Custom_Cupy_Ref"));
@@ -44,6 +44,15 @@ namespace pybind11 { namespace detail {
 					return false;
             }
 
+            if(src.attr("shape").cast<vector<size_t>>().size() != TDim)
+            {
+                std::ostringstream oss;
+                oss << "Wrong cupy dimension\n";
+                oss << "Current dimension : " << src.attr("shape").cast<vector<size_t>>().size() << "\n";
+                oss << "Expected dimension : " << TDim << "\n";
+                std::cerr << oss.str(); 
+                return false;
+            }
             
             value.ptr = reinterpret_cast<T *>(src.attr("ptr").cast<size_t>());
             value.size = src.attr("size").cast<size_t>();

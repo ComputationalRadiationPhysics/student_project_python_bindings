@@ -18,6 +18,10 @@ using namespace std::literals::complex_literals;
 using namespace pybind11::literals;
 namespace py = pybind11;
 
+template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
+template<> cufftDoubleComplex *convertToCUFFT(complex<double> * ptr);
+template <typename T> Custom_Cupy_Ref<T> getCustomCupyRef(py::object obj);
+
 //test 1. Generate 1D cupy of complex double from c++
 py::object test_generating_cupy_of_complex_double_from_c()
 {
@@ -84,7 +88,20 @@ py::object test_cupy_cufft_inverse_forward(size_t a_address, size_t a_size, size
     return cp;    
 }
 
-//test 4. same with test 3, but with cupy caster
+//test 4. Test create a custom cupy from a non cupy object in C++
+template <typename T>
+void test_create_a_custom_cupy_from_a_non_cupy_object_in_c()
+{
+    auto cp = py::module::import("numpy").attr("ones")(4, "dtype"_a="complex128").attr("reshape")(2, 2);
+    Custom_Cupy_Ref<T> casted_cp = getCustomCupyRef<T>(cp);
+}
+
+//test 5. create a custom cupy with wrong dimension (expected : 2)
+template <typename T>
+void test_create_a_custom_cupy_with_wrong_dimension(Custom_Cupy_Ref<T> b){}
+
+
+//test 6. same with test 3, but with cupy caster
 template <typename T>
 py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
 {
@@ -98,13 +115,15 @@ py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
     int dimension = static_cast<int>(b.size); //Convert size to integer to prevent getting warning from CUFFT
 
     //convert source cupy from double complex to cufftDoubleComplex so CUFFT can use it
-    cufftDoubleComplex *gpu_data = reinterpret_cast<cufftDoubleComplex *>(b.ptr);
+    // cufftDoubleComplex *gpu_data = reinterpret_cast<cufftDoubleComplex *>(b.ptr);
+    cufftDoubleComplex *gpu_data = convertToCUFFT<T, cufftDoubleComplex>(b.ptr);
 
     //create a new 2D cupy double complex with the same size and shape as source cupy
     auto cp = py::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128").attr("reshape")(size_x, size_y);
+    Custom_Cupy_Ref<T> casted_cp = getCustomCupyRef<T>(cp);
 
     //convert new cupy from double complex to cufftDoubleComplex so CUFFT can use it
-    cufftDoubleComplex *gpu_data_result = reinterpret_cast<cufftDoubleComplex *>(cp.attr("data").attr("ptr").cast<size_t>());
+    cufftDoubleComplex *gpu_data_result = convertToCUFFT<T, cufftDoubleComplex>(casted_cp.ptr);
 
     //coopy data from source cupy to new cupy
     CUDA_CHECK(cudaMemcpy(gpu_data_result, gpu_data, dimension*sizeof(cufftDoubleComplex), cudaMemcpyDeviceToDevice));
@@ -128,7 +147,7 @@ py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
     return cp;    
 }
 
-//test 5. send cupy caster to c++ and send it back to python
+//test 7. send cupy caster to c++ and send it back to python
 //although the result caster (c) doesnt have its own cupy, this test may be useful
 template <typename T>
 Custom_Cupy_Ref<T> test_send_cupy_caster_to_c_and_get_it_back(Custom_Cupy_Ref<T> b)
@@ -137,7 +156,7 @@ Custom_Cupy_Ref<T> test_send_cupy_caster_to_c_and_get_it_back(Custom_Cupy_Ref<T>
     return c;
 }
 
-//test 6. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
+//test 8. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
 void test_cupy_from_c_memory()
 {
     vector<complex<double>> v{3.14, 4.25, 5.36};
@@ -147,4 +166,28 @@ void test_cupy_from_c_memory()
     assert(py::module::import("cupy").attr("get_default_memory_pool")().attr("used_bytes")().cast<size_t>() > 0 );
 
     //cp removed automatically after the next closing bracket
+}
+
+template<typename TInputData, typename TOutputData>
+TOutputData * convertToCUFFT(TInputData * ptr)
+{
+  throw std::logic_error("Not implemented");
+}
+
+template<>
+cufftDoubleComplex *convertToCUFFT(complex<double> * ptr)
+{  
+    return reinterpret_cast<cufftDoubleComplex *>(ptr);
+}
+
+template <typename T>
+Custom_Cupy_Ref<T> getCustomCupyRef(py::object obj)
+{
+    if(py::module::import("builtins").attr("str")(obj.attr("__class__")).cast<string>() != "<class 'cupy.core.core.ndarray'>")
+    {
+        throw std::exception("Exception : Python object must be a cupy array");
+        
+    }
+
+    return Custom_Cupy_Ref<T>(obj);
 }
