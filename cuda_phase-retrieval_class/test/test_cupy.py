@@ -39,14 +39,20 @@ def test_create_a_custom_cupy_from_a_non_cupy_object_in_c():
     print(excinfo.value)
 
 
-#test 5. create a custom cupy with wrong dimension (expected : 2)
-def test_create_a_custom_cupy_with_wrong_dimension():
-    print()
-    print("Test 5")
-    with pytest.raises(Exception):
-        a = cp.ones((2,2,2), dtype=cp.complex128)
-        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
-        cuPhaseRet_Test.test_create_a_custom_cupy_with_wrong_dimension(b)
+#test 5. create a custom cupy with flexible dimension
+def test_create_a_custom_cupy_with_flexible_dimension():
+    a = cp.ones((2,2,2), dtype=cp.complex128)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
+
+    assert(c == 3)
+
+    a = cp.ones((3,3,3,3), dtype=cp.complex128)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
+
+    assert(c == 4)
+    
 
 
 #test 6. same with test 3, but with cupy caster

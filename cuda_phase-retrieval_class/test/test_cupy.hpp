@@ -10,6 +10,7 @@
 #include <iostream>
 #include <complex>
 #include <string>
+// #include "cupy_ref.hpp"
 
 #define PI 3.1415926535897932384626433
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
@@ -20,7 +21,6 @@ namespace py = pybind11;
 
 template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
 template<> cufftDoubleComplex *convertToCUFFT(complex<double> * ptr);
-template <typename T> Custom_Cupy_Ref<T> getCustomCupyRef(py::object obj);
 
 //test 1. Generate 1D cupy of complex double from c++
 py::object test_generating_cupy_of_complex_double_from_c()
@@ -93,12 +93,15 @@ template <typename T>
 void test_create_a_custom_cupy_from_a_non_cupy_object_in_c()
 {
     auto cp = py::module::import("numpy").attr("ones")(4, "dtype"_a="complex128").attr("reshape")(2, 2);
-    Custom_Cupy_Ref<T> casted_cp = getCustomCupyRef<T>(cp);
+    Custom_Cupy_Ref<T> casted_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(cp);
 }
 
-//test 5. create a custom cupy with wrong dimension (expected : 2)
+//test 5. create a custom cupy with flexible dimension
 template <typename T>
-void test_create_a_custom_cupy_with_wrong_dimension(Custom_Cupy_Ref<T> b){}
+size_t test_create_a_custom_cupy_with_flexible_dimension(Custom_Cupy_Ref<T> b)
+{
+    return b.shape.size();
+}
 
 
 //test 6. same with test 3, but with cupy caster
@@ -120,7 +123,7 @@ py::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
 
     //create a new 2D cupy double complex with the same size and shape as source cupy
     auto cp = py::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128").attr("reshape")(size_x, size_y);
-    Custom_Cupy_Ref<T> casted_cp = getCustomCupyRef<T>(cp);
+    Custom_Cupy_Ref<T> casted_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(cp);
 
     //convert new cupy from double complex to cufftDoubleComplex so CUFFT can use it
     cufftDoubleComplex *gpu_data_result = convertToCUFFT<T, cufftDoubleComplex>(casted_cp.ptr);
@@ -169,25 +172,10 @@ void test_cupy_from_c_memory()
 }
 
 template<typename TInputData, typename TOutputData>
-TOutputData * convertToCUFFT(TInputData * ptr)
-{
-  throw std::logic_error("Not implemented");
-}
+TOutputData * convertToCUFFT(TInputData * ptr){}
 
 template<>
 cufftDoubleComplex *convertToCUFFT(complex<double> * ptr)
 {  
     return reinterpret_cast<cufftDoubleComplex *>(ptr);
-}
-
-template <typename T>
-Custom_Cupy_Ref<T> getCustomCupyRef(py::object obj)
-{
-    if(py::module::import("builtins").attr("str")(obj.attr("__class__")).cast<string>() != "<class 'cupy.core.core.ndarray'>")
-    {
-        throw std::exception("Exception : Python object must be a cupy array");
-        
-    }
-
-    return Custom_Cupy_Ref<T>(obj);
 }

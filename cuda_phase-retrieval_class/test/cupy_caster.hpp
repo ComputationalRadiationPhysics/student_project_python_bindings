@@ -44,7 +44,7 @@ namespace pybind11 { namespace detail {
 					return false;
             }
 
-            if(src.attr("shape").cast<vector<size_t>>().size() != TDim)
+            if(TDim != 0 && src.attr("shape").cast<vector<size_t>>().size() != TDim)
             {
                 std::ostringstream oss;
                 oss << "Wrong cupy dimension\n";

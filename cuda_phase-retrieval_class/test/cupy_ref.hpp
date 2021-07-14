@@ -3,7 +3,8 @@
 using namespace std;
 namespace py = pybind11;
 
-template<typename TData, int TDim = 2>
+//change to 0
+template<typename TData, int TDim = 0>
 class Custom_Cupy_Ref {
   public :
     TData * ptr;
@@ -12,6 +13,18 @@ class Custom_Cupy_Ref {
     vector<size_t> shape;
 
     Custom_Cupy_Ref(){}
+
+    static Custom_Cupy_Ref getCustomCupyRef(py::object obj)
+    {
+        if(py::module::import("builtins").attr("str")(obj.attr("__class__")).cast<string>() != "<class 'cupy.core.core.ndarray'>")
+        {
+            throw std::runtime_error("Exception : Python object must be a cupy array");   
+        }
+
+        return Custom_Cupy_Ref(obj);
+    }
+
+  private:
 
     Custom_Cupy_Ref(py::object obj)
     {
