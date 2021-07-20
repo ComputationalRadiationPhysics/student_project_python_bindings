@@ -1,8 +1,0 @@
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/CMakeFiles/pyExampleScript.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/CMakeFiles/cuPhaseRet.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/CMakeFiles/INSTALL.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/CMakeFiles/ALL_BUILD.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/CMakeFiles/ZERO_CHECK.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/cuPhaseRet_Test.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/pyTestScript.dir
-C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/INSTALL.dir
