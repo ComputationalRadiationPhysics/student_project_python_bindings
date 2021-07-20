@@ -39,7 +39,7 @@ def test_create_a_custom_cupy_from_a_non_cupy_object_in_c():
     print(excinfo.value)
 
 
-#test 5. create a custom cupy with flexible dimension
+#test 5. create a custom cupy with flexible dimension (TDim is using the default value "0" in C++)
 def test_create_a_custom_cupy_with_flexible_dimension():
     a = cp.ones((2,2,2), dtype=cp.complex128)
     b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
@@ -52,10 +52,26 @@ def test_create_a_custom_cupy_with_flexible_dimension():
     c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
 
     assert(c == 4)
-    
+
+#test 6. test for succesfully create a custom cupy with fixed dimension (TDim is equal to the dimensiom of this functiom cupy "a")
+def test_create_a_custom_cupy_with_fixed_dimension_success():
+    a = cp.ones((2,2,2), dtype=cp.complex128)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    c= cuPhaseRet_Test.test_create_a_custom_cupy_with_fixed_dimension_success(b)
+
+    assert(c == 3)
+
+#test 7. test for failing to create a custom cupy with fixed dimension (TDim is not equal to the dimensiom of this functiom cupy "a")
+def test_create_a_custom_cupy_with_fixed_dimension_fail():
+    with pytest.raises(Exception):
+        a = cp.ones((2,2,2), dtype=cp.complex128)
+        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+        c = cuPhaseRet_Test.test_create_a_custom_cupy_with_fixed_dimension_fail(b)
+
+        assert(c == 3)
 
 
-#test 6. same with test 3, but with cupy caster
+#test 8. same with test 3, but with cupy caster
 def test_cupy_cufft_inverse_forward_with_caster():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
     b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
@@ -68,7 +84,7 @@ def test_cupy_cufft_inverse_forward_with_caster():
 
     assert(cp.allclose(a, c)) #array_uqual wont work because there is still a very very small difference
 
-#test 7. send cupy caster to c++ and send it back to python
+#test 9. send cupy caster to c++ and send it back to python
 #although the result caster (c) doesnt have its own cupy, this test may be useful
 def test_send_cupy_caster_to_c_and_get_it_back():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
@@ -77,10 +93,10 @@ def test_send_cupy_caster_to_c_and_get_it_back():
 
     assert(a.data.ptr == c.ptr and a.size == c.size and a.dtype == c.dtype and a.shape == c.shape)
 
-#test 8. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
+#test 10. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
 def test_cupy_from_c_memory():
     assert(cp.get_default_memory_pool().used_bytes() == 0)
     
     cuPhaseRet_Test.test_cupy_from_c_memory()
-
+    
     assert(cp.get_default_memory_pool().used_bytes() == 0)

@@ -1,0 +1,389 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7D0ED0EA-69BF-333F-8625-5CF7AA6A8311}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>cuPhaseRet_Test</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cuPhaseRet_Test.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cuPhaseRet_Test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.pyd</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cuPhaseRet_Test.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cuPhaseRet_Test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.pyd</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">cuPhaseRet_Test.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">cuPhaseRet_Test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.pyd</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">cuPhaseRet_Test.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">cuPhaseRet_Test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.pyd</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>CMAKE_INTDIR="Debug";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;CMAKE_INTDIR=\"Debug\";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <CudaCompile>
+      <Include>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(Include)</Include>
+      <Defines>_WINDOWS;CMAKE_INTDIR="Debug";cuPhaseRet_Test_EXPORTS;%(Defines)</Defines>
+      <AdditionalOptions>%(AdditionalOptions) -std=c++14 -Xcompiler="/EHsc -Zi -Ob0"</AdditionalOptions>
+      <CodeGeneration>compute_35,compute_35;compute_35,sm_35</CodeGeneration>
+      <CompileOut>$(IntDir)%(Filename).obj</CompileOut>
+      <CudaRuntime>Static</CudaRuntime>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <Optimization>Od</Optimization>
+      <Runtime>MDd</Runtime>
+      <RuntimeChecks>RTC1</RuntimeChecks>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <TypeInfo>true</TypeInfo>
+      <UseHostInclude>false</UseHostInclude>
+      <Warning>W3</Warning>
+    </CudaCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Anaconda3\libs\python38.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;D:\opencv\build\x64\vc15\lib\opencv_world451d.lib;cudart.lib;cufft.lib;curand.lib;cudadevrt.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/Debug/cuPhaseRet_Test.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/cuPhaseRet_Test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <CudaLink>
+      <AdditionalOptions>-forward-unknown-to-host-compiler -Wno-deprecated-gpu-targets </AdditionalOptions>
+      <PerformDeviceLink>false</PerformDeviceLink>
+    </CudaLink>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>CMAKE_INTDIR="Release";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;CMAKE_INTDIR=\"Release\";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <CudaCompile>
+      <Include>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(Include)</Include>
+      <Defines>_WINDOWS;NDEBUG;CMAKE_INTDIR="Release";cuPhaseRet_Test_EXPORTS;%(Defines)</Defines>
+      <AdditionalOptions>%(AdditionalOptions) -std=c++14 -Xcompiler="/EHsc -Ob2"</AdditionalOptions>
+      <CodeGeneration>compute_35,compute_35;compute_35,sm_35</CodeGeneration>
+      <CompileOut>$(IntDir)%(Filename).obj</CompileOut>
+      <CudaRuntime>Static</CudaRuntime>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <Optimization>O2</Optimization>
+      <Runtime>MD</Runtime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <TypeInfo>true</TypeInfo>
+      <UseHostInclude>false</UseHostInclude>
+      <Warning>W3</Warning>
+    </CudaCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Anaconda3\libs\python38.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;cudart.lib;cufft.lib;curand.lib;cudadevrt.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/Release/cuPhaseRet_Test.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/cuPhaseRet_Test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <CudaLink>
+      <AdditionalOptions>-forward-unknown-to-host-compiler -Wno-deprecated-gpu-targets </AdditionalOptions>
+      <PerformDeviceLink>false</PerformDeviceLink>
+    </CudaLink>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>CMAKE_INTDIR="MinSizeRel";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;CMAKE_INTDIR=\"MinSizeRel\";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <CudaCompile>
+      <Include>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(Include)</Include>
+      <Defines>_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel";cuPhaseRet_Test_EXPORTS;%(Defines)</Defines>
+      <AdditionalOptions>%(AdditionalOptions) -std=c++14 -Xcompiler="/EHsc -Ob1"</AdditionalOptions>
+      <CodeGeneration>compute_35,compute_35;compute_35,sm_35</CodeGeneration>
+      <CompileOut>$(IntDir)%(Filename).obj</CompileOut>
+      <CudaRuntime>Static</CudaRuntime>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <Optimization>O1</Optimization>
+      <Runtime>MD</Runtime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <TypeInfo>true</TypeInfo>
+      <UseHostInclude>false</UseHostInclude>
+      <Warning>W3</Warning>
+    </CudaCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Anaconda3\libs\python38.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;cudart.lib;cufft.lib;curand.lib;cudadevrt.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/MinSizeRel/cuPhaseRet_Test.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/MinSizeRel/cuPhaseRet_Test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <CudaLink>
+      <AdditionalOptions>-forward-unknown-to-host-compiler -Wno-deprecated-gpu-targets </AdditionalOptions>
+      <PerformDeviceLink>false</PerformDeviceLink>
+    </CudaLink>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>CMAKE_INTDIR="RelWithDebInfo";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;CMAKE_INTDIR=\"RelWithDebInfo\";cuPhaseRet_Test_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <CudaCompile>
+      <Include>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(Include)</Include>
+      <Defines>_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo";cuPhaseRet_Test_EXPORTS;%(Defines)</Defines>
+      <AdditionalOptions>%(AdditionalOptions) -std=c++14 -Xcompiler="/EHsc -Zi -Ob1"</AdditionalOptions>
+      <CodeGeneration>compute_35,compute_35;compute_35,sm_35</CodeGeneration>
+      <CompileOut>$(IntDir)%(Filename).obj</CompileOut>
+      <CudaRuntime>Static</CudaRuntime>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <Optimization>O2</Optimization>
+      <Runtime>MD</Runtime>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <TypeInfo>true</TypeInfo>
+      <UseHostInclude>false</UseHostInclude>
+      <Warning>W3</Warning>
+    </CudaCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Anaconda3\include;D:\Anaconda3\Library\include;D:\opencv\build\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>D:\Anaconda3\libs\python38.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;D:\opencv\build\x64\vc15\lib\opencv_world451.lib;cudart.lib;cufft.lib;curand.lib;cudadevrt.lib;cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/RelWithDebInfo/cuPhaseRet_Test.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/RelWithDebInfo/cuPhaseRet_Test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <CudaLink>
+      <AdditionalOptions>-forward-unknown-to-host-compiler -Wno-deprecated-gpu-targets </AdditionalOptions>
+      <PerformDeviceLink>false</PerformDeviceLink>
+    </CudaLink>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\CMakeLists.txt">
+      <StdOutEncoding>UTF-8</StdOutEncoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class -BC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class --check-stamp-file C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageMessage.cmake;D:\opencv\build\OpenCVConfig-version.cmake;D:\opencv\build\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-debug.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-release.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class -BC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class --check-stamp-file C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageMessage.cmake;D:\opencv\build\OpenCVConfig-version.cmake;D:\opencv\build\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-debug.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-release.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class -BC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class --check-stamp-file C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageMessage.cmake;D:\opencv\build\OpenCVConfig-version.cmake;D:\opencv\build\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-debug.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-release.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class -BC:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class --check-stamp-file C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.20\Modules\FindPackageMessage.cmake;D:\opencv\build\OpenCVConfig-version.cmake;D:\opencv\build\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVConfig.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-debug.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules-release.cmake;D:\opencv\build\x64\vc15\lib\OpenCVModules.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\test\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="test_binding.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\ASUS\Documents\student_project_python_bindings\cuda_phase-retrieval_class\ZERO_CHECK.vcxproj">
+      <Project>{8974DF89-4F1E-3179-B00B-BDCE5A8628FC}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.2.targets" />
+  </ImportGroup>
+</Project>

@@ -1,0 +1,10 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.20/Modules/FindPackageMessage.cmake
+C:/Users/ASUS/Documents/student_project_python_bindings/cuda_phase-retrieval_class/test/CMakeLists.txt
+D:/opencv/build/OpenCVConfig-version.cmake
+D:/opencv/build/OpenCVConfig.cmake
+D:/opencv/build/x64/vc15/lib/OpenCVConfig.cmake
+D:/opencv/build/x64/vc15/lib/OpenCVModules-debug.cmake
+D:/opencv/build/x64/vc15/lib/OpenCVModules-release.cmake
+D:/opencv/build/x64/vc15/lib/OpenCVModules.cmake
