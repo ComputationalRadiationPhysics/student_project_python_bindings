@@ -19,7 +19,7 @@ result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, 20,
 
 phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, "hybrid", 0.8, array_random)
 
-phase_retrieval_pybind.iterate_random_phase(20)
+phase_retrieval_pybind.iterate_random_phase(200)
 
 result_cuda = phase_retrieval_pybind.get_result()
 

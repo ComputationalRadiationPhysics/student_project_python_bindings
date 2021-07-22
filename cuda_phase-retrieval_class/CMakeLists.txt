@@ -14,8 +14,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
 include_directories(${PYTHON_INCLUDE_DIRS})
 include_directories(${pybind11_INCLUDE_DIR})
 
-set(CMAKE_CUDA_ARCHITECTURES 35 CACHE STRING "CUDA architectures")
-set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
+set(CMAKE_CUDA_ARCHITECTURES 60 CACHE STRING "CUDA architectures")
+set(ENABLE_TEST OFF CACHE BOOL "Enable Python binding tests")
 
 set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
@@ -58,10 +58,16 @@ add_custom_command(TARGET pyExampleScript PRE_BUILD
   ${CMAKE_CURRENT_SOURCE_DIR}/run.py $<TARGET_FILE_DIR:cuPhaseRet>
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/run.py)
 
+  add_custom_command(TARGET pyExampleScript PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py $<TARGET_FILE_DIR:cuPhaseRet>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py)
+
 install(TARGETS cuPhaseRet DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/example.py DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py DESTINATION bin)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/run.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py DESTINATION bin)
 
 if(ENABLE_TEST)
   add_subdirectory("test/")
