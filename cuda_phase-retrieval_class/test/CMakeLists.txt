@@ -1,6 +1,7 @@
 set(OpenCV_STATIC ON)
 find_package( OpenCV 4.5.1 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../includes)
 
 add_library(cuPhaseRet_Test SHARED test_binding.cu)
 
@@ -35,6 +36,12 @@ add_custom_command(TARGET pyTestScript PRE_BUILD
 
 add_custom_command(TARGET pyTestScript PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py)
+  ${CMAKE_CURRENT_SOURCE_DIR}/../includes/cupy_ref.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../includes/cupy_ref.py)
+
+install(TARGETS cuPhaseRet_Test DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test_cupy.py DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../includes/cupy_ref.py DESTINATION bin)
+
 
