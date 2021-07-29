@@ -5,12 +5,12 @@ function(add_msvc_poperties tgt)
     set_target_properties(${tgt} PROPERTIES SUFFIX ".pyd")
   endif()
 
-  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio*")
-    set_target_properties(${tgt} PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
-    set_target_properties(${tgt} PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR} )
-    set_target_properties(${tgt} PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
-  endif()
+#  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio*")
+#    set_target_properties(${tgt} PROPERTIES
+#      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+#    set_target_properties(${tgt} PROPERTIES
+#      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_BINARY_DIR} )
+#    set_target_properties(${tgt} PROPERTIES
+#      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_BINARY_DIR} )
+#  endif()
 endfunction()

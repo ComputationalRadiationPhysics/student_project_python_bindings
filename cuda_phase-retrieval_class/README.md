@@ -28,8 +28,8 @@ Contains the Python implementation of the algorithm as `git submodule`. The orig
   python run.py -h
 
   #use CUDA version
-  python run.py --image "example_images/a.png" --mask 256 --beta 0.8 --step 100 --mode hybrid --type cuda
+  python run.py --image "../example_images/a.png" --mask 256 --beta 0.8 --step 100 --mode hybrid --type cuda
 
   #use Python version
-  python run.py --image "example_images/a.png" --mask 256 --beta 0.8 --step 100 --mode hybrid --type python
+  python run.py --image "../example_images/a.png" --mask 256 --beta 0.8 --step 100 --mode hybrid --type python
 ```

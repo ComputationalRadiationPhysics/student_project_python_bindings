@@ -11,7 +11,6 @@
 #include <complex>
 #include <string>
 #include <random>
-#include <opencv2/imgcodecs.hpp>
 #if defined _MSC_VER
 #include <direct.h>
 #define GetCurrentDir _getcwd
@@ -30,7 +29,6 @@ namespace py = pybind11;
 
 void createDir(string dir);
 string get_current_dir();
-void print_image(string workdir, vector<double> image, int iter, int size_x, int size_y);
 __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex arg);
 __device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int size);
 __device__ cufftDoubleComplex get_complex(double real_data);
@@ -54,7 +52,7 @@ py::array_t<double, py::array::c_style> array_check(py::array_t<double, py::arra
     size_t X = bufImg.shape[0]; //width of magnitude
     size_t Y = bufImg.shape[1]; //height of magnitude
 
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
     int dimension = size_x*size_y;
 
@@ -82,7 +80,7 @@ py::array_t<double, py::array::c_style> array_check_cuda(py::array_t<double, py:
     size_t X = bufImg.shape[0]; //width of magnitude
     size_t Y = bufImg.shape[1]; //height of magnitude
 
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
     int dimension = size_x * size_y;
 
@@ -97,7 +95,7 @@ py::array_t<double, py::array::c_style> array_check_cuda(py::array_t<double, py:
 
     double *ptrImg_dev, *ptrRes_dev;
     CUDA_CHECK(cudaMalloc(&ptrImg_dev, dimension * sizeof(double)));
-    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(double))); 
+    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(double)));
 
     CUDA_CHECK(cudaMemcpy(ptrImg_dev, ptrImg, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
@@ -121,7 +119,7 @@ py::array_t<complex<double>, py::array::c_style> array_check_complex(py::array_t
     size_t X = bufMag.shape[0]; //width of magnitude
     size_t Y = bufMag.shape[1]; //height of magnitude
 
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
 
     py::array_t<complex<double>, py::array::c_style> result = py::array_t<complex<double>, py::array::c_style>(bufMag.size);
@@ -146,7 +144,7 @@ py::array_t<complex<double>, py::array::c_style> array_check_complex_cuda(py::ar
     size_t X = bufMag.shape[0]; //width of magnitude
     size_t Y = bufMag.shape[1]; //height of magnitude
 
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
     int dimension = size_x * size_y;
 
@@ -160,7 +158,7 @@ py::array_t<complex<double>, py::array::c_style> array_check_complex_cuda(py::ar
 
     cufftDoubleComplex *ptrMag_dev, *ptrRes_dev;
     CUDA_CHECK(cudaMalloc(&ptrMag_dev, dimension * sizeof(cufftDoubleComplex)));
-    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(cufftDoubleComplex))); 
+    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(cufftDoubleComplex)));
 
     CUDA_CHECK(cudaMemcpy(ptrMag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
@@ -184,7 +182,7 @@ py::array_t<complex<double>, py::array::c_style> cufft_inverse_forward(py::array
     size_t X = bufMag.shape[0]; //width of magnitude
     size_t Y = bufMag.shape[1]; //height of magnitude
 
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
     int dimension = size_x * size_y;
 
@@ -198,12 +196,12 @@ py::array_t<complex<double>, py::array::c_style> cufft_inverse_forward(py::array
 
     cufftDoubleComplex *ptrMag_dev, *ptrRes_dev;
     CUDA_CHECK(cudaMalloc(&ptrMag_dev, dimension * sizeof(cufftDoubleComplex)));
-    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(cufftDoubleComplex))); 
+    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(cufftDoubleComplex)));
 
     CUDA_CHECK(cudaMemcpy(ptrMag_dev, ptrMag, dimension * sizeof(cufftDoubleComplex), cudaMemcpyHostToDevice));
 
     cufftHandle plan; //create cufft plan
-        
+
     CUFFT_CHECK(cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z));
 
     CUFFT_CHECK(cufftExecZ2Z(plan, ptrMag_dev, ptrMag_dev, CUFFT_INVERSE));
@@ -231,7 +229,7 @@ py::array_t<complex<double>, py::array::c_style> abs_cufft_forward(py::array_t<d
     size_t X = bufImg.shape[0]; //width of magnitude
     size_t Y = bufImg.shape[1]; //height of magnitude
 
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
     int dimension = size_x * size_y;
 
@@ -247,14 +245,14 @@ py::array_t<complex<double>, py::array::c_style> abs_cufft_forward(py::array_t<d
     cufftDoubleComplex *ptrRes_dev;
     CUDA_CHECK(cudaMalloc(&ptrImg_dev, dimension * sizeof(double)));
     CUDA_CHECK(cudaMalloc(&ptrResAbs_dev, dimension * sizeof(double)));
-    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(cufftDoubleComplex))); 
+    CUDA_CHECK(cudaMalloc(&ptrRes_dev, dimension * sizeof(cufftDoubleComplex)));
 
     CUDA_CHECK(cudaMemcpy(ptrImg_dev, ptrImg, dimension * sizeof(double), cudaMemcpyHostToDevice));
 
     get_complex_array<<<8*numSMs, 256>>>(ptrImg_dev, ptrRes_dev, dimension);
 
     cufftHandle plan; //create cufft plan
-        
+
     CUFFT_CHECK(cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z));
 
     CUFFT_CHECK(cufftExecZ2Z(plan, ptrRes_dev, ptrRes_dev, CUFFT_FORWARD));
@@ -296,10 +294,10 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     double *mask = static_cast<double*>(bufMask.ptr); //mask array, same size as image
     double *random_value = static_cast<double*>(bufRand.ptr); //array of uniform random number, same size as image
 
-    //alternative fot saving image size, prevent warning while using CUFFT 
+    //alternative fot saving image size, prevent warning while using CUFFT
     //( warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data)"
     //get int version of size instead of size_t, then create dimension (image size)
-    int size_x = static_cast<int>(X); 
+    int size_x = static_cast<int>(X);
     int size_y = static_cast<int>(Y);
     int dimension = size_x*size_y;
 
@@ -351,7 +349,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
 
     //iteration with number of steps------------------------------------------------------------------------------------------------------
     for(int iter = 0; iter < steps; iter++)
-    {   
+    {
         cufftHandle plan; //create cufft plan
         CUFFT_CHECK(cufftPlan2d(&plan, size_x, size_y, CUFFT_Z2Z));
         CUFFT_CHECK(cufftExecZ2Z(plan, y_hat_dev, y_hat_dev, CUFFT_INVERSE));
@@ -360,11 +358,6 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
         satisfy_fourier<<<8*numSMs, 256>>>(y_hat_dev, image_x_dev_comp, mag_dev, dimension);
         cufftDestroy(plan);
 
-        if(verbose == true)
-        {
-            CUDA_CHECK(cudaMemcpy(image_print.data(), image_x_device, dimension * sizeof(double), cudaMemcpyDeviceToHost));
-            print_image(workdir, image_print, iter, size_x, size_y); 
-        }
     }
 
     py::array_t<double, py::array::c_style> result = py::array_t<double, py::array::c_style>(bufImg.size);
@@ -378,7 +371,7 @@ py::array_t<double, py::array::c_style> fienup_phase_retrieval(py::array_t<doubl
     cudaFree(random_value_dev);
     cudaFree(mag_dev);
     cudaFree(mask_dev);
-    cudaFree(image_x_device); 
+    cudaFree(image_x_device);
     cudaFree(image_x_p_device);
     cudaFree(image_x_dev_comp);
 
@@ -403,7 +396,7 @@ __device__ cufftDoubleComplex normalize(cufftDoubleComplex comp_data, int dimens
     cufftDoubleComplex norm_data;
     norm_data.x = comp_data.x / static_cast<double>(dimension);
     norm_data.y = comp_data.y / static_cast<double>(dimension);
-    
+
     return norm_data;
 }
 
@@ -417,7 +410,7 @@ __device__ cufftDoubleComplex get_complex(double real_data)
     return comp_data;
 }
 
-//Get real number part of a CUFFT complex number 
+//Get real number part of a CUFFT complex number
 __device__ double get_real(cufftDoubleComplex comp_data)
 {
     return comp_data.x;
@@ -426,7 +419,7 @@ __device__ double get_real(cufftDoubleComplex comp_data)
 //Convert array of real number into array of complex number
 __global__ void get_complex_array(double *real_array, cufftDoubleComplex *complex_array, int dimension)
 {
-   for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
+   for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
     {
         complex_array[idx].x = real_array[idx];
         complex_array[idx].y = 0;
@@ -436,7 +429,7 @@ __global__ void get_complex_array(double *real_array, cufftDoubleComplex *comple
 //Get absolute of complex number
 __global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *real_array , int dimension)
 {
-   for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
+   for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
     {
         real_array[idx] = cuCabs(complex_array[idx]);
     }
@@ -445,18 +438,18 @@ __global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *re
 //create states for random values
 __global__ void init_random(double seed, curandState_t *states, int dimension)
 {
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x) 
-    { 
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
+    {
         curand_init(seed, idx, 0, &states[idx]);
     }
 }
 
 //sample random phase using array of random from input
-__global__ void random_phase(double *random, cufftDoubleComplex *y_hat, double *ptrMag, int dimension ) 
+__global__ void random_phase(double *random, cufftDoubleComplex *y_hat, double *ptrMag, int dimension )
 {
     cufftDoubleComplex complex1i, exp_target, mag_comp;
     complex1i.x = 0; complex1i.y = 1;
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
     {
         mag_comp.x = ptrMag[idx];
         mag_comp.y = 0;
@@ -467,11 +460,11 @@ __global__ void random_phase(double *random, cufftDoubleComplex *y_hat, double *
 }
 
 //sample random phase using curandState_t as random value
-__global__ void random_phase_cudastate(curandState_t *states, cufftDoubleComplex *y_hat, double *ptrMag, int dimension ) 
+__global__ void random_phase_cudastate(curandState_t *states, cufftDoubleComplex *y_hat, double *ptrMag, int dimension )
 {
     cufftDoubleComplex complex1i, exp_target, mag_comp;
     complex1i.x = 0; complex1i.y = 1;
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
     {
         mag_comp.x = ptrMag[idx];
         mag_comp.y = 0;
@@ -482,11 +475,11 @@ __global__ void random_phase_cudastate(curandState_t *states, cufftDoubleComplex
 }
 
 //satisfy fourier domain constraints
-__global__ void satisfy_fourier(cufftDoubleComplex *y_hat, cufftDoubleComplex *x_hat, double *ptrMag, int dimension ) 
+__global__ void satisfy_fourier(cufftDoubleComplex *y_hat, cufftDoubleComplex *x_hat, double *ptrMag, int dimension )
 {
     cufftDoubleComplex complex1i, exp_target, mag_comp;
     complex1i.x = 0; complex1i.y = 1;
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
     {
         mag_comp.x = ptrMag[idx];
         mag_comp.y = 0;
@@ -500,7 +493,7 @@ __global__ void satisfy_fourier(cufftDoubleComplex *y_hat, cufftDoubleComplex *x
 //processing magnitudes with mask
 __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *image_x, double *image_x_p, cufftDoubleComplex *image_x_comp, double beta, int mode, int iter, int dimension)
 {
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
     {
         bool logical_not_mask;
         bool y_less_than_zero;
@@ -515,7 +508,7 @@ __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *
         //updates for elements that satisfy object domain constraints
         if(mode == 3 || mode == 1) image_x[idx] = y;
 
-        //find elements that violate object domain constraints or are not masked 
+        //find elements that violate object domain constraints or are not masked
         if(mask[idx] <= 0) logical_not_mask = true;
         else if(mask[idx] >= 1) logical_not_mask = false;
 
@@ -523,7 +516,7 @@ __global__ void process_arrays(double *mask, cufftDoubleComplex *y_hat, double *
         if(y < 0) y_less_than_zero = true;
         else if(y >= 0) y_less_than_zero = false;
 
-        //use "and" logical to check the "less than zero y" and the mask  
+        //use "and" logical to check the "less than zero y" and the mask
         if(y_less_than_zero == true && mask[idx] >= 1) logical_and = true;
         else logical_and = false;
 
@@ -565,7 +558,7 @@ void createDir(string dir)
 }
 
 //Get current location (same as the executable file)
-string get_current_dir() 
+string get_current_dir()
 {
    char buff[FILENAME_MAX]; //create string buffer to hold path
    GetCurrentDir( buff, FILENAME_MAX );
@@ -573,20 +566,11 @@ string get_current_dir()
    return current_working_dir;
 }
 
-//Create grayscale image file in a folder
-void print_image(string workdir, vector<double> image, int iter, int size_x, int size_y)
-{
-    string fulldir = workdir + "/image_" + to_string(iter+1) + ".png";
-    const char *filename = fulldir.c_str();
-    cv::Mat img = cv::Mat(size_x, size_y, CV_64FC1, image.data()).clone();
-    cv::imwrite(filename, img);
-}
-
 //Normalize array of complex number (results of CUFFT INVERSE)
 __global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *ptrRes, int dimension)
 {
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x) 
-    { 
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
+    {
         ptrRes[idx].x = ptrImg[idx].x / static_cast<double>(dimension);
         ptrRes[idx].y = ptrImg[idx].y / static_cast<double>(dimension);
     }
@@ -595,8 +579,8 @@ __global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *
 //Simple array of double copy in CUDA
 __global__ void copy_value(double *ptrImg, double *ptrRes, int dimension)
 {
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x) 
-    { 
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
+    {
         ptrRes[idx] = ptrImg[idx];
     }
 }
@@ -604,9 +588,8 @@ __global__ void copy_value(double *ptrImg, double *ptrRes, int dimension)
 //Simple array of complex double copy in CUDA
 __global__ void copy_value_complex(cufftDoubleComplex *ptrMag, cufftDoubleComplex *ptrRes, int dimension)
 {
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x) 
-    { 
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
+    {
         ptrRes[idx] = ptrMag[idx];
     }
 }
-
