@@ -14,6 +14,8 @@ iteration = 100
 
 print("Running phase retrieval with " + str(iteration) + " iterations")
 
+result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, 20, "hybrid", 0.8, array_random)
+
 t0_start = perf_counter()
 
 phase_retrieval_pybind_v2 = cuPhaseRet.Phase_Algo(image, mask, "hybrid", 0.8, array_random)
@@ -36,6 +38,9 @@ plt.subplot(221)
 plt.imshow(image, cmap='gray')
 plt.title('Image')
 plt.subplot(222)
+plt.imshow(result_original, cmap='gray')
+plt.title('Original Phase Retrieval')
+plt.subplot(223)
 plt.imshow(result_cuda_v2, cmap='gray')
 plt.title('CUDA Phase Retrieval V2, runtime (s) : ' + str(t0_elapsed))
 # on headless systems, maximizing the window could be a problem
