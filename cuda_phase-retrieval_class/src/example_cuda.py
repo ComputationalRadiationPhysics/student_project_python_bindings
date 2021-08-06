@@ -16,18 +16,21 @@ print("Running phase retrieval with " + str(iteration) + " iterations")
 
 result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, 20, "hybrid", 0.8, array_random)
 
-t0_start = perf_counter()
-
 phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, "hybrid", 0.8, array_random)
+
+phase_retrieval_pybind.iterate_random_phase(1) #run phase retrieval once first
+phase_retrieval_pybind.reset_random_phase() #reset random phase to its initial values
+
+#start measuring time
+t0_start = perf_counter()
 
 phase_retrieval_pybind.iterate_random_phase(iteration)
 
-result_cuda = phase_retrieval_pybind.get_result()
-
-phase_retrieval_pybind.reset_random_phase() #if there is a need to iterate again
-
+#stop measuring time
 t0_stop = perf_counter()
 t0_elapsed = t0_stop-t0_start
+
+result_cuda = phase_retrieval_pybind.get_result()
 
 plt.show()
 plt.subplot(221)
