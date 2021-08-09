@@ -30,6 +30,7 @@ __global__ void get_initial_random_phase_curand(curandState_t *states, cufftDoub
 __global__ void satisfy_fourier_gpu(cufftDoubleComplex *random_phase, double *magnitude, int dimension);
 __global__ void process_arrays_gpu(cufftDoubleComplex *random_phase, double *mask, double *image_output, double beta, int mode, int iter, int dimension);
 void CUFFT_CHECK(cufftResult cufft_process);
+int get_number_of_cuda_sm();
 template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
 template<> cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr);
 
@@ -54,7 +55,14 @@ class Phase_Algo
         std::size_t X, Y;
         T beta;
 
-        //GPU class variables
+        //Pybind11 objects for GPU
+        pybind11::object magnitude_gpu,
+                         random_phase, 
+                         random_phase_init,
+                         mask_gpu,
+                         image_output_gpu;
+
+        //Custom GPU class variables
         Custom_Cupy_Ref<T> magnitude_gpu_cp,      //Magnitudes in GPU
                         mask_gpu_cp,           //Mask in GPU
                         image_output_gpu_cp;        //Image output in GPU
@@ -74,7 +82,7 @@ class Phase_Algo
         void set_magnitudes(T *images)
         {
             //Magnitude result
-            pybind11::object magnitude_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64");
+            magnitude_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64");
             magnitude_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(magnitude_gpu);
 
             //Source image in GPU 
@@ -97,6 +105,21 @@ class Phase_Algo
 
             //Then get the absolute value of the result, the absolute result is called magnitude
             get_absolute_array<<<8*numSMs, 256>>>(source_image_gpu_cufft_cp, magnitude_gpu_cp.ptr, dimension);
+        }
+
+        void allocate_memory()
+        {
+            random_phase = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128");
+            random_phase_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase);
+            
+            random_phase_init = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128");
+            random_phase_init_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase_init);
+
+            mask_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64");
+            mask_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(mask_gpu);
+
+            image_output_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64");
+            image_output_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(image_output_gpu);
         }
 
         void set_random_phase(pybind11::array_t<T, pybind11::array::c_style> randoms)
@@ -179,25 +202,12 @@ class Phase_Algo
             /**
             * 3. Allocating memories in GPU with cupy
             */                 
-            // allocate_cupy_memory(); moving line 182 to 193 to a new function cause wrong result
-            pybind11::object random_phase = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128");
-            random_phase_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase);
-            
-            pybind11::object random_phase_init = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128");
-            random_phase_init_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase_init);
-
-            pybind11::object mask_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64");
-            mask_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(mask_gpu);
-
-            pybind11::object image_output_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64");
-            image_output_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(image_output_gpu);
+            allocate_memory();
                        
             /**
-            * 4. Set number of SM for CUDA Kernel
+            * 4. Set number of Streaming Multiprocessor for CUDA Kernel
             */
-            int devId;
-            cudaGetDevice(&devId);
-            cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
+            numSMs = get_number_of_cuda_sm();
 
             /**
             * 5. Get magntitudes
@@ -540,6 +550,14 @@ __global__ void process_arrays_gpu(cufftDoubleComplex *random_phase, double *mas
 void CUFFT_CHECK(cufftResult cufft_process)
 {
     if(cufft_process != CUFFT_SUCCESS) std::cout<<cufft_process<<std::endl;
+}
+
+int get_number_of_cuda_sm()
+{
+    int devId, numSMs;
+    cudaGetDevice(&devId);
+    cudaDeviceGetAttribute( &numSMs, cudaDevAttrMultiProcessorCount, devId);
+    return numSMs;
 }
 
 template<typename TInputData, typename TOutputData>
