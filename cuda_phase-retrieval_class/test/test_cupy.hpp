@@ -17,8 +17,12 @@
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;
 
+enum Mode { Hybrid = 1, InputOutput = 2, OutputOutput = 3};
+
 template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
 template<> cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr);
+template<typename T> pybind11::object cupy_allocate(std::vector<int> size);
+
 
 //test 1. Generate 1D cupy of complex double from c++
 pybind11::object test_generating_cupy_of_complex_double_from_c()
@@ -181,6 +185,27 @@ void test_cupy_from_c_memory()
     assert(pybind11::module::import("cupy").attr("get_default_memory_pool")().attr("used_bytes")().cast<std::size_t>() > 0 );
 
     //cp removed automatically after the next closing bracket
+}
+
+//test 11. Test Enum with pybind
+int test_enum(Mode phase_mode)
+{
+    return phase_mode;
+}
+
+//test 12. Test create a cupy object with a custom allocate function
+Custom_Cupy_Ref<std::complex<double>> test_custom_cupy_object_creator()
+{
+    pybind11::object cp = cupy_allocate<std::complex<double>>({4,4});
+    Custom_Cupy_Ref<std::complex<double>> custom_cp = Custom_Cupy_Ref<std::complex<double>>::getCustomCupyRef(cp);
+    return custom_cp;
+}
+
+template<typename T> 
+pybind11::object cupy_allocate(std::vector<int> size)
+{
+    pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(size[0]*size[1], "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(size[0], size[1]);
+    return cp;
 }
 
 template<typename TInputData, typename TOutputData>

@@ -100,3 +100,19 @@ def test_cupy_from_c_memory():
     cuPhaseRet_Test.test_cupy_from_c_memory()
     
     assert(cp.get_default_memory_pool().used_bytes() == 0)
+
+#test 11. Test Enum with pybind 
+def test_enum():
+    assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.Hybrid) == 1)
+    assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.InputOutput) == 2)
+    assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.OutputOutput) == 3)
+
+#test 12. Test create a cupy object with a custom allocate function
+def test_custom_cupy_object_creator():
+   b = cuPhaseRet_Test.test_custom_cupy_object_creator()
+   assert(b.size == 16)
+   print(b.size)
+   assert(b.dtype == "complex128")
+   print(b.dtype)
+   assert(b.shape == (4,4))
+   print(b.shape)

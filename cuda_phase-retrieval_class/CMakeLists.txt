@@ -9,7 +9,7 @@ find_package(PythonLibs 3.6 REQUIRED)
 find_package(pybind11 REQUIRED)
 
 set(CMAKE_CUDA_ARCHITECTURES 60 CACHE STRING "CUDA architectures")
-set(ENABLE_TEST OFF CACHE BOOL "Enable Python binding tests")
+set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
 
 set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})

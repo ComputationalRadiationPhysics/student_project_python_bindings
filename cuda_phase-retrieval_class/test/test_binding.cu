@@ -23,6 +23,13 @@ PYBIND11_MODULE(cuPhaseRet_Test, m)
   m.def("fienup_phase_retrieval", pybind11::overload_cast<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>, int, bool, std::string, double, pybind11::array_t<double, pybind11::array::c_style>>(&fienup_phase_retrieval));
 
   //test_cupy
+
+  py::enum_<Mode>(m, "Mode")
+        .value("Hybrid", Hybrid)
+        .value("InputOutput", InputOutput)
+        .value("OutputOutput", OutputOutput)
+        .export_values();
+
   /*1*/ m.def("test_generating_cupy_of_complex_double_from_c", &test_generating_cupy_of_complex_double_from_c);
   /*2*/ m.def("test_send_cupy_complex_to_c_and_send_it_back", &test_send_cupy_complex_to_c_and_send_it_back);
   /*3*/ m.def("test_cupy_cufft_inverse_forward", &test_cupy_cufft_inverse_forward);
@@ -33,6 +40,8 @@ PYBIND11_MODULE(cuPhaseRet_Test, m)
   /*8*/ m.def("test_cupy_cufft_inverse_forward_with_caster", &test_cupy_cufft_inverse_forward_with_caster<std::complex<double>>);
   /*9*/ m.def("test_send_cupy_caster_to_c_and_get_it_back", &test_send_cupy_caster_to_c_and_get_it_back<std::complex<double>>);
   /*10*/ m.def("test_cupy_from_c_memory", &test_cupy_from_c_memory);
+  /*11*/ m.def("test_enum", &test_enum);
+  /*12*/ m.def("test_custom_cupy_object_creator", &test_custom_cupy_object_creator);
 }
 
 
