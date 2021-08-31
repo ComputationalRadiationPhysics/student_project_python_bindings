@@ -107,12 +107,44 @@ def test_enum():
     assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.InputOutput) == 2)
     assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.OutputOutput) == 3)
 
-#test 12. Test create a cupy object with a custom allocate function
-def test_custom_cupy_object_creator():
-   b = cuPhaseRet_Test.test_custom_cupy_object_creator()
+#test 12. Test create a 1D cupy object with a custom allocate function
+def test_custom_cupy_object_creator_1d():
+   b = cuPhaseRet_Test.test_custom_cupy_object_creator_1d()
+   print()
+   print("Test 12, 1D")
+   assert(b.size == 42)
+   print(b.size)
+   assert(b.dtype == "uint64")
+   print(b.dtype)
+   assert(b.shape == (42,))
+   print(b.shape)
+   assert(b.ndim == 1)
+   print(b.ndim)
+
+#test 13. Test create a 2D cupy object with a custom allocate function
+def test_custom_cupy_object_creator_2d():
+   b = cuPhaseRet_Test.test_custom_cupy_object_creator_2d()
+   print()
+   print("Test 13, 2D")
    assert(b.size == 16)
    print(b.size)
    assert(b.dtype == "complex128")
    print(b.dtype)
    assert(b.shape == (4,4))
    print(b.shape)
+   assert(b.ndim == 2)
+   print(b.ndim)
+
+#test 14. Test create a 3D cupy object with a custom allocate function
+def test_custom_cupy_object_creator_3d():
+   b = cuPhaseRet_Test.test_custom_cupy_object_creator_3d()
+   print()
+   print("Test 14, 3D")
+   assert(b.size == 60)
+   print(b.size)
+   assert(b.dtype == "int64")
+   print(b.dtype)
+   assert(b.shape == (3,4,5))
+   print(b.shape)
+   assert(b.ndim == 3)
+   print(b.ndim)

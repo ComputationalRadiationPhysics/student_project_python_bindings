@@ -193,18 +193,34 @@ int test_enum(Mode phase_mode)
     return phase_mode;
 }
 
-//test 12. Test create a cupy object with a custom allocate function
-Custom_Cupy_Ref<std::complex<double>> test_custom_cupy_object_creator()
+//test 12. Test create a 1D cupy object with a custom allocate function
+pybind11::object test_custom_cupy_object_creator_1d()
+{
+    pybind11::object cp = cupy_allocate<std::uint64_t>({42});
+    return cp;
+}
+
+//test 13. Test create a 2D cupy object with a custom allocate function
+pybind11::object test_custom_cupy_object_creator_2d()
 {
     pybind11::object cp = cupy_allocate<std::complex<double>>({4,4});
-    Custom_Cupy_Ref<std::complex<double>> custom_cp = Custom_Cupy_Ref<std::complex<double>>::getCustomCupyRef(cp);
-    return custom_cp;
+    return cp;
+}
+
+//test 14. Test create a 3D cupy object with a custom allocate function
+pybind11::object test_custom_cupy_object_creator_3d()
+{
+    pybind11::object cp = cupy_allocate<long long int>({3,4,5});
+    return cp;
 }
 
 template<typename T> 
-pybind11::object cupy_allocate(std::vector<int> size)
+pybind11::object cupy_allocate(std::vector<int> shape)
 {
-    pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(size[0]*size[1], "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(size[0], size[1]);
+    int linear_size = 1;
+    for(int const &s : shape) linear_size *= s;
+    // pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(linear_size, "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(shape[0], shape[1]);
+    pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(linear_size, "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(shape);
     return cp;
 }
 

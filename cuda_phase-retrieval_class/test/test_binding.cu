@@ -41,7 +41,9 @@ PYBIND11_MODULE(cuPhaseRet_Test, m)
   /*9*/ m.def("test_send_cupy_caster_to_c_and_get_it_back", &test_send_cupy_caster_to_c_and_get_it_back<std::complex<double>>);
   /*10*/ m.def("test_cupy_from_c_memory", &test_cupy_from_c_memory);
   /*11*/ m.def("test_enum", &test_enum);
-  /*12*/ m.def("test_custom_cupy_object_creator", &test_custom_cupy_object_creator);
+  /*12*/ m.def("test_custom_cupy_object_creator_1d", &test_custom_cupy_object_creator_1d);
+  /*13*/ m.def("test_custom_cupy_object_creator_2d", &test_custom_cupy_object_creator_2d);
+  /*14*/ m.def("test_custom_cupy_object_creator_3d", &test_custom_cupy_object_creator_3d);
 }
 
 
