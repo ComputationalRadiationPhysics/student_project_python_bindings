@@ -14,7 +14,7 @@ iteration = 100
 
 print("Running phase retrieval with " + str(iteration) + " iterations")
 
-phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, "hybrid", 0.8)
+phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, cuPhaseRet.Hybrid, 0.8)
 
 phase_retrieval_pybind.iterate_random_phase(1) #run phase retrieval once first
 phase_retrieval_pybind.reset_random_phase() #reset random phase to its initial values

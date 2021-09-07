@@ -24,7 +24,7 @@ PYBIND11_MODULE(cuPhaseRet_Test, m)
 
   //test_cupy
 
-  py::enum_<Mode>(m, "Mode")
+  pybind11::enum_<Mode>(m, "Mode")
         .value("Hybrid", Hybrid)
         .value("InputOutput", InputOutput)
         .value("OutputOutput", OutputOutput)

@@ -8,9 +8,15 @@
 
 PYBIND11_MODULE(cuPhaseRet, m) 
 {
+  pybind11::enum_<Mode>(m, "Mode")
+        .value("Hybrid", Hybrid)
+        .value("InputOutput", InputOutput)
+        .value("OutputOutput", OutputOutput)
+        .export_values();
+
   pybind11::class_<Phase_Algo<double>>(m, "Phase_Algo", pybind11::module_local())
-      .def(pybind11::init<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>, std::string, double>())
-      .def(pybind11::init<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>, std::string, double, pybind11::array_t<double, pybind11::array::c_style>>())
+      .def(pybind11::init<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>, Mode, double>())
+      .def(pybind11::init<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>, Mode, double, pybind11::array_t<double, pybind11::array::c_style>>())
       .def("iterate_random_phase", &Phase_Algo<double>::iterate_random_phase)
       .def("reset_random_phase", &Phase_Algo<double>::reset_random_phase)
       .def("do_cufft_inverse", &Phase_Algo<double>::do_cufft_inverse)

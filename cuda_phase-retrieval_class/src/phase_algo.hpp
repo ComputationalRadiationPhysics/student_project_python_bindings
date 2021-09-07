@@ -18,6 +18,8 @@
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;
 
+enum Mode { Hybrid = 1, InputOutput = 2, OutputOutput = 3};
+
 __device__ cufftDoubleComplex gpu_exp(cufftDoubleComplex complex_number);
 __device__ cufftDoubleComplex normalize(cufftDoubleComplex complex_number, int size);
 __device__ cufftDoubleComplex get_complex(double real_number);
@@ -33,17 +35,8 @@ void CUFFT_CHECK(cufftResult cufft_process);
 int get_number_of_cuda_sm();
 template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
 template<> cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr);
+template<typename T> pybind11::object cupy_allocate(std::vector<int> shape);
 
-/**
- * \brief CUDA Phase Retrieval primary function with random array as an additional parameter
- * \param image Input image
- * \param masks Input mask (default 1)
- * \param steps Number of iteration
- * \param mode Input mode ("input-ouput", "output-output", or "hybrid")
- * \param beta Input beta (default 0.8)
- * \param randoms Input array of random
- * \return Image result
- */
 
 template<typename T>
 class Phase_Algo
@@ -51,7 +44,8 @@ class Phase_Algo
     private:
         //CPU class variables
         pybind11::buffer_info bufImg;  
-        int mode, size_x, size_y, dimension, numSMs;
+        Mode phase_mode;
+        int size_x, size_y, dimension, numSMs;
         std::size_t X, Y;
         T beta;
 
@@ -63,41 +57,30 @@ class Phase_Algo
                          image_output_gpu;
 
         //Custom GPU class variables
-        Custom_Cupy_Ref<T> magnitude_gpu_cp,   //Magnitudes in GPU
-                        mask_gpu_cp,           //Mask in GPU
-                        image_output_gpu_cp;   //Image output in GPU
+        Custom_Cupy_Ref<T> magnitude_gpu_cp,     //Magnitudes in GPU
+                           mask_gpu_cp,          //Mask in GPU
+                           image_output_gpu_cp;  //Image output in GPU
 
-        Custom_Cupy_Ref<std::complex<T>> random_phase_cp,      //Sample random phase in GPU
-                                        random_phase_init_cp;  //Store initial GPU random phase before iterations 
+        Custom_Cupy_Ref<std::complex<T>> random_phase_cp,       //Sample random phase in GPU
+                                         random_phase_init_cp;  //Store initial GPU random phase before iterations 
 
         cufftHandle plan; //handling FFT on gpu with CUFFT
-
-        /**
-        * \brief Change mode from string to integer
-        * \param mode string version of mode
-        */ 
-        void set_mode(std::string mode)
-        {
-            if(mode.compare("hybrid") == 0) this->mode = 1;
-            else if(mode.compare("input-output") == 0) this->mode = 2;
-            else if(mode.compare("output-output") == 0) this->mode = 3;
-        }
 
         /**
         * \brief Allocating memories in GPU with cupy
         */    
         void allocate_memory()
         {
-            random_phase = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128").attr("reshape")(size_x, size_y);
+            random_phase = cupy_allocate<std::complex<T>>({size_x,size_y});
             random_phase_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase);
             
-            random_phase_init = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128").attr("reshape")(size_x, size_y);
+            random_phase_init = cupy_allocate<std::complex<T>>({size_x,size_y});
             random_phase_init_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase_init);
 
-            mask_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64").attr("reshape")(size_x, size_y);
+            mask_gpu = cupy_allocate<T>({size_x,size_y});
             mask_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(mask_gpu);
 
-            image_output_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64").attr("reshape")(size_x, size_y);
+            image_output_gpu = cupy_allocate<T>({size_x,size_y});
             image_output_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(image_output_gpu);
         }
 
@@ -108,15 +91,15 @@ class Phase_Algo
         void set_magnitudes(T *images)
         {
             //Magnitude result
-            magnitude_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64").attr("reshape")(size_x, size_y);
+            magnitude_gpu = cupy_allocate<T>({size_x,size_y});
             magnitude_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(magnitude_gpu);
 
             //Source image in GPU 
-            pybind11::object source_image_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64").attr("reshape")(size_x, size_y);
+            pybind11::object source_image_gpu = cupy_allocate<T>({size_x,size_y});
             Custom_Cupy_Ref<T> source_image_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(source_image_gpu);
 
             //complex number version of source image in GPU
-            pybind11::object source_image_complex_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128").attr("reshape")(size_x, size_y);
+            pybind11::object source_image_complex_gpu = cupy_allocate<std::complex<T>>({size_x,size_y});
             Custom_Cupy_Ref<std::complex<T>> source_image_complex_gpu_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(source_image_complex_gpu);
             cufftDoubleComplex *source_image_gpu_cufft_cp = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(source_image_complex_gpu_cp.ptr);
 
@@ -152,7 +135,7 @@ class Phase_Algo
                 T *random_value = static_cast<T*>(bufRand.ptr);   //Array of uniform random number, same size as image
 
                 //Array of random in GPU
-                pybind11::object random_value_gpu = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="float64").attr("reshape")(size_x, size_y);
+                pybind11::object random_value_gpu = cupy_allocate<T>({size_x,size_y});
                 Custom_Cupy_Ref<T> random_value_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(random_value_gpu);
                 CUDA_CHECK(cudaMemcpy(random_value_gpu_cp.ptr, random_value, dimension * sizeof(T), cudaMemcpyHostToDevice));
                 get_initial_random_phase<<<8*numSMs, 256>>>(random_value_gpu_cp.ptr, random_phase_cufft_cp, magnitude_gpu_cp.ptr, dimension);
@@ -170,37 +153,49 @@ class Phase_Algo
             CUDA_CHECK(cudaMemcpy(random_phase_init_cufft_cp, random_phase_cufft_cp, dimension * sizeof(cufftDoubleComplex), cudaMemcpyDeviceToDevice));
         }
 
-    
     public:
-        Phase_Algo(pybind11::array_t<T, pybind11::array::c_style> image, pybind11::array_t<T, pybind11::array::c_style> masks, std::string mode, T beta)
+
+        /**
+        * \brief CUDA Phase Retrieval primary function
+        * \param image source image
+        * \param masks mask array
+        * \param phase_mode mode for iteration (hybrid, input-output, or output-output)
+        * \param beta beta
+        */
+        Phase_Algo(pybind11::array_t<T, pybind11::array::c_style> image, pybind11::array_t<T, pybind11::array::c_style> masks, Mode phase_mode, T beta)
         {
             pybind11::array_t<T, pybind11::array::c_style> randoms = pybind11::array_t<T, pybind11::array::c_style>(0);
-            init(image, masks, mode, beta, randoms);
+            init(image, masks, phase_mode, beta, randoms);
         }
         
-        Phase_Algo(pybind11::array_t<T, pybind11::array::c_style> image, pybind11::array_t<T, pybind11::array::c_style> masks, std::string mode, T beta, pybind11::array_t<T, pybind11::array::c_style> randoms)
+        /**
+        * \brief CUDA Phase Retrieval primary function with additional random array as parameter
+        * \param image source image
+        * \param masks mask array
+        * \param phase_mode mode for iteration (hybrid, input-output, or output-output)
+        * \param beta beta
+        * \param randoms Array of random, can be an empty array
+        */
+        Phase_Algo(pybind11::array_t<T, pybind11::array::c_style> image, pybind11::array_t<T, pybind11::array::c_style> masks, Mode phase_mode, T beta, pybind11::array_t<T, pybind11::array::c_style> randoms)
         {
-            init(image, masks, mode, beta, randoms);
+            init(image, masks, phase_mode, beta, randoms);
         }
 
         /**
         * \brief Initialization of the phase retrieval object, called by constructor
         * \param image source image
         * \param masks mask array
-        * \param mode mode for iteration (hybrid, input-output, or output-output)
+        * \param phase_mode mode for iteration (hybrid, input-output, or output-output)
         * \param beta beta
         * \param randoms Array of random, can be an empty array
         */
-        void init(pybind11::array_t<T, pybind11::array::c_style> image, pybind11::array_t<T, pybind11::array::c_style> masks, std::string mode, T beta, pybind11::array_t<T, pybind11::array::c_style> randoms)
+        void init(pybind11::array_t<T, pybind11::array::c_style> image, pybind11::array_t<T, pybind11::array::c_style> masks, Mode phase_mode, T beta, pybind11::array_t<T, pybind11::array::c_style> randoms)
         {
             /**
             * \b Process
-            * Asserting inputs
             */
-            assert(beta > 0);
-            assert(mode == "input-output" || mode == "output-output" || mode == "hybrid");
-
-            set_mode(mode); //use integer instead of string for mode 
+            assert(beta > 0);  //Make sure beta is bigger than 0
+            this->phase_mode = phase_mode;
             bufImg = image.request();       
             pybind11::buffer_info bufMask = masks.request();      
            
@@ -209,7 +204,7 @@ class Phase_Algo
             this->beta = beta;
 
             /**
-            * Asserting array size, make sure all arrays are using the same size
+            * Asserting array size, make sure mask from python has the same size as input image
             */
             std::size_t mask_X = bufMask.shape[0];            //Width of mask
             std::size_t mask_Y = bufMask.shape[1];            //Height of mask
@@ -222,11 +217,11 @@ class Phase_Algo
             size_y = static_cast<int>(Y); //Convert Y to integer to prevent getting warning from CUFFT
             dimension = size_x*size_y;    //Area or dimension of image, mask, and array of random
                
-            allocate_memory();
+            allocate_memory(); //Allocate several GPU array using cupy
                    
-            numSMs = get_number_of_cuda_sm();
+            numSMs = get_number_of_cuda_sm(); //Get the number of GPU Streaming Multiprocessor
          
-            set_magnitudes(source_image);
+            set_magnitudes(source_image); //Set magnitudes using input image
             
             /**
             * Copy mask and array of random to GPU
@@ -297,7 +292,7 @@ class Phase_Algo
         void do_process_arrays(Custom_Cupy_Ref<std::complex<T>> data, int iter)
         {
             cufftDoubleComplex *data_cufft = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(data.ptr); 
-            process_arrays_gpu<<<8*numSMs, 256>>>(data_cufft, mask_gpu_cp.ptr, image_output_gpu_cp.ptr, beta, mode, iter, dimension);
+            process_arrays_gpu<<<8*numSMs, 256>>>(data_cufft, mask_gpu_cp.ptr, image_output_gpu_cp.ptr, beta, phase_mode, iter, dimension);
         }
 
         /**
@@ -515,11 +510,11 @@ __global__ void satisfy_fourier_gpu(cufftDoubleComplex *random_phase, double *ma
 * \param random_phase Random phase data with size of dimension
 * \param image_output Image result
 * \param beta Input beta
-* \param mode Integer version of Input mode (hybrid = 1, input-output = 2, output-output = 3)
+* \param phase_mode Mode (hybrid = 1, input-output = 2, output-output = 3)
 * \param iter current iteration
 * \param dimension Size of all arrays
 */
-__global__ void process_arrays_gpu(cufftDoubleComplex *random_phase, double *mask, double *image_output, double beta, int mode, int iter, int dimension)
+__global__ void process_arrays_gpu(cufftDoubleComplex *random_phase, double *mask, double *image_output, double beta, Mode phase_mode, int iter, int dimension)
 {
     for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)  
     {
@@ -541,7 +536,7 @@ __global__ void process_arrays_gpu(cufftDoubleComplex *random_phase, double *mas
         /**
         * 2. Updates for elements that satisfy object domain constraint
         */
-        if(mode == 3 || mode == 1) image_output[idx] = y;
+        if(phase_mode == OutputOutput || phase_mode == Hybrid) image_output[idx] = y;
 
         /**
         * 3. Find elements that violate object domain constraints or are not masked 
@@ -572,11 +567,11 @@ __global__ void process_arrays_gpu(cufftDoubleComplex *random_phase, double *mas
         */ 
         if(indices == true)
         {
-            if(mode == 1 || mode == 2)
+            if(phase_mode == Hybrid || phase_mode == InputOutput)
             {
                 image_output[idx] = image_output_temp-beta*y;
             }
-            else if(mode == 3)
+            else if(phase_mode == OutputOutput)
             {
                 image_output[idx] = y-beta*y;
             }
@@ -619,5 +614,20 @@ cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr)
 {  
     return reinterpret_cast<cufftDoubleComplex *>(ptr);
 }
+
+/**
+* \brief Generate a cupy array with 0 as the values
+* \param shape vector representing dimension and size
+* \return python object, which is a cupy array
+*/
+template<typename T> 
+pybind11::object cupy_allocate(std::vector<int> shape)
+{
+    int linear_size = 1;
+    for(int const &s : shape) linear_size *= s;
+    pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(linear_size, "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(shape);
+    return cp;
+}
+
 
 

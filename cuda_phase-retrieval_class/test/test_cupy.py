@@ -148,3 +148,30 @@ def test_custom_cupy_object_creator_3d():
    print(b.shape)
    assert(b.ndim == 3)
    print(b.ndim)
+
+#test 15. Test modify generated cupy
+def test_modify_generated_cupy():
+   b = cuPhaseRet_Test.test_custom_cupy_object_creator_1d()
+   print()
+   print("Test 15, 1D")
+   print(b)
+   print("First Element + 10")
+   b[0] = b[0] + 10
+   print(b)
+   print("Last Element + 50")
+   b[b.size-1] = b[b.size-1] + 50
+   print(b)
+   print("Create new cupy from python")
+   c = cp.ones(42)
+   print(c)
+   print("Add test 15 cupy with new cupy")
+   b = b + c
+   print(b)
+   print("Get Sum")
+   print(cp.sum(b))
+   print("Sort")
+   b = cp.sort(b)
+   print(b)
+   print("Copy to CPU")
+   b_cpu = cp.asnumpy(b)
+   print(b_cpu)

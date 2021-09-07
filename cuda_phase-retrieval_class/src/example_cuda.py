@@ -17,10 +17,10 @@ test_run = 10
 
 print("Running phase retrieval with " + str(iteration) + " iterations")
 
-result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, iteration, "output-output", 0.8, array_random)
+result_original = phase_retrieval_python.fienup_phase_retrieval(image, mask, iteration, "hybrid", 0.8, array_random)
 
 #---------------------CUDA Phase Retrieval Pre-Run------------------------
-phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, "output-output", 0.8, array_random)
+phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, cuPhaseRet.Hybrid, 0.8, array_random)
 
 phase_retrieval_pybind.iterate_random_phase(1) #run phase retrieval once first
 phase_retrieval_pybind.reset_random_phase() #reset random phase to its initial values
@@ -29,7 +29,7 @@ phase_retrieval_pybind.reset_random_phase() #reset random phase to its initial v
 algo_objects = []
 
 for i in range(test_run):
-  algo_objects.append(cuPhaseRet.Phase_Algo(image, mask, "output-output", 0.8, array_random))
+  algo_objects.append(cuPhaseRet.Phase_Algo(image, mask, cuPhaseRet.Hybrid, 0.8, array_random))
 
 #start measuring time
 t0_start = perf_counter()
