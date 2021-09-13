@@ -1,0 +1,94 @@
+# cmake_minimum_required(VERSION 3.11)
+# project(gpuMemManagement LANGUAGES CXX CUDA)
+
+# include("cmake/add_msvc_poperties.cmake")
+
+# find_package(PythonInterp 3.6 REQUIRED)
+# find_package(PythonLibs 3.6 REQUIRED)
+# find_package(pybind11 REQUIRED)
+
+# include_directories(${PYTHON_INCLUDE_DIRS})
+# include_directories(${pybind11_INCLUDE_DIR})
+
+# set(CMAKE_CUDA_ARCHITECTURES 35 CACHE STRING "CUDA architectures")
+# # set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
+
+# set(CXX_STANDARD 14)
+# set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# set(CUDA_STANDARD ${CXX_STANDARD})
+
+# # copy example images to build folder
+# # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
+# #   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/example_images/ )
+
+# add_library(gpuMemManagement SHARED cupy_pybind.cu)
+
+# target_include_directories(gpuMemManagement
+#   PUBLIC
+#   ${PYTHON_INCLUDE_DIRS}
+#   ${pybind11_INCLUDE_DIR})
+
+# target_link_libraries(gpuMemManagement
+#   ${PYTHON_LIBRARIES}
+#   ${OpenCV_LIBS}
+#   cudart
+#   cufft
+#   curand)
+
+# add_msvc_poperties(gpuMemManagement)
+
+# set_target_properties(gpuMemManagement PROPERTIES PREFIX "")
+
+# # add a custom target for the test.py script, which will copy test.py
+# # to the installation folder and update every time there is a change
+# add_custom_target(pyExampleScript ALL)
+# add_custom_command(TARGET pyExampleScript PRE_BUILD
+#   COMMAND ${CMAKE_COMMAND} -E copy
+#   ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py $<TARGET_FILE_DIR:gpuMemManagement>
+#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py)
+
+# add_custom_command(TARGET pyExampleScript PRE_BUILD
+#   COMMAND ${CMAKE_COMMAND} -E copy
+#   ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py $<TARGET_FILE_DIR:gpuMemManagement>
+#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py)
+
+# add_custom_command(TARGET pyExampleScript PRE_BUILD
+#   COMMAND ${CMAKE_COMMAND} -E copy
+#   ${CMAKE_CURRENT_SOURCE_DIR}/test/test_custom_cupy.py $<TARGET_FILE_DIR:gpuMemManagement>
+#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/test_custom_cupy.py)
+
+# install(TARGETS gpuMemManagement DESTINATION bin)
+# install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py DESTINATION bin)
+# install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py DESTINATION bin)
+# install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/test/test_custom_cupy.py DESTINATION bin)
+
+# # if(ENABLE_TEST)
+# #   add_subdirectory("test/")
+# # endif()
+
+cmake_minimum_required(VERSION 3.13)
+
+set(_targetName gpuMemManagement)
+add_library(${_targetName} SHARED cupy_pybind.cu)
+
+target_link_libraries(${_targetName}
+  PUBLIC
+  cupyref::headers
+  ${PYTHON_LIBRARIES}
+  ${OpenCV_LIBS}
+  cudart
+  cufft
+  curand)
+
+add_msvc_poperties(${_targetName})
+
+set_target_properties(${_targetName} PROPERTIES PREFIX "")
+
+set(python_files
+  ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/cupy_pybind.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_custom_cupy.py
+  )
+
+copy_python_files(${_targetName} "${python_files}")

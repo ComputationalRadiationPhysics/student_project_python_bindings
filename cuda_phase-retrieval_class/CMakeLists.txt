@@ -19,7 +19,8 @@ set(CUDA_STANDARD ${CXX_STANDARD})
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/include")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 if(ENABLE_TEST)
-  add_subdirectory("test/")
+  add_subdirectory("test/test_1_initial_cupy_reference/")
+  add_subdirectory("test/test_3_cupy_reference_management/")
 endif()
 
 # copy example images to build folder
