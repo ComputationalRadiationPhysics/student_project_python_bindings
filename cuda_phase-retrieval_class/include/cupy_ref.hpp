@@ -12,7 +12,7 @@ class Custom_Cupy_Ref {
 
     static Custom_Cupy_Ref getCustomCupyRef(pybind11::object obj)
     {
-        if(pybind11::module::import("builtins").attr("str")(obj.attr("__class__")).cast<std::string>() != "<class 'cupy.core.core.ndarray'>")
+        if(pybind11::module::import("builtins").attr("str")(obj.attr("__class__")).cast<std::string>() != "<class 'cupy._core.core.ndarray'>")
         {
             throw std::runtime_error("Exception : Python object must be a cupy array");   
         }
