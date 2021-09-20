@@ -10,10 +10,7 @@
 #include "cupy_ref.hpp"
 #include "cupy_caster.hpp"
 #include "gpu_algo.hpp"
-#include "test.hpp"
-
-namespace py = pybind11;
-using namespace std;
+#include "test_custom_cupy.hpp"
 
 PYBIND11_MODULE(gpuMemManagement, m) 
 {
@@ -34,7 +31,7 @@ PYBIND11_MODULE(gpuMemManagement, m)
   m.def("test_copy_real_cupy_to_cpu", &test_copy_real_cupy_to_cpu);
   m.def("real_cupy_increment_all_data_by_1", &real_cupy_increment_all_data_by_1);
   m.def("custom_cupy_increment_all_data_by_1", &custom_cupy_increment_all_data_by_1);
-  m.def("test_create_real_cupy_from_c", &test_create_real_cupy_from_c, py::return_value_policy::move);
+  m.def("test_create_real_cupy_from_c", &test_create_real_cupy_from_c, pybind11::return_value_policy::move);
   m.def("test_copy_custom_cupy_to_custom_cupy", &test_copy_custom_cupy_to_custom_cupy);
   m.def("test_wrong_dtype_float", &test_wrong_dtype_float);
   m.def("test_wrong_dtype_int", &test_wrong_dtype_int);
@@ -48,16 +45,16 @@ PYBIND11_MODULE(gpuMemManagement, m)
   m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<uint32_t>);
   m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<float>);
   m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<double>);
-  m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<complex<float>>);
-  m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<complex<double>>);
+  m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<std::complex<float>>);
+  m.def("test_custom_cupy_template_function", &test_custom_cupy_template_function<std::complex<double>>);
 
   //overloading produce the same errors
-  // m.def("test_custom_cupy_template_function", py::overload_cast<size_t, Custom_Cupy_Ref<uint16_t>>(&test_custom_cupy_template_function<uint16_t>));
-  // m.def("test_custom_cupy_template_function", py::overload_cast<size_t, Custom_Cupy_Ref<uint32_t>>(&test_custom_cupy_template_function<uint32_t>));
-  // m.def("test_custom_cupy_template_function", py::overload_cast<size_t, Custom_Cupy_Ref<float>>(&test_custom_cupy_template_function<float>));
-  // m.def("test_custom_cupy_template_function", py::overload_cast<size_t, Custom_Cupy_Ref<double>>(&test_custom_cupy_template_function<double>));
-  // m.def("test_custom_cupy_template_function", py::overload_cast<size_t, Custom_Cupy_Ref<complex<float>>>(&test_custom_cupy_template_function<complex<float>>));
-  // m.def("test_custom_cupy_template_function", py::overload_cast<size_t, Custom_Cupy_Ref<complex<double>>>(&test_custom_cupy_template_function<complex<double>>));
+  // m.def("test_custom_cupy_template_function", pybind11::overload_cast<size_t, Custom_Cupy_Ref<uint16_t>>(&test_custom_cupy_template_function<uint16_t>));
+  // m.def("test_custom_cupy_template_function", pybind11::overload_cast<size_t, Custom_Cupy_Ref<uint32_t>>(&test_custom_cupy_template_function<uint32_t>));
+  // m.def("test_custom_cupy_template_function", pybind11::overload_cast<size_t, Custom_Cupy_Ref<float>>(&test_custom_cupy_template_function<float>));
+  // m.def("test_custom_cupy_template_function", pybind11::overload_cast<size_t, Custom_Cupy_Ref<double>>(&test_custom_cupy_template_function<double>));
+  // m.def("test_custom_cupy_template_function", pybind11::overload_cast<size_t, Custom_Cupy_Ref<complex<float>>>(&test_custom_cupy_template_function<complex<float>>));
+  // m.def("test_custom_cupy_template_function", pybind11::overload_cast<size_t, Custom_Cupy_Ref<complex<double>>>(&test_custom_cupy_template_function<complex<double>>));
 
 }
 

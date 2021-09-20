@@ -10,10 +10,7 @@
 #include <random>
 
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
-using namespace std;
 using namespace std::literals::complex_literals;
-namespace py = pybind11;
-
 
 __global__ void partial_image_update(double *parted_image, double *partial_update, double update, int size)
 {
@@ -38,9 +35,9 @@ int getNumberofSM()
     return numSMs;
 }
 
-void copy_to_device(size_t gpu_image, py::array_t<double, py::array::c_style> image, int size, int device)
+void copy_to_device(std::size_t gpu_image, pybind11::array_t<double, pybind11::array::c_style> image, int size, int device)
 {
-    py::buffer_info bufImg = image.request();
+    pybind11::buffer_info bufImg = image.request();
 
     CUDA_CHECK(cudaSetDevice(device));
     cudaStream_t stream;
@@ -54,7 +51,7 @@ void copy_to_device(size_t gpu_image, py::array_t<double, py::array::c_style> im
     CUDA_CHECK(cudaDeviceSynchronize());
 }
 
-void update_images(size_t gpu_image, size_t gpu_partial_update, double update, int size, int device) 
+void update_images(std::size_t gpu_image, std::size_t gpu_partial_update, double update, int size, int device) 
 {
     CUDA_CHECK(cudaSetDevice(device));
     double *device_image = reinterpret_cast<double*>(gpu_image);
@@ -70,7 +67,7 @@ void update_images(size_t gpu_image, size_t gpu_partial_update, double update, i
     CUDA_CHECK(cudaDeviceSynchronize());
 }
 
-void free_gpu_memory(size_t device_array, int device) 
+void free_gpu_memory(std::size_t device_array, int device) 
 {
     CUDA_CHECK(cudaSetDevice(device));
     double *gpu_array = reinterpret_cast<double*>(device_array);

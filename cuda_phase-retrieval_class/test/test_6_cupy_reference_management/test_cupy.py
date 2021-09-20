@@ -42,13 +42,13 @@ def test_create_a_custom_cupy_from_a_non_cupy_object_in_c():
 #test 5. create a custom cupy with flexible dimension (TDim is using the default value "0" in C++)
 def test_create_a_custom_cupy_with_flexible_dimension():
     a = cp.ones((2,2,2), dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
     c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
 
     assert(c == 3)
 
     a = cp.ones((3,3,3,3), dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
     c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
 
     assert(c == 4)
@@ -56,7 +56,7 @@ def test_create_a_custom_cupy_with_flexible_dimension():
 #test 6. test for succesfully create a custom cupy with fixed dimension (TDim is equal to the dimensiom of this functiom cupy "a")
 def test_create_a_custom_cupy_with_fixed_dimension_success():
     a = cp.ones((2,2,2), dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
     c= cuPhaseRet_Test.test_create_a_custom_cupy_with_fixed_dimension_success(b)
 
     assert(c == 3)
@@ -65,7 +65,7 @@ def test_create_a_custom_cupy_with_fixed_dimension_success():
 def test_create_a_custom_cupy_with_fixed_dimension_fail():
     with pytest.raises(Exception):
         a = cp.ones((2,2,2), dtype=cp.complex128)
-        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
         c = cuPhaseRet_Test.test_create_a_custom_cupy_with_fixed_dimension_fail(b)
 
         assert(c == 3)
@@ -74,7 +74,7 @@ def test_create_a_custom_cupy_with_fixed_dimension_fail():
 #test 8. same with test 3, but with cupy caster
 def test_cupy_cufft_inverse_forward_with_caster():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
     c = cuPhaseRet_Test.test_cupy_cufft_inverse_forward_with_caster(b)
 
     print()
@@ -88,10 +88,10 @@ def test_cupy_cufft_inverse_forward_with_caster():
 #although the result caster (c) doesnt have its own cupy, this test may be useful
 def test_send_cupy_caster_to_c_and_get_it_back():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, size = a.size, dtype = str(a.dtype), shape = a.shape)
+    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
     c = cuPhaseRet_Test.test_send_cupy_caster_to_c_and_get_it_back(b)
 
-    assert(a.data.ptr == c.ptr and a.size == c.size and a.dtype == c.dtype and a.shape == c.shape)
+    assert(a.data.ptr == c.ptr and a.dtype == c.dtype and a.shape == c.shape)
 
 #test 10. check if c++ is properly removing the cupy object that is created in c++ after an end of a function
 def test_cupy_from_c_memory():

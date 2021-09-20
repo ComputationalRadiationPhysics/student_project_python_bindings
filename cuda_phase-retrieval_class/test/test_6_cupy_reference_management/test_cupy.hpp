@@ -131,7 +131,7 @@ pybind11::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> 
 
     int size_x = static_cast<int>(b.shape[0]); //Convert X to integer to prevent getting warning from CUFFT
     int size_y = static_cast<int>(b.shape[1]); //Convert Y to integer to prevent getting warning from CUFFT
-    int dimension = static_cast<int>(b.size); //Convert size to integer to prevent getting warning from CUFFT
+    int dimension = static_cast<int>(size_x*size_y); //Convert size to integer to prevent getting warning from CUFFT
 
     //convert source cupy from double complex to cufftDoubleComplex so CUFFT can use it
     // cufftDoubleComplex *gpu_data = reinterpret_cast<cufftDoubleComplex *>(b.ptr);

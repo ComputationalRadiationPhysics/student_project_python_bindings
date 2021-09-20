@@ -2,8 +2,6 @@ import cuPhaseRet #c++ pybind phase retrieval
 import numpy as np
 import imageio
 import matplotlib.pyplot as plt
-import phase_retrieval_python
-import cupy_ref
 from time import perf_counter
 
 #np.random.seed(1)
