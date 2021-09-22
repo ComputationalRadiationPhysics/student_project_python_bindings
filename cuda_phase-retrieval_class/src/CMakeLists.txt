@@ -7,7 +7,6 @@ target_link_libraries(${_targetName}
   PUBLIC
   cupyref::headers
   ${PYTHON_LIBRARIES}
-  ${OpenCV_LIBS}
   cudart
   cufft
   curand)

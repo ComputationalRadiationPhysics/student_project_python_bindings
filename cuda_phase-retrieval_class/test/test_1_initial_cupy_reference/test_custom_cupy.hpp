@@ -9,7 +9,6 @@
 #include <string>
 #include <random>
 
-
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;

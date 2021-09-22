@@ -7,7 +7,6 @@ target_link_libraries(${_targetName}
   PUBLIC
   cupyref::headers
   ${PYTHON_LIBRARIES}
-  ${OpenCV_LIBS}
   )
 
 add_msvc_poperties(${_targetName})
@@ -20,4 +19,5 @@ set(python_files
   )
 
 copy_python_files(${_targetName} "${python_files}")
+add_test(NAME ${_targetName} COMMAND pytest)
 

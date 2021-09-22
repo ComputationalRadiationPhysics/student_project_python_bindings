@@ -12,6 +12,7 @@
 
 PYBIND11_MODULE(cuPhaseRet_Test, m) 
 {
+  //---test_algo----------
   m.def("array_check", &array_check);
   m.def("array_check_cuda", &array_check_cuda);
   m.def("array_check_complex", &array_check_complex);
@@ -19,11 +20,7 @@ PYBIND11_MODULE(cuPhaseRet_Test, m)
   m.def("cufft_inverse_forward", &cufft_inverse_forward);
   m.def("abs_cufft_forward", &abs_cufft_forward);
 
-  //phase retrieval with verbose
-  m.def("fienup_phase_retrieval", pybind11::overload_cast<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>, int, bool, std::string, double, pybind11::array_t<double, pybind11::array::c_style>>(&fienup_phase_retrieval));
-
-  //test_cupy
-
+  //---test_cupy----------
   pybind11::enum_<Mode>(m, "Mode")
         .value("Hybrid", Hybrid)
         .value("InputOutput", InputOutput)

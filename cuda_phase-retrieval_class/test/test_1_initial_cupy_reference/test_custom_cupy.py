@@ -1,6 +1,4 @@
-from typing import Type
 import cupy as cp
-import numpy as np
 
 import gpuMemManagement
 import cupy_ref

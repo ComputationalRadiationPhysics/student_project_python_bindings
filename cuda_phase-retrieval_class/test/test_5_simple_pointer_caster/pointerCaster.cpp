@@ -8,17 +8,15 @@
 #include <sstream>
 #include <cstdint>
 
-namespace py = pybind11;
-
 /* Set the first element of a numpy array to 42. */
-void change_first_element_numpy_array(py::array_t<int> &input){
-  py::buffer_info buf = input.request();
-  static_cast<int*>(buf.ptr)[0] = 42;
+void change_first_element_numpy_array(pybind11::array_t<double> &input){
+  pybind11::buffer_info buf = input.request();
+  static_cast<double*>(buf.ptr)[0] = 42.0;
 }
 
 /* Returns the memory address of the numpy array data as string. */
-std::string return_numpy_ptr_as_string(py::array_t<int> &input){
-  py::buffer_info buf = input.request();
+std::string return_numpy_ptr_as_string(pybind11::array_t<double> &input){
+  pybind11::buffer_info buf = input.request();
 
   std::ostringstream oss;
   oss << buf.ptr;
@@ -33,9 +31,9 @@ std::uint32_t dereference_pointer_numpy_uint32(std::size_t py_ptr){
   oss << "[cpp] memory address: ";
   oss << py_ptr;
 
-  py::print(oss.str());
+  pybind11::print(oss.str());
   std::uint32_t * ptr = reinterpret_cast<std::uint32_t *>(py_ptr);
-  py::print("[cpp] value ptr: ", *ptr);
+  pybind11::print("[cpp] value ptr: ", *ptr);
   return *ptr;
 }
 
