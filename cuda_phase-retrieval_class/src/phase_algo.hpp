@@ -57,11 +57,11 @@ class Phase_Algo
                          image_output_gpu;
 
         //Custom GPU class variables
-        Custom_Cupy_Ref<T> magnitude_gpu_cp,     //Magnitudes in GPU
+        Cupy_Ref<T> magnitude_gpu_cp,     //Magnitudes in GPU
                            mask_gpu_cp,          //Mask in GPU
                            image_output_gpu_cp;  //Image output in GPU
 
-        Custom_Cupy_Ref<std::complex<T>> random_phase_cp,       //Sample random phase in GPU
+        Cupy_Ref<std::complex<T>> random_phase_cp,       //Sample random phase in GPU
                                          random_phase_init_cp;  //Store initial GPU random phase before iterations 
 
         cufftHandle plan; //handling FFT on gpu with CUFFT
@@ -72,16 +72,16 @@ class Phase_Algo
         void allocate_memory()
         {
             random_phase = cupy_allocate<std::complex<T>>({size_x,size_y});
-            random_phase_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase);
+            random_phase_cp = Cupy_Ref<std::complex<T>>::getCupyRef(random_phase);
             
             random_phase_init = cupy_allocate<std::complex<T>>({size_x,size_y});
-            random_phase_init_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(random_phase_init);
+            random_phase_init_cp = Cupy_Ref<std::complex<T>>::getCupyRef(random_phase_init);
 
             mask_gpu = cupy_allocate<T>({size_x,size_y});
-            mask_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(mask_gpu);
+            mask_gpu_cp = Cupy_Ref<T>::getCupyRef(mask_gpu);
 
             image_output_gpu = cupy_allocate<T>({size_x,size_y});
-            image_output_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(image_output_gpu);
+            image_output_gpu_cp = Cupy_Ref<T>::getCupyRef(image_output_gpu);
         }
 
         /**
@@ -92,15 +92,15 @@ class Phase_Algo
         {
             //Magnitude result
             magnitude_gpu = cupy_allocate<T>({size_x,size_y});
-            magnitude_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(magnitude_gpu);
+            magnitude_gpu_cp = Cupy_Ref<T>::getCupyRef(magnitude_gpu);
 
             //Source image in GPU 
             pybind11::object source_image_gpu = cupy_allocate<T>({size_x,size_y});
-            Custom_Cupy_Ref<T> source_image_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(source_image_gpu);
+            Cupy_Ref<T> source_image_gpu_cp = Cupy_Ref<T>::getCupyRef(source_image_gpu);
 
             //complex number version of source image in GPU
             pybind11::object source_image_complex_gpu = cupy_allocate<std::complex<T>>({size_x,size_y});
-            Custom_Cupy_Ref<std::complex<T>> source_image_complex_gpu_cp = Custom_Cupy_Ref<std::complex<T>>::getCustomCupyRef(source_image_complex_gpu);
+            Cupy_Ref<std::complex<T>> source_image_complex_gpu_cp = Cupy_Ref<std::complex<T>>::getCupyRef(source_image_complex_gpu);
             cufftDoubleComplex *source_image_gpu_cufft_cp = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(source_image_complex_gpu_cp.ptr);
 
             CUDA_CHECK(cudaMemcpy(source_image_gpu_cp.ptr, images, dimension * sizeof(T), cudaMemcpyHostToDevice));
@@ -136,7 +136,7 @@ class Phase_Algo
 
                 //Array of random in GPU
                 pybind11::object random_value_gpu = cupy_allocate<T>({size_x,size_y});
-                Custom_Cupy_Ref<T> random_value_gpu_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(random_value_gpu);
+                Cupy_Ref<T> random_value_gpu_cp = Cupy_Ref<T>::getCupyRef(random_value_gpu);
                 CUDA_CHECK(cudaMemcpy(random_value_gpu_cp.ptr, random_value, dimension * sizeof(T), cudaMemcpyHostToDevice));
                 get_initial_random_phase<<<8*numSMs, 256>>>(random_value_gpu_cp.ptr, random_phase_cufft_cp, magnitude_gpu_cp.ptr, dimension);
             }
@@ -268,7 +268,7 @@ class Phase_Algo
         * \brief Do an FFT Inverse to a CUFFT array
         * \param data A CUFFT array inplemented in a custom GPU array
         */
-        void do_cufft_inverse(Custom_Cupy_Ref<std::complex<T>> data)
+        void do_cufft_inverse(Cupy_Ref<std::complex<T>> data)
         {
             cufftDoubleComplex *data_cufft = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(data.ptr); 
             CUFFT_CHECK(cufftExecZ2Z(plan, data_cufft, data_cufft, CUFFT_INVERSE));
@@ -278,7 +278,7 @@ class Phase_Algo
         * \brief Do an FFT to a CUFFT array
         * \param data A CUFFT array inplemented in a custom GPU array
         */
-        void do_cufft_forward(Custom_Cupy_Ref<std::complex<T>> data)
+        void do_cufft_forward(Cupy_Ref<std::complex<T>> data)
         {
             cufftDoubleComplex *data_cufft = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(data.ptr); 
             CUFFT_CHECK(cufftExecZ2Z(plan, data_cufft, data_cufft, CUFFT_FORWARD));
@@ -289,7 +289,7 @@ class Phase_Algo
         * \param data A CUFFT array inplemented in a custom GPU array
         * \param iter Iteration index
         */
-        void do_process_arrays(Custom_Cupy_Ref<std::complex<T>> data, int iter)
+        void do_process_arrays(Cupy_Ref<std::complex<T>> data, int iter)
         {
             cufftDoubleComplex *data_cufft = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(data.ptr); 
             process_arrays_gpu<<<8*numSMs, 256>>>(data_cufft, mask_gpu_cp.ptr, image_output_gpu_cp.ptr, beta, phase_mode, iter, dimension);
@@ -299,7 +299,7 @@ class Phase_Algo
         * \brief Satisfy fourier of the random phase array
         * \param data A CUFFT array inplemented in a custom GPU array
         */
-        void do_satisfy_fourier(Custom_Cupy_Ref<std::complex<T>> data)
+        void do_satisfy_fourier(Cupy_Ref<std::complex<T>> data)
         {
             cufftDoubleComplex *data_cufft = convertToCUFFT<std::complex<T>, cufftDoubleComplex>(data.ptr); 
             satisfy_fourier_gpu<<<8*numSMs, 256>>>(data_cufft, magnitude_gpu_cp.ptr, dimension);
@@ -309,7 +309,7 @@ class Phase_Algo
         * \brief Get the random phase
         * \return Random phase array in GPU implemented with a custom cupy array
         */
-        Custom_Cupy_Ref<std::complex<T>> get_random_phase_custom_cupy()
+        Cupy_Ref<std::complex<T>> get_random_phase_custom_cupy()
         {
             return random_phase_cp;
         }

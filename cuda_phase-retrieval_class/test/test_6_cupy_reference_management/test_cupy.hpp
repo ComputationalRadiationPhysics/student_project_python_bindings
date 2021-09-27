@@ -95,26 +95,26 @@ template <typename T>
 void test_create_a_custom_cupy_from_a_non_cupy_object_in_c()
 {
     auto cp = pybind11::module::import("numpy").attr("ones")(4, "dtype"_a="complex128").attr("reshape")(2, 2);
-    Custom_Cupy_Ref<T> casted_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(cp);
+    Cupy_Ref<T> casted_cp = Cupy_Ref<T>::getCupyRef(cp);
 }
 
 //test 5. create a custom cupy with flexible dimension (TDim is using the default value "0")
 template <typename T>
-std::size_t test_create_a_custom_cupy_with_flexible_dimension(Custom_Cupy_Ref<T> b)
+std::size_t test_create_a_custom_cupy_with_flexible_dimension(Cupy_Ref<T> b)
 {
     return b.shape.size();
 }
 
 //test 6. test for succesfully create a custom cupy with fixed dimension (TDim is equal to the dimensiom of the source cupy)
 template <typename T>
-std::size_t test_create_a_custom_cupy_with_fixed_dimension_success(Custom_Cupy_Ref<T, 3> b)
+std::size_t test_create_a_custom_cupy_with_fixed_dimension_success(Cupy_Ref<T, 3> b)
 {
     return b.shape.size();
 }
 
 //test 7. test for failing to create a custom cupy with fixed dimension (TDim is not equal to the dimensiom of the source cupy)
 template <typename T>
-std::size_t test_create_a_custom_cupy_with_fixed_dimension_fail(Custom_Cupy_Ref<T, 4> b)
+std::size_t test_create_a_custom_cupy_with_fixed_dimension_fail(Cupy_Ref<T, 4> b)
 {
     return b.shape.size();
 }
@@ -122,7 +122,7 @@ std::size_t test_create_a_custom_cupy_with_fixed_dimension_fail(Custom_Cupy_Ref<
 
 //test 8. same with test 3, but with cupy caster
 template <typename T>
-pybind11::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> b)
+pybind11::object test_cupy_cufft_inverse_forward_with_caster(Cupy_Ref<T> b)
 {
     //find number of SM
     int devId, numSMs;
@@ -139,7 +139,7 @@ pybind11::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> 
 
     //create a new 2D cupy double complex with the same size and shape as source cupy
     auto cp = pybind11::module::import("cupy").attr("zeros")(dimension, "dtype"_a="complex128").attr("reshape")(size_x, size_y);
-    Custom_Cupy_Ref<T> casted_cp = Custom_Cupy_Ref<T>::getCustomCupyRef(cp);
+    Cupy_Ref<T> casted_cp = Cupy_Ref<T>::getCupyRef(cp);
 
     //convert new cupy from double complex to cufftDoubleComplex so CUFFT can use it
     cufftDoubleComplex *gpu_data_result = convertToCUFFT<T, cufftDoubleComplex>(casted_cp.ptr);
@@ -169,9 +169,9 @@ pybind11::object test_cupy_cufft_inverse_forward_with_caster(Custom_Cupy_Ref<T> 
 //test 9. send cupy caster to c++ and send it back to python
 //although the result caster (c) doesnt have its own cupy, this test may be useful
 template <typename T>
-Custom_Cupy_Ref<T> test_send_cupy_caster_to_c_and_get_it_back(Custom_Cupy_Ref<T> b)
+Cupy_Ref<T> test_send_cupy_caster_to_c_and_get_it_back(Cupy_Ref<T> b)
 {
-    Custom_Cupy_Ref<T> c = b;
+    Cupy_Ref<T> c = b;
     return c;
 }
 

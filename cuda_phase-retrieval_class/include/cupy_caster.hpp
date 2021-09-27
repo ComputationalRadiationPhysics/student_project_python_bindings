@@ -24,12 +24,12 @@ template<> std::string cupy_ref_get_dtype<std::complex<double>>(){ return "compl
 
 
 namespace pybind11 { namespace detail {
-    template <typename T, int TDim> struct type_caster<Custom_Cupy_Ref<T, TDim>> 
+    template <typename T, int TDim> struct type_caster<Cupy_Ref<T, TDim>> 
     {
-        using Custom_Cupy_Ref_t = Custom_Cupy_Ref<T, TDim>;
+        using Cupy_Ref_t = Cupy_Ref<T, TDim>;
 
         public:
-            PYBIND11_TYPE_CASTER(Custom_Cupy_Ref_t, _("cupy_ref.Custom_Cupy_Ref"));
+            PYBIND11_TYPE_CASTER(Cupy_Ref_t, _("cupy_ref.Cupy_Ref"));
       
         // python -> C++
         bool load(handle src, bool)
@@ -66,13 +66,13 @@ namespace pybind11 { namespace detail {
             return true;
         }
 
-        static handle cast(Custom_Cupy_Ref<T> src, return_value_policy /* policy */, handle /* parent */) {
+        static handle cast(Cupy_Ref<T> src, return_value_policy /* policy */, handle /* parent */) {
 
             //in the previous function "load" to convert python to c++, I need to reinterpret cast a size_t of the ptr to a double*.
             //in this function, because I have to convert it from c++ to python, then I need to convert the ptr from double* to size_t 
             std::size_t python_pointer = reinterpret_cast<std::size_t>(src.ptr);
-            auto custom_cupy = module::import("cupy_ref").attr("Custom_Cupy_Ref")(python_pointer, src.dtype, src.shape);
-            return custom_cupy.release();
+            auto cupy = module::import("cupy_ref").attr("Cupy_Ref")(python_pointer, src.dtype, src.shape);
+            return cupy.release();
         }
     };
 }}

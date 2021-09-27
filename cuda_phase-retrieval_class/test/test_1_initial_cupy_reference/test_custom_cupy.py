@@ -23,7 +23,7 @@ def test_getting_cupy_size():
 def test_if_reinterpret_ptr_is_the_same():
     cp.cuda.Device(0).use()
     a = cp.array([3, 4, 5], dtype=cp.float64)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype)) # the type of a cupy type is a numpy type class, 
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype)) # the type of a cupy type is a numpy type class, 
                                                                                         # so I need to convert the type to string first
     c = gpuMemManagement.test_if_reinterpret_ptr_is_the_same(a.data.ptr, b)
 
@@ -41,7 +41,7 @@ def test_if_real_cupy_reinterpret_ptr_is_a_gpu_array():
 def test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array():
     cp.cuda.Device(0).use()
     a = cp.array([3.14, 4.25, 5.36], dtype=cp.float64)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
     res = gpuMemManagement.test_if_custom_cupy_reinterpret_ptr_is_a_gpu_array(b)
 
     assert(res == True)
@@ -58,7 +58,7 @@ def test_copy_real_cupy_to_cpu():
 def test_copy_custom_cupy_to_cpu():
     cp.cuda.Device(0).use()
     a = cp.array([3.14, 4.25, 5.36], dtype=cp.float64)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
     c = gpuMemManagement.test_copy_custom_cupy_to_cpu(b)
 
     assert(c == True)
@@ -80,7 +80,7 @@ def test_real_cupy_pointer_with_cuda_kernel():
 #test 9 : test if custom cupy can run successfully in cuda kernel
 def test_custom_cupy_pointer_with_cuda_kernel():
     a = cp.array([3.14, 4.25, 5.36], dtype=cp.float64)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
     c = gpuMemManagement.custom_cupy_increment_all_data_by_1(b)
 
     assert(c == True)
@@ -106,7 +106,7 @@ def test_create_real_cupy_from_c():
 def test_copy_custom_cupy_to_custom_cupy():
 
     a = cp.array([3.14, 4.25, 5.36], dtype=cp.float64)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
     c = gpuMemManagement.test_copy_custom_cupy_to_custom_cupy(b)
 
     assert(b.ptr == c.ptr and b.dtype == c.dtype)
@@ -128,21 +128,21 @@ def test_memory():
 def test_wrong_dtype_float():
     with pytest.raises(TypeError):
         a = cp.array([3.14, 4.25, 5.36], dtype=cp.float32) #this cupy is set to float32, but the c++ function is float64
-        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+        b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
         gpuMemManagement.test_wrong_dtype_float(b) #this should raise an exception
 
 #test 14 : send wrong integer types
 def test_wrong_dtype_int():
     with pytest.raises(TypeError):
         a = cp.array([3, 4, 5], dtype=cp.uint32) #this cupy is set to uint32, but the c++ function is uint16
-        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+        b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
         gpuMemManagement.test_wrong_dtype_int(b) #this should raise an exception
 
 #test 15 : send wrong complex types
 def test_wrong_dtype_complex():
     with pytest.raises(TypeError):
         a = cp.array([2.+3.j,  0.+0.j, 4.+1.j], dtype=cp.complex64) #this cupy is set to float32, but the c++ function is float64
-        b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
+        b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype))
         gpuMemManagement.test_wrong_dtype_complex(b) #this should raise an exception
 
 #test 16 : test template function with pybind 11
@@ -150,7 +150,7 @@ def test_wrong_dtype_complex():
 def test_custom_cupy_template_function():
     cp.cuda.Device(0).use()
     a = cp.array([3, 4, 5], dtype=cp.complex128)
-    b = cupy_ref.Custom_Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype)) # the type of a cupy type is a numpy type class, 
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = str(a.dtype)) # the type of a cupy type is a numpy type class, 
                                                                                         # so I need to convert the type to string first
     c = gpuMemManagement.test_custom_cupy_template_function(a.data.ptr, b)
 

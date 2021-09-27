@@ -1,4 +1,4 @@
-class Custom_Cupy_Ref:
+class Cupy_Ref:
     def __init__(self, ptr, dtype, shape):
         self.ptr = ptr
         self.dtype = dtype
