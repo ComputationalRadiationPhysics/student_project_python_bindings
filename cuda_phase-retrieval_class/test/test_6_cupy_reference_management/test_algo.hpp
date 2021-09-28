@@ -12,15 +12,11 @@
 #include <string>
 #include <random>
 
-#define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 using namespace std::literals::complex_literals;
 
-__global__ void get_complex_array(double *real_array, cufftDoubleComplex *complex_array, int dimension);
-__global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *real_array,  int dimension);
 __global__ void copy_value(double *ptrMag, double *ptrRes, int dimension);
 __global__ void copy_value_complex(cufftDoubleComplex *ptrMag, cufftDoubleComplex *ptrRes, int dimension);
 __global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *ptrRes, int dimension);
-void CUFFT_CHECK(cufftResult cufft_process);
 
 //Test whether array of double received by C++ code is the same as initial python value
 pybind11::array_t<double, pybind11::array::c_style> array_check(pybind11::array_t<double, pybind11::array::c_style> img)
@@ -247,31 +243,6 @@ pybind11::array_t<std::complex<double>, pybind11::array::c_style> abs_cufft_forw
     //send to python
     result.resize({X, Y});
     return result;
-}
-
-//Convert array of real number into array of complex number
-__global__ void get_complex_array(double *real_array, cufftDoubleComplex *complex_array, int dimension)
-{
-   for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
-    {
-        complex_array[idx].x = real_array[idx];
-        complex_array[idx].y = 0;
-    }
-}
-
-//Get absolute of complex number
-__global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *real_array , int dimension)
-{
-   for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
-    {
-        real_array[idx] = cuCabs(complex_array[idx]);
-    }
-}
-
-//CUFFT error checking
-void CUFFT_CHECK(cufftResult cufft_process)
-{
-    if(cufft_process != CUFFT_SUCCESS) std::cout<<cufft_process<<std::endl;
 }
 
 //Normalize array of complex number (results of CUFFT INVERSE)

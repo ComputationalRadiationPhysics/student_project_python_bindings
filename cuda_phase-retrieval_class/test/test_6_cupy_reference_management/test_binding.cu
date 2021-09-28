@@ -7,6 +7,7 @@
 
 #include "cupy_ref.hpp"
 #include "cupy_caster.hpp"
+#include "cuda_algo.hpp"
 #include "test_algo.hpp"
 #include "test_cupy.hpp"
 

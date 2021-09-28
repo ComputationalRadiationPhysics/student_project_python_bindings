@@ -11,18 +11,10 @@
 #include <complex>
 #include <string>
 
-#define PI 3.1415926535897932384626433
-#define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
-
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;
 
 enum Mode { Hybrid = 1, InputOutput = 2, OutputOutput = 3};
-
-template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
-template<> cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr);
-template<typename T> pybind11::object cupy_allocate(std::vector<int> size);
-
 
 //test 1. Generate 1D cupy of complex double from c++
 pybind11::object test_generating_cupy_of_complex_double_from_c()
@@ -212,22 +204,4 @@ pybind11::object test_custom_cupy_object_creator_3d()
 {
     pybind11::object cp = cupy_allocate<long long int>({3,4,5});
     return cp;
-}
-
-template<typename T> 
-pybind11::object cupy_allocate(std::vector<int> shape)
-{
-    int linear_size = 1;
-    for(int const &s : shape) linear_size *= s;
-    pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(linear_size, "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(shape);
-    return cp;
-}
-
-template<typename TInputData, typename TOutputData>
-TOutputData * convertToCUFFT(TInputData * ptr){}
-
-template<>
-cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr)
-{  
-    return reinterpret_cast<cufftDoubleComplex *>(ptr);
 }

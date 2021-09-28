@@ -3,7 +3,6 @@ import numpy as np
 import imageio
 import matplotlib.pyplot as plt
 import phase_retrieval_python
-import string
 from time import perf_counter
 import argparse
 
@@ -40,7 +39,15 @@ t1_start = perf_counter()
 if(type == "python"):
     result = phase_retrieval_python.fienup_phase_retrieval(image, mask, step, mode, beta, array_random)
 elif(type == "cuda"):
-    result =  cuPhaseRet.fienup_phase_retrieval(image, mask, step, mode, beta, array_random)
+    phase_mode = cuPhaseRet.Hybrid
+    if mode == "input-output":
+        phase_mode = cuPhaseRet.InputOutput
+    elif mode == "output-output":
+        phase_mode = cuPhaseRet.OutputOutput
+
+    result_cuda = cuPhaseRet.Phase_Algo(image, mask, phase_mode, 0.8, array_random)
+    result_cuda.iterate_random_phase(step)
+    result = result_cuda.get_result()
 
 t1_stop = perf_counter() 
 print("Elapsed time during the whole program in seconds:", t1_stop-t1_start)
