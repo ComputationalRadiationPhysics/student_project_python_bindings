@@ -1,22 +1,21 @@
 #include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <cufft.h>
 #include <cuComplex.h>
 #include <curand.h>
 #include <curand_kernel.h>
-#include <cmath>
 #include <cstdio>
-#include <time.h>
 #include <iostream>
 #include <complex>
-#include <string>
-#include <random>
+
+#include "cupy_ref.hpp"
+#include "cupy_caster.hpp"
+#include "cuda_algo.hpp"
 
 using namespace std::literals::complex_literals;
 
 __global__ void copy_value(double *ptrMag, double *ptrRes, int dimension);
 __global__ void copy_value_complex(cufftDoubleComplex *ptrMag, cufftDoubleComplex *ptrRes, int dimension);
-__global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *ptrRes, int dimension);
 
 //Test whether array of double received by C++ code is the same as initial python value
 pybind11::array_t<double, pybind11::array::c_style> array_check(pybind11::array_t<double, pybind11::array::c_style> img)
@@ -243,16 +242,6 @@ pybind11::array_t<std::complex<double>, pybind11::array::c_style> abs_cufft_forw
     //send to python
     result.resize({X, Y});
     return result;
-}
-
-//Normalize array of complex number (results of CUFFT INVERSE)
-__global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *ptrRes, int dimension)
-{
-    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
-    {
-        ptrRes[idx].x = ptrImg[idx].x / static_cast<double>(dimension);
-        ptrRes[idx].y = ptrImg[idx].y / static_cast<double>(dimension);
-    }
 }
 
 //Simple array of double copy in CUDA

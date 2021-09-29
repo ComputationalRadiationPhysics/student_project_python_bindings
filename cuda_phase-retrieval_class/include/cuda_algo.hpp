@@ -1,23 +1,17 @@
 #include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <cufft.h>
 #include <cuComplex.h>
-#include <curand.h>
-#include <curand_kernel.h>
-#include <cmath>
 #include <cstdio>
-#include <time.h>
 #include <iostream>
 #include <complex>
-#include <string>
-#include <random>
 
 #define PI 3.1415926535897932384626433
 #define CUDA_CHECK(call) {cudaError_t error = call; if(error!=cudaSuccess){printf("<%s>:%i ",__FILE__,__LINE__); printf("[CUDA] Error: %s\n", cudaGetErrorString(error));}}
 
 __global__ void get_complex_array(double *real_array, cufftDoubleComplex *complex_array, int dimension);
 __global__ void get_absolute_array(cufftDoubleComplex *complex_array, double *real_array , int dimension);
+__global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *ptrRes, int dimension);
 template<typename TInputData, typename TOutputData> TOutputData * convertToCUFFT(TInputData * ptr);
 template<> cufftDoubleComplex *convertToCUFFT(std::complex<double> * ptr);
 template<typename T> pybind11::object cupy_allocate(std::vector<int> shape);
@@ -89,4 +83,14 @@ pybind11::object cupy_allocate(std::vector<int> shape)
     for(int const &s : shape) linear_size *= s;
     pybind11::object cp = pybind11::module::import("cupy").attr("zeros")(linear_size, "dtype"_a=cupy_ref_get_dtype<T>()).attr("reshape")(shape);
     return cp;
+}
+
+//Normalize array of complex number (results of CUFFT INVERSE)
+__global__ void normalize_array(cufftDoubleComplex *ptrImg, cufftDoubleComplex *ptrRes, int dimension)
+{
+    for (int idx = blockIdx.x * blockDim.x + threadIdx.x; idx < dimension; idx += blockDim.x * gridDim.x)
+    {
+        ptrRes[idx].x = ptrImg[idx].x / static_cast<double>(dimension);
+        ptrRes[idx].y = ptrImg[idx].y / static_cast<double>(dimension);
+    }
 }

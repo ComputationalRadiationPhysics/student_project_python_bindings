@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(_targetName Test_Custom_Cupy)
-add_library(${_targetName} SHARED test_custom_cupy.cu)
+set(_targetName Test_Algorithm)
+add_library(${_targetName} SHARED test_algo.cu)
 
 target_link_libraries(${_targetName}
   PUBLIC
@@ -17,7 +17,7 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_custom_cupy.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_algo.py
   )
 
 copy_python_files(${_targetName} "${python_files}")

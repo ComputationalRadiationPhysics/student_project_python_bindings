@@ -1,11 +1,9 @@
 #include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/cast.h>
 #include <cstdio>
 #include <iostream>
 #include <complex>
-#include <string>
+#include "cupy_ref.hpp"
 
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;

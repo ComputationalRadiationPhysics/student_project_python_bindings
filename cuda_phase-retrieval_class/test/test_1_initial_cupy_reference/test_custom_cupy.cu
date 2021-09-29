@@ -1,18 +1,10 @@
-#include <stdio.h>
-#include <string>
-#include <cufft.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 
-
 //store C++ and CUDA version of phase retrieval
-#include "cupy_ref.hpp"
-#include "cupy_caster.hpp"
-#include "cuda_algo.hpp"
 #include "test_custom_cupy.hpp"
 
-PYBIND11_MODULE(gpuMemManagement, m) 
+PYBIND11_MODULE(Test_Custom_Cupy, m) 
 {
   m.def("test_if_reinterpret_ptr_is_the_same", &test_if_reinterpret_ptr_is_the_same);
   m.def("test_if_real_cupy_reinterpret_ptr_is_a_gpu_array", &test_if_real_cupy_reinterpret_ptr_is_a_gpu_array);

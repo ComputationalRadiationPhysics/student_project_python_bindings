@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(_targetName cuPhaseRet_Test)
-add_library(${_targetName} SHARED test_binding.cu)
+set(_targetName Test_Cupy)
+add_library(${_targetName} SHARED test_cupy.cu)
 
 target_link_libraries(${_targetName}
   PUBLIC
@@ -17,7 +17,6 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/test_algo.py
   ${CMAKE_CURRENT_SOURCE_DIR}/test_cupy.py
   )
 

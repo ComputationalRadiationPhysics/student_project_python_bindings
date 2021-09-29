@@ -1,4 +1,4 @@
-import cuPhaseRet_Test
+import Test_Cupy
 import cupy as cp
 import cupy_ref
 import pytest
@@ -6,21 +6,21 @@ import pytest
 #test 1. Generate 1D cupy of complex double from c++
 def test_generating_cupy_of_complex_double_from_c():
     a = cp.array([3.14, 4.25, 5.36], dtype=cp.complex128)
-    b = cuPhaseRet_Test.test_generating_cupy_of_complex_double_from_c()
+    b = Test_Cupy.test_generating_cupy_of_complex_double_from_c()
 
     assert(cp.array_equal(a, b))
 
 #test 2. Generate 2D cupy of complex double from python, send it to c++, and get it back
 def test_send_cupy_complex_to_c_and_send_it_back():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
-    b = cuPhaseRet_Test.test_send_cupy_complex_to_c_and_send_it_back(a.data.ptr, a.size, a.shape[0], a.shape[1]) #is there any way to receive shape a single variable?
+    b = Test_Cupy.test_send_cupy_complex_to_c_and_send_it_back(a.data.ptr, a.size, a.shape[0], a.shape[1]) #is there any way to receive shape a single variable?
 
     assert(cp.array_equal(a, b))
 
 #test 3. Use CUFFT inverse + forward into 2D cupy of complex double, copy the result to a new cupy from c++, then send the result back
 def test_cupy_cufft_inverse_forward():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
-    b = cuPhaseRet_Test.test_cupy_cufft_inverse_forward(a.data.ptr, a.size, a.shape[0], a.shape[1])
+    b = Test_Cupy.test_cupy_cufft_inverse_forward(a.data.ptr, a.size, a.shape[0], a.shape[1])
 
     print()
     print("Test 3")
@@ -32,7 +32,7 @@ def test_cupy_cufft_inverse_forward():
 #test 4. Test create a custom cupy from a non cupy object in C++
 def test_create_a_custom_cupy_from_a_non_cupy_object_in_c():
     with pytest.raises(Exception) as excinfo:
-        cuPhaseRet_Test.test_create_a_custom_cupy_from_a_non_cupy_object_in_c()
+        Test_Cupy.test_create_a_custom_cupy_from_a_non_cupy_object_in_c()
     
     print()
     print("Test 4")
@@ -43,13 +43,13 @@ def test_create_a_custom_cupy_from_a_non_cupy_object_in_c():
 def test_create_a_custom_cupy_with_flexible_dimension():
     a = cp.ones((2,2,2), dtype=cp.complex128)
     b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
-    c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
+    c= Test_Cupy.test_create_a_custom_cupy_with_flexible_dimension(b)
 
     assert(c == 3)
 
     a = cp.ones((3,3,3,3), dtype=cp.complex128)
     b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
-    c= cuPhaseRet_Test.test_create_a_custom_cupy_with_flexible_dimension(b)
+    c= Test_Cupy.test_create_a_custom_cupy_with_flexible_dimension(b)
 
     assert(c == 4)
 
@@ -57,7 +57,7 @@ def test_create_a_custom_cupy_with_flexible_dimension():
 def test_create_a_custom_cupy_with_fixed_dimension_success():
     a = cp.ones((2,2,2), dtype=cp.complex128)
     b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
-    c= cuPhaseRet_Test.test_create_a_custom_cupy_with_fixed_dimension_success(b)
+    c= Test_Cupy.test_create_a_custom_cupy_with_fixed_dimension_success(b)
 
     assert(c == 3)
 
@@ -66,7 +66,7 @@ def test_create_a_custom_cupy_with_fixed_dimension_fail():
     with pytest.raises(Exception):
         a = cp.ones((2,2,2), dtype=cp.complex128)
         b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
-        c = cuPhaseRet_Test.test_create_a_custom_cupy_with_fixed_dimension_fail(b)
+        c = Test_Cupy.test_create_a_custom_cupy_with_fixed_dimension_fail(b)
 
         assert(c == 3)
 
@@ -75,7 +75,7 @@ def test_create_a_custom_cupy_with_fixed_dimension_fail():
 def test_cupy_cufft_inverse_forward_with_caster():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
     b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
-    c = cuPhaseRet_Test.test_cupy_cufft_inverse_forward_with_caster(b)
+    c = Test_Cupy.test_cupy_cufft_inverse_forward_with_caster(b)
 
     print()
     print("Test 6")
@@ -89,7 +89,7 @@ def test_cupy_cufft_inverse_forward_with_caster():
 def test_send_cupy_caster_to_c_and_get_it_back():
     a = cp.array([[3.14, 4.25, 5.36], [4, 5, 6], [1.23, 4.56, 7.89]], dtype=cp.complex128)
     b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, dtype = str(a.dtype), shape = a.shape)
-    c = cuPhaseRet_Test.test_send_cupy_caster_to_c_and_get_it_back(b)
+    c = Test_Cupy.test_send_cupy_caster_to_c_and_get_it_back(b)
 
     assert(a.data.ptr == c.ptr and a.dtype == c.dtype and a.shape == c.shape)
 
@@ -97,19 +97,19 @@ def test_send_cupy_caster_to_c_and_get_it_back():
 def test_cupy_from_c_memory():
     assert(cp.get_default_memory_pool().used_bytes() == 0)
     
-    cuPhaseRet_Test.test_cupy_from_c_memory()
+    Test_Cupy.test_cupy_from_c_memory()
     
     assert(cp.get_default_memory_pool().used_bytes() == 0)
 
 #test 11. Test Enum with pybind 
 def test_enum():
-    assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.Hybrid) == 1)
-    assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.InputOutput) == 2)
-    assert(cuPhaseRet_Test.test_enum(cuPhaseRet_Test.OutputOutput) == 3)
+    assert(Test_Cupy.test_enum(Test_Cupy.Hybrid) == 1)
+    assert(Test_Cupy.test_enum(Test_Cupy.InputOutput) == 2)
+    assert(Test_Cupy.test_enum(Test_Cupy.OutputOutput) == 3)
 
 #test 12. Test create a 1D cupy object with a custom allocate function
 def test_custom_cupy_object_creator_1d():
-   b = cuPhaseRet_Test.test_custom_cupy_object_creator_1d()
+   b = Test_Cupy.test_custom_cupy_object_creator_1d()
    print()
    print("Test 12, 1D")
    assert(b.size == 42)
@@ -123,7 +123,7 @@ def test_custom_cupy_object_creator_1d():
 
 #test 13. Test create a 2D cupy object with a custom allocate function
 def test_custom_cupy_object_creator_2d():
-   b = cuPhaseRet_Test.test_custom_cupy_object_creator_2d()
+   b = Test_Cupy.test_custom_cupy_object_creator_2d()
    print()
    print("Test 13, 2D")
    assert(b.size == 16)
@@ -137,7 +137,7 @@ def test_custom_cupy_object_creator_2d():
 
 #test 14. Test create a 3D cupy object with a custom allocate function
 def test_custom_cupy_object_creator_3d():
-   b = cuPhaseRet_Test.test_custom_cupy_object_creator_3d()
+   b = Test_Cupy.test_custom_cupy_object_creator_3d()
    print()
    print("Test 14, 3D")
    assert(b.size == 60)
@@ -151,7 +151,7 @@ def test_custom_cupy_object_creator_3d():
 
 #test 15. Test modify generated cupy
 def test_modify_generated_cupy():
-   b = cuPhaseRet_Test.test_custom_cupy_object_creator_1d()
+   b = Test_Cupy.test_custom_cupy_object_creator_1d()
    print()
    print("Test 15, 1D")
    print(b)

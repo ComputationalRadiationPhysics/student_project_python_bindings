@@ -1,26 +1,9 @@
-#include <cstdio>
-#include <string>
-#include <cufft.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
 #include <pybind11/stl.h>
-
-#include "cupy_ref.hpp"
-#include "cupy_caster.hpp"
-#include "cuda_algo.hpp"
-#include "test_algo.hpp"
 #include "test_cupy.hpp"
 
-PYBIND11_MODULE(cuPhaseRet_Test, m) 
+PYBIND11_MODULE(Test_Cupy, m) 
 {
-  //---test_algo----------
-  m.def("array_check", &array_check);
-  m.def("array_check_cuda", &array_check_cuda);
-  m.def("array_check_complex", &array_check_complex);
-  m.def("array_check_complex_cuda", &array_check_complex_cuda);
-  m.def("cufft_inverse_forward", &cufft_inverse_forward);
-  m.def("abs_cufft_forward", &abs_cufft_forward);
-
   //---test_cupy----------
   pybind11::enum_<Mode>(m, "Mode")
         .value("Hybrid", Hybrid)

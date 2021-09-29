@@ -1,10 +1,4 @@
 #include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
-#include "cupy_ref.hpp"
-#include "cupy_caster.hpp"
-#include "cuda_algo.hpp"
 #include "phase_algo.hpp"
 
 PYBIND11_MODULE(cuPhaseRet, m) 
