@@ -12,7 +12,7 @@ mask = np.ones(image.shape) #default mask, must have the same size as input imag
 iteration = 100
 test_run = 10
 
-#-----------------------Original Phase Retrievel----------------------------
+#-----------------------Original Phase Retrieval----------------------------
 
 print("Running phase retrieval with " + str(iteration) + " iterations")
 
@@ -24,7 +24,7 @@ phase_retrieval_pybind = cuPhaseRet.Phase_Algo(image, mask, cuPhaseRet.Hybrid, 0
 phase_retrieval_pybind.iterate_random_phase(1) #run phase retrieval once first
 phase_retrieval_pybind.reset_random_phase() #reset random phase to its initial values
 
-#-----------------------CUDA Phase Retrievel-----------------------------
+#-----------------------CUDA Phase Retrieval-----------------------------
 algo_objects = []
 
 for i in range(test_run):

@@ -11,6 +11,7 @@
 #include "cupy_ref.hpp"
 #include "cupy_caster.hpp"
 #include "cuda_algo.hpp"
+#include "cupy_allocate.hpp"
 
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;
@@ -49,11 +50,11 @@ class Phase_Algo
 
         //Custom GPU class variables
         Cupy_Ref<T> magnitude_gpu_cp,     //Magnitudes in GPU
-                           mask_gpu_cp,          //Mask in GPU
-                           image_output_gpu_cp;  //Image output in GPU
+                    mask_gpu_cp,          //Mask in GPU
+                    image_output_gpu_cp;  //Image output in GPU
 
         Cupy_Ref<std::complex<T>> random_phase_cp,       //Sample random phase in GPU
-                                         random_phase_init_cp;  //Store initial GPU random phase before iterations 
+                                  random_phase_init_cp;  //Store initial GPU random phase before iterations 
 
         cufftHandle plan; //handling FFT on gpu with CUFFT
 
@@ -324,6 +325,11 @@ class Phase_Algo
             */
             result.resize({X, Y});
             return result;
+        }
+
+        Cupy_Ref<T> get_custom_cupy_result()
+        {
+            return image_output_gpu_cp;
         }
 
 

@@ -1,4 +1,5 @@
 import cuPhaseRet #c++ pybind phase retrieval
+# import cupy_ref
 import numpy as np
 import imageio
 import matplotlib.pyplot as plt
@@ -49,23 +50,29 @@ for i in range(test_run):
 t0_stop = perf_counter()
 t0_elapsed = (t0_stop-t0_start)/test_run
 
-result_cuda_v2 = algo_objects[0].get_result()
+result_custom_cupy = algo_objects[0].get_custom_cupy_result()
 
-plt.show()
-plt.subplot(221)
-plt.imshow(image, cmap='gray')
-plt.title('Image')
-plt.subplot(222)
-plt.imshow(result_original, cmap='gray')
-plt.title('Original Phase Retrieval')
-plt.subplot(223)
-plt.imshow(result_cuda_v2, cmap='gray')
-plt.title('CUDA Phase Retrieval V2, runtime (s) : ' + str(t0_elapsed))
-# on headless systems, maximizing the window could be a problem
-try:
-    figManager = plt.get_current_fig_manager()
-    figManager.window.showMaximized()
-except:
-    # simply ignore it, if maximizing is not possible
-    pass
-plt.show()
+#successfully get the cupy reference of the result, 
+# but this cannot be used to get the content (image) of the result
+print(result_custom_cupy.shape)
+print(result_custom_cupy.ptr)
+print(result_custom_cupy.dtype)
+
+# plt.show()
+# plt.subplot(221)
+# plt.imshow(image, cmap='gray')
+# plt.title('Image')
+# plt.subplot(222)
+# plt.imshow(result_original, cmap='gray')
+# plt.title('Original Phase Retrieval')
+# plt.subplot(223)
+# plt.imshow(result_cuda_v2, cmap='gray')
+# plt.title('CUDA Phase Retrieval V2, runtime (s) : ' + str(t0_elapsed))
+# # on headless systems, maximizing the window could be a problem
+# try:
+#     figManager = plt.get_current_fig_manager()
+#     figManager.window.showMaximized()
+# except:
+#     # simply ignore it, if maximizing is not possible
+#     pass
+# plt.show()

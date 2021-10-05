@@ -1,0 +1,9 @@
+name: cuda_phase_retrieval
+dependencies:
+  - pybind11=2.7.1
+  - cupy=9.4.0
+  - matplotlib
+  - pip
+  - pip:
+    - pytest
+    - imageio

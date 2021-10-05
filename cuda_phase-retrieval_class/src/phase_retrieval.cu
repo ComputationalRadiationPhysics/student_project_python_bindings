@@ -19,5 +19,6 @@ PYBIND11_MODULE(cuPhaseRet, m)
       .def("do_cufft_forward", &Phase_Algo<double>::do_cufft_forward)
       .def("do_satisfy_fourier", &Phase_Algo<double>::do_satisfy_fourier)
       .def("get_random_phase_custom_cupy", &Phase_Algo<double>::get_random_phase_custom_cupy)
-      .def("get_result", &Phase_Algo<double>::get_result);
+      .def("get_result", &Phase_Algo<double>::get_result)
+      .def("get_custom_cupy_result", &Phase_Algo<double>::get_custom_cupy_result);
 }

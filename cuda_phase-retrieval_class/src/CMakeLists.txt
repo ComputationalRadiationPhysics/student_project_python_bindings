@@ -21,6 +21,7 @@ set(python_files
   ${CMAKE_CURRENT_SOURCE_DIR}/example_cuda.py
   ${CMAKE_CURRENT_SOURCE_DIR}/example_cuda_v2.py
   ${CMAKE_CURRENT_SOURCE_DIR}/example_cuda_no_random.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/example_cuda_custom_cupy_result.py
   ${CMAKE_CURRENT_SOURCE_DIR}/phase_retrieval_python.py
   ${CMAKE_CURRENT_SOURCE_DIR}/run.py
   )
