@@ -6,28 +6,30 @@ The student project investigates the performance and memory handling of Python b
 ## Linux
 
 ```bash
-  mkdir build && cd build
+  mkdir build
+  cd build
   # Maybe you need to set: -DPYTHON_EXECUTABLE:FILEPATH=
   cmake ..
-  cd src
-  cmake --build ..
+  cmake --build .
 ```
 
 ## Windows
 
 ```bash
-  mkdir build; cd build
+  mkdir build
+  cd build
   cmake -G "Visual Studio 16 2019" -A x64 ..
-  cd src
-  cmake --build ..
+  cmake --build .
 ```
 
 # Usage
 
 ## Main Phase Retrieval Program 
 
+The main program location is in **build/src**
+
 ```bash
-  #See argument details
+  #List of supported arguments
   python run.py -h
 
   #Use CUDA version
@@ -38,6 +40,8 @@ The student project investigates the performance and memory handling of Python b
 ```
 
 ## Other Examples
+
+The location of the examples is in **build/src**
 
 ```bash
   #Running original phase retrieval algorithm
@@ -58,10 +62,9 @@ The student project investigates the performance and memory handling of Python b
 
 ## Tests
 
-After running the main program or/and examples above, run these commands
+To run the test, go to **build** folder. then run
+
 ```bash
-  cd ..
-  cd test
-  pytest
+  ctest -C Debug
 ```
 
