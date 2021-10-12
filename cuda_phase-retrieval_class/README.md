@@ -3,9 +3,19 @@ The student project investigates the performance and memory handling of Python b
 
 # Install
 
+## Prerequisites
+
+1. Please install[Anaconda 3](https://www.anaconda.com/). It is recommended to follow the recommended installation process according to the setup.
+2. You need to install [CUDA](https://developer.nvidia.com/cuda-toolkit) on your system. 
+3. For Windows, [Microsoft Visual Studio](https://visualstudio.microsoft.com/vs/community/) is needed.
+4. Open the environment.yml file, and change the version of CUDA to the same version of the CUDA version your system is using (more details in the file). 
+5. If you are using Windows, you may need to use Anaconda Prompt before running commands below
+
 ## Linux
 
 ```bash
+  conda env create -f environment.yml
+  conda activate cuda_phase_retrieval
   mkdir build
   cd build
   # Maybe you need to set: -DPYTHON_EXECUTABLE:FILEPATH=
@@ -16,6 +26,8 @@ The student project investigates the performance and memory handling of Python b
 ## Windows
 
 ```bash
+  conda env create -f environment.yml
+  conda activate cuda_phase_retrieval
   mkdir build
   cd build
   cmake -G "Visual Studio 16 2019" -A x64 ..
@@ -63,6 +75,12 @@ The location of the examples is in **build/src**
 ## Tests
 
 To run the test, go to **build** folder. then run
+
+```bash
+  ctest
+```
+
+If you are using Windows, you need some extra arguments
 
 ```bash
   ctest -C Debug
