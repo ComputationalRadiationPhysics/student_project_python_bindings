@@ -4,8 +4,8 @@ project(cuPhaseRet LANGUAGES CXX CUDA)
 include("cmake/add_msvc_poperties.cmake")
 include("cmake/copy_python_files.cmake")
 
-find_package(PythonInterp 3.6 REQUIRED)
-find_package(PythonLibs 3.6 REQUIRED)
+find_package(PythonInterp 3.8 REQUIRED)
+find_package(PythonLibs 3.8 REQUIRED)
 find_package(pybind11 REQUIRED)
 
 set(CMAKE_CUDA_ARCHITECTURES 60 CACHE STRING "CUDA architectures")

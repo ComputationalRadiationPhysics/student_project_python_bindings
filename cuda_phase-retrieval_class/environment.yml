@@ -2,7 +2,7 @@ name: cuda_phase_retrieval
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
+  - python>=3.8,<3.9
   - pybind11=2.7.1
   - matplotlib
   - pip

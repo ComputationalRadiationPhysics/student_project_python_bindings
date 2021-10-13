@@ -5,7 +5,7 @@ The student project investigates the performance and memory handling of Python b
 
 ## Prerequisites
 
-1. Please install[Anaconda 3](https://www.anaconda.com/). It is recommended to follow the recommended installation process according to the setup.
+1. Please install [Miniconda3](https://docs.conda.io/en/latest/miniconda.html). Version 3.8 is recommended. It is recommended to follow the recommended options during the installation process.
 2. You need to install [CUDA](https://developer.nvidia.com/cuda-toolkit) on your system. 
 3. For Windows, [Microsoft Visual Studio](https://visualstudio.microsoft.com/vs/community/) is needed.
 4. Open the environment.yml file, and change the version of CUDA to the same version of the CUDA version your system is using (more details in the file). 
