@@ -4,7 +4,5 @@
 
 PYBIND11_MODULE(Test_Interface, m) 
 {
-  m.def("get", &get);
+  
 }
-
-

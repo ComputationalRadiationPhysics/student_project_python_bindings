@@ -17,7 +17,6 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py 
-  # ${CMAKE_CURRENT_SOURCE_DIR}/cupy_ref.py
   ${CMAKE_CURRENT_SOURCE_DIR}/test_interface.py
   )
 
