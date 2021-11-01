@@ -44,8 +44,26 @@ def test_add_cupy_and_numpy():
     for i in range(3):
         c[i] = data[i]
 
-    assert(cp.array_equal(c, c_inc))
+    assert cp.array_equal(c, c_inc)
 
 
+def test_memory_sychronization():
+    """
+    Check if automatic copy to host and copy to device are correct done,
+    if c++ cuda kernel is called via python binding
+    """
+    size = 30
 
+    mem_holder = Test_Interface.GPU_memory_holder([size])
+    mem_holder_ref = mem_holder.get_memory_reference()
+    mem_holder_array = cp.array(mem_holder_ref, dtype=mem_holder_ref.dtype, copy=False)
 
+    data = np.arange(1, size + 1, 1, np.float64)
+    expected_result = cp.array(data + 1)
+
+    for i in range(size):
+        mem_holder_array[i] = data[i]
+
+    Test_Interface.incOne(mem_holder_ref, size)
+
+    assert cp.array_equal(expected_result, mem_holder_array)
