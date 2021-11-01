@@ -1,29 +1,11 @@
-set(OpenCV_STATIC ON)
-find_package( OpenCV 4.5.1 REQUIRED )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+cmake_minimum_required(VERSION 3.13)
 
-add_library(cuPhaseRet_Test SHARED test_binding.cu)
+add_subdirectory("test_1_initial_cupy_reference/")
+add_subdirectory("test_2_simple_python_to_c_caster/")
+add_subdirectory("test_3_simple_c_to_python_caster/")
+add_subdirectory("test_4_simple_bidirect_caster/")
+add_subdirectory("test_5_simple_pointer_caster/")
+add_subdirectory("test_6_cuda_fft_algorithm/")
+add_subdirectory("test_7_cupy_reference_management/")
+add_subdirectory("test_8_cupy_reference_cuda_interface/")
 
-target_include_directories(cuPhaseRet_Test
-  PUBLIC
-  ${PYTHON_INCLUDE_DIRS}
-  ${pybind11_INCLUDE_DIR})
-
-target_link_libraries(cuPhaseRet_Test
-  ${PYTHON_LIBRARIES}
-  ${OpenCV_LIBS}
-  cudart
-  cufft
-  curand)
-
-add_msvc_poperties(cuPhaseRet_Test)
-
-set_target_properties(cuPhaseRet_Test PROPERTIES PREFIX "")
-
-# add a custom target for the test.py script, which will copy test.py
-# to the installation folder and update every time there is a change
-add_custom_target(pyTestScript ALL)
-add_custom_command(TARGET pyTestScript PRE_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/test.py $<TARGET_FILE_DIR:cuPhaseRet_Test>
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test.py)
