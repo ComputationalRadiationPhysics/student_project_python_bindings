@@ -6,7 +6,7 @@ import Test_Interface
 
 def test_return_as_cupy_copy():
     a = cp.array([1.1, 3.14, 42.69])
-    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = a.dtype)
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = a.dtype, typestr = a.dtype.str)
 
     c = cp.array(b, dtype=b.dtype, copy=True) # we use copy to create a new cupy object with the same value of "a"
     
@@ -15,7 +15,7 @@ def test_return_as_cupy_copy():
 
 def test_return_as_cupy_not_copy():
     a = cp.array([1.1, 3.14, 42.69])
-    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = a.dtype)
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = a.dtype, typestr = a.dtype.str)
 
     c = cp.array(b, dtype=b.dtype, copy=False) # we dont use copy to get the original "a"
      
@@ -67,3 +67,13 @@ def test_memory_sychronization():
     Test_Interface.incOne(mem_holder_ref, size)
 
     assert cp.array_equal(expected_result, mem_holder_array)
+
+
+def test_return_as_cupy_using_cupy_ref_class():
+    a = cp.array([1.1, 3.14, 42.69])
+    b = cupy_ref.Cupy_Ref(ptr = a.data.ptr, shape = a.shape, dtype = a.dtype, typestr = a.dtype.str)
+
+    c = b.get_cupy_array()
+     
+    assert(cp.array_equal(a,c))
+    assert(a.data.ptr == c.data.ptr) # make sure it is not copied
