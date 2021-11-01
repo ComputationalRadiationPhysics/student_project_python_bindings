@@ -4,7 +4,7 @@ template<typename TData, int TDim = 0>
 class Cupy_Ref {
   public :
     TData * ptr;
-    std::string dtype;
+    std::string dtype, typestr;
     std::vector<unsigned int> shape;
 
     Cupy_Ref(){}
@@ -26,5 +26,8 @@ class Cupy_Ref {
       ptr = reinterpret_cast<TData *>(obj.attr("data").attr("ptr").cast<std::size_t>());
       dtype = pybind11::module::import("builtins").attr("str")(obj.attr("dtype")).cast<std::string>();
       shape = obj.attr("shape").cast<std::vector<unsigned int>>();
+      typestr = pybind11::module::import("builtins").attr("str")(obj.attr("dtype").attr("str")).cast<std::string>();
     }
+
+    
 };
