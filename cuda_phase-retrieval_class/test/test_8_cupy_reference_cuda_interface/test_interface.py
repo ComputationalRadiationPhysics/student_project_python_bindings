@@ -56,7 +56,7 @@ def test_memory_sychronization():
 
     mem_holder = Test_Interface.GPU_memory_holder([size])
     mem_holder_ref = mem_holder.get_memory_reference()
-    mem_holder_array = cp.array(mem_holder_ref, dtype=mem_holder_ref.dtype, copy=False)
+    mem_holder_array = mem_holder_ref.get_cupy_array()
 
     data = np.arange(1, size + 1, 1, np.float64)
     expected_result = cp.array(data + 1)
