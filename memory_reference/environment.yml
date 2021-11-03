@@ -1,0 +1,15 @@
+name: cuda_phase_retrieval
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.8,<3.9
+  - pybind11=2.7.1
+  - matplotlib
+  - pip
+  - pip:
+    - pytest
+    - imageio
+    #Please change the cuda version based on the CUDA version you are using in your system
+    #For example, if you use cuda 11.3, the change cupy-cuda112 to cupy-cuda113
+    #Changing the cupy version itself is not needed.
+    - cupy-cuda112==9.4.0

@@ -1,0 +1,2 @@
+struct CPU;
+struct CUDAGPU;
