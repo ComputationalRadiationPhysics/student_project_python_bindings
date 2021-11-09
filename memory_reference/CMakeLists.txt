@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(cuPhaseRet LANGUAGES CXX CUDA)
+project(binding LANGUAGES CXX CUDA)
 
 include("cmake/add_msvc_poperties.cmake")
 include("cmake/copy_python_files.cmake")

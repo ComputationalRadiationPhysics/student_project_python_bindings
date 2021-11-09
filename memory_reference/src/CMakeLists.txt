@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(_targetName MemRef)
+set(_targetName binding)
 add_library(${_targetName} SHARED binding.cu)
 
 target_link_libraries(${_targetName}
@@ -18,8 +18,6 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
   ${CMAKE_CURRENT_SOURCE_DIR}/main.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/mem_ref.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/algo.py
   )
 
 copy_python_files(${_targetName} "${python_files}")

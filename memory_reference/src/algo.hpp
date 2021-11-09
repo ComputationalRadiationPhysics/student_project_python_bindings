@@ -1,8 +1,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include "tags.hpp"
-#include "mem_ref.hpp"
-#include "mem_ref_caster.hpp"
+#include "mem_ref_detail.hpp"
 
 template<typename TDevice>
 class Algo {
@@ -19,43 +18,45 @@ class Algo {
 template<>
 class Algo<CPU> {
 public:
-    using TAcc = CPU;
+    Mem_Ref<CPU> input;
+    Mem_Ref<CPU> output;
 
-    // float * input;
-    // float * output;
-
-    Mem_Ref<TAcc> input;
-    Mem_Ref<TAcc> output;
     int size;
 
-    void whoami(){
-    std::cout << "I'm the CPU version\n";
+    void whoami()
+    {
+        std::cout << "I'm the CPU version\n";
     }
-
-    Algo(){}
 
     void initialize_array(int size)
     {
-        input =  Mem_Ref<TAcc>(size, 0.0);
-        output = Mem_Ref<TAcc>(size, 0.0);
+        this->size = size;
+        input = Mem_Ref<CPU>(size);
+        output = Mem_Ref<CPU>(size);
     }
 
-    Mem_Ref<TAcc> get_input_memory()
+    Mem_Ref<CPU> get_input_memory()
     {
-        // input as numpy_array or similar
         return input;
+        
     }
 
-    Mem_Ref<TAcc> get_output_memory(int size)
+    Mem_Ref<CPU> get_output_memory()
     {
-        // output as numpy_array or similar
         return output;
+        
     }
-    void compute(Mem_Ref<TAcc> input, Mem_Ref<TAcc> output)
+    void compute(Mem_Ref<CPU> input, Mem_Ref<CPU> output)
     {
-        for(int i = 0; i < size; ++i)
+        pybind11::buffer_info bufInput = input.request();
+        double *ptrInput = static_cast<double*>(bufInput.ptr);
+
+        pybind11::buffer_info bufOutput = output.request();
+        double *ptrOutput = static_cast<double*>(bufOutput.ptr);
+
+        for(int i = 0; i < size; i++)
         {
-            output.get_c_data()[i] = 2 * input.get_c_data()[i];
+            ptrOutput[i] =  ptrInput[i];
         }
     }
 };
