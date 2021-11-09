@@ -4,8 +4,8 @@ import numpy as np
 
 
 # algo can be easily replace by 
-algo = binding.AlgoCPU()
-# algo = binding.AlgoCUDA
+# algo = binding.AlgoCPU()
+algo = binding.AlgoCUDA()
 
 algo.whoami()
 algo.initialize_array(10)
@@ -13,13 +13,16 @@ algo.initialize_array(10)
 input = algo.get_input_memory()
 output = algo.get_output_memory()
 
-print(input)
-print(type(input))
+cupy_input = cp.array(input, copy = False)
+cupy_output = cp.array(output, copy = False)
+
+print(cupy_input)
+print(type(cupy_input))
 
 for i in range(10):
-    input[i] = 2.0
+    cupy_input[i] = 2.0
 
 algo.compute(input, output)
 
-print(output)
-print(type(output))
+print(cupy_output)
+print(type(cupy_output))

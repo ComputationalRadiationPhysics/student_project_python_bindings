@@ -2,6 +2,9 @@
 #include <pybind11/stl.h>
 #include "tags.hpp"
 #include "mem_ref_detail.hpp"
+#include "cupy_ref.hpp"
+#include "cupy_caster.hpp"
+#include "cupy_allocate.hpp"
 
 template<typename TDevice>
 class Algo {
@@ -31,8 +34,20 @@ public:
     void initialize_array(int size)
     {
         this->size = size;
+
         input = Mem_Ref<CPU>(size);
+        pybind11::buffer_info bufInput = input.request();
+        double *ptrInput = static_cast<double*>(bufInput.ptr);
+        
         output = Mem_Ref<CPU>(size);
+        pybind11::buffer_info bufOutput = output.request();
+        double *ptrOutput = static_cast<double*>(bufOutput.ptr);
+
+        for(int i = 0; i < size; i++)
+        {
+            ptrOutput[i] =  0.0;
+            ptrInput[i] = 0.0;
+        }
     }
 
     Mem_Ref<CPU> get_input_memory()
@@ -61,23 +76,43 @@ public:
     }
 };
 
-// template<>
-// class Algo<CUDAGPU> {
-// using TAcc = CUDAGPU;
-// public:
-//   void whoami(){
-//     std::cout << "I'm the CUDA GPU version\n";
-//   }
+template<>
+class Algo<CUDAGPU> {
+public:
+    Mem_Ref<CUDAGPU> input;
+    Mem_Ref<CUDAGPU> output;
 
-//   Mem_Ref<TAcc> get_input_memory(){
-//     return ; // input as cupy_ref
-//   }
+    int size;
 
-//   void compute(Ref<TAcc> input, Ref<TAcc> output, int size){
-//     // execute cuda kernel
-//   }
+    void whoami()
+    {
+        std::cout << "I'm the GPU version\n";
+    }
 
-//   Mem_Ref<TAcc> get_output_memory(){
-//     return; // output as cupy_ref
-//   }
-// };
+    void initialize_array(int size)
+    {
+        this->size = size;
+
+        pybind11::object input_allocate = cupy_allocate<double>({size});
+        input = Mem_Ref<CUDAGPU>::getCupyRef(input_allocate);
+
+        pybind11::object output_allocate = cupy_allocate<double>({size});
+        output = Mem_Ref<CUDAGPU>::getCupyRef(output_allocate);
+    }
+
+    Mem_Ref<CUDAGPU> get_input_memory() 
+    {
+        return input;
+        
+    }
+
+    Mem_Ref<CUDAGPU> get_output_memory()
+    {
+        return output;
+        
+    }
+    void compute(Mem_Ref<CUDAGPU> input, Mem_Ref<CUDAGPU> output)
+    {
+        cudaMemcpy(output.ptr, input.ptr, size * sizeof(double), cudaMemcpyDeviceToDevice);
+    }
+};
