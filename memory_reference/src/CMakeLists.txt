@@ -18,6 +18,7 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
   ${CMAKE_CURRENT_SOURCE_DIR}/main.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/algogpu.py
   )
 
 copy_python_files(${_targetName} "${python_files}")
