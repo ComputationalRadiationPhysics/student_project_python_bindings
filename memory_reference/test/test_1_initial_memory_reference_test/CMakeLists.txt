@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(_targetName binding)
-add_library(${_targetName} SHARED binding.cu)
+set(_targetName Test_Mem_Ref)
+add_library(${_targetName} SHARED test_mem_ref.cu)
 
 target_link_libraries(${_targetName}
   PUBLIC
@@ -17,8 +17,9 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
-  ${PROJECT_SOURCE_DIR}/include/algogpu.py
-  ${CMAKE_CURRENT_SOURCE_DIR}/main.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/algogpu.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_mem_ref.py
   )
 
 copy_python_files(${_targetName} "${python_files}")
+add_test(NAME ${_targetName} COMMAND pytest)

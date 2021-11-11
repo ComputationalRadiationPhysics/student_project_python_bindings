@@ -9,7 +9,7 @@ find_package(PythonLibs 3.8 REQUIRED)
 find_package(pybind11 REQUIRED)
 
 set(CMAKE_CUDA_ARCHITECTURES 60 CACHE STRING "CUDA architectures")
-# set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
+set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
 
 set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
@@ -18,10 +18,10 @@ set(CUDA_STANDARD ${CXX_STANDARD})
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/include")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
-# if(ENABLE_TEST)
-#   enable_testing("test/")
-#   add_subdirectory("test/")
-# endif()
+if(ENABLE_TEST)
+  enable_testing("test/")
+  add_subdirectory("test/")
+endif()
 
 # copy example images to build folder
 # file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/

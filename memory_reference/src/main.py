@@ -1,10 +1,6 @@
 from algogpu import AlgoGPU
 from binding import AlgoCPU
-import algogpu
 import cupy_ref
-import cupy as cp
-import numpy as np
-
 
 # algo can be easily replace by 
 # algo = AlgoCPU()

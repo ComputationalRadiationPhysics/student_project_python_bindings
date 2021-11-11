@@ -1,10 +1,10 @@
-import binding
+from Test_Mem_Ref import AlgoCUDA
 import cupy_ref
 import cupy as cp
 
 class AlgoGPU:
     def __init__(self):
-        self.algocuda = binding.AlgoCUDA()
+        self.algocuda = AlgoCUDA()
     
     def whoami(self):
         self.algocuda.whoami()
