@@ -1,5 +1,5 @@
-import algogpu
-import binding
+from algogpu import AlgoGPU
+from binding import AlgoCPU
 import algogpu
 import cupy_ref
 import cupy as cp
@@ -7,8 +7,8 @@ import numpy as np
 
 
 # algo can be easily replace by 
-# algo = binding.AlgoCPU()
-algo = algogpu.AlgoGPU()
+# algo = AlgoCPU()
+algo = AlgoGPU()
 
 algo.whoami()
 algo.initialize_array(10)

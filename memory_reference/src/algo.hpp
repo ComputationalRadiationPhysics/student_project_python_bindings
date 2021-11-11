@@ -21,9 +21,7 @@ class Algo {
 template<>
 class Algo<CPU> {
 public:
-    Mem_Ref<CPU> input;
-    Mem_Ref<CPU> output;
-
+    pybind11::array_t<double, pybind11::array::c_style> input, output;
     int size;
 
     void whoami()
@@ -79,8 +77,11 @@ public:
 template<>
 class Algo<CUDAGPU> {
 public:
-    Mem_Ref<CUDAGPU> input;
-    Mem_Ref<CUDAGPU> output;
+
+    pybind11::object input_allocate, output_allocate;
+
+    //if I dont use this, get_input and get_ouput will return empty
+    Mem_Ref<CUDAGPU> input, output;
 
     int size;
 
@@ -92,24 +93,21 @@ public:
     void initialize_array(int size)
     {
         this->size = size;
-
         pybind11::object input_allocate = cupy_allocate<double>({size});
-        input = Mem_Ref<CUDAGPU>::getCupyRef(input_allocate);
-
         pybind11::object output_allocate = cupy_allocate<double>({size});
+        
+        input = Mem_Ref<CUDAGPU>::getCupyRef(input_allocate);
         output = Mem_Ref<CUDAGPU>::getCupyRef(output_allocate);
     }
 
     Mem_Ref<CUDAGPU> get_input_memory() 
-    {
-        return input;
-        
+    {      
+        return input;       
     }
 
     Mem_Ref<CUDAGPU> get_output_memory()
     {
         return output;
-        
     }
     void compute(Mem_Ref<CUDAGPU> input, Mem_Ref<CUDAGPU> output)
     {
