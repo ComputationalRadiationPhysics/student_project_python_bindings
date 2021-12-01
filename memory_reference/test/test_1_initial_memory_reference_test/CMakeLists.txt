@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(_targetName Test_Mem_Ref)
-add_library(${_targetName} SHARED test_mem_ref.cu)
+add_library(${_targetName} SHARED test_mem_ref.cpp foo.cpp)
 
 target_link_libraries(${_targetName}
   PUBLIC
   cupyref::headers
-  ${PYTHON_LIBRARIES}
-  cudart
-  cufft
-  curand)
+  ${PYTHON_LIBRARIES})
+
+if(TARGET cpyref::cuda)
+  target_link_libraries(${_targetName} PUBLIC cpyref::cuda)
+  set_cuda_language(${_targetName})
+endif()
+
 
 add_msvc_poperties(${_targetName})
 

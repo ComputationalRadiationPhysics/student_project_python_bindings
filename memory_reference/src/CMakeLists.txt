@@ -1,15 +1,20 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(_targetName binding)
-add_library(${_targetName} SHARED binding.cu)
+add_library(${_targetName} SHARED binding.cpp)
 
 target_link_libraries(${_targetName}
   PUBLIC
   cupyref::headers
   ${PYTHON_LIBRARIES}
-  cudart
-  cufft
-  curand)
+  )
+
+if(TARGET cpyref::cuda)
+  target_link_libraries(${_targetName} PUBLIC cpyref::cuda)
+  set_cuda_language(${_targetName})
+endif()
+
+add_custom_target(genexdebug COMMAND ${CMAKE_COMMAND} -E echo "$<TARGET_PROPERTY:binding,SOURCES>")
 
 add_msvc_poperties(${_targetName})
 
