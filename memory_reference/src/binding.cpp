@@ -11,6 +11,7 @@ PYBIND11_MODULE(binding, m)
         .def("get_output_memory", &Algo<CPU>::get_output_memory)
         .def("compute", &Algo<CPU>::compute);
 
+    #ifdef ENABLED_CUDA
     pybind11::class_<Algo<CUDAGPU>>(m, "AlgoCUDA", pybind11::module_local())
         .def(pybind11::init())
         .def("whoami", &Algo<CUDAGPU>::whoami)
@@ -18,4 +19,5 @@ PYBIND11_MODULE(binding, m)
         .def("get_input_memory", &Algo<CUDAGPU>::get_input_memory)
         .def("get_output_memory", &Algo<CUDAGPU>::get_output_memory)
         .def("compute", &Algo<CUDAGPU>::compute);
+    #endif 
 }

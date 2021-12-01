@@ -74,6 +74,7 @@ public:
     }
 };
 
+#ifdef ENABLED_CUDA
 template<>
 class Algo<CUDAGPU> {
 public:
@@ -108,3 +109,4 @@ public:
         cudaMemcpy(output.ptr, input.ptr, size * sizeof(double), cudaMemcpyDeviceToDevice);
     }
 };
+#endif 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(_targetName Test_Mem_Ref)
-add_library(${_targetName} SHARED test_mem_ref.cpp foo.cpp)
+add_library(${_targetName} SHARED test_mem_ref.cpp)
 
 target_link_libraries(${_targetName}
   PUBLIC
