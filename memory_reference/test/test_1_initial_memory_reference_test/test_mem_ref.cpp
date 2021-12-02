@@ -7,7 +7,7 @@
 PYBIND11_MODULE(Test_Mem_Ref, m) 
 {
     m.def("get_available_device", &get_available_device);
-    m.def("get_cuda", &get_cuda);
+    m.def("is_cuda_available", &is_cuda_available);
 
     pybind11::class_<Algo<CPU>>(m, "AlgoCPU", pybind11::module_local())
         .def(pybind11::init())

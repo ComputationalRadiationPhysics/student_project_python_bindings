@@ -32,11 +32,11 @@ std::vector<std::string> get_available_device()
   return device_list;
 }
 
-bool get_cuda()
+bool is_cuda_available()
 {
   #ifdef ENABLED_CUDA
   return true;
-  #endif
-
+  #else
   return false;
+  #endif
 }

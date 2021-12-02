@@ -1,6 +1,10 @@
-from algogpu import AlgoGPU
-from binding import AlgoCPU
-import cupy_ref
+from binding import *
+
+if is_cuda_available() == True:
+    from algogpu import AlgoGPU
+    import cupy_ref
+
+print(get_available_device())
 
 # algo can be easily replace by 
 # algo = AlgoCPU()

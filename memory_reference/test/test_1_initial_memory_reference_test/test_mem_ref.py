@@ -1,10 +1,10 @@
 import Test_Mem_Ref
-import cupy_ref
-import cupy as cp
 import numpy as np
 
-if Test_Mem_Ref.get_cuda() == True:
+if Test_Mem_Ref.is_cuda_available() == True:
     from algogpu import AlgoGPU
+    import cupy_ref
+    import cupy as cp
 
 def test_memory_reference_for_cpu():
     algo = Test_Mem_Ref.AlgoCPU()
@@ -31,7 +31,7 @@ def test_memory_reference_for_cpu():
     assert(str(type(output)) == "<class 'numpy.ndarray'>")
 
 def test_memory_reference_for_gpu():
-    if Test_Mem_Ref.get_cuda() == True:
+    if Test_Mem_Ref.is_cuda_available() == True:
         algo = AlgoGPU()
 
         algo.whoami()
