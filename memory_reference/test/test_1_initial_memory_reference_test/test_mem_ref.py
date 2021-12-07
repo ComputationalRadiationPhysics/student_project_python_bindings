@@ -27,8 +27,8 @@ def test_memory_reference_for_cpu():
     print(type(output))
 
     assert(np.array_equal(input,output))
-    assert(str(type(input)) == "<class 'numpy.ndarray'>")
-    assert(str(type(output)) == "<class 'numpy.ndarray'>")
+    assert(isinstance(input, np.ndarray))
+    assert(isinstance(output, np.ndarray))
 
 def test_memory_reference_for_gpu():
     if Test_Mem_Ref.is_cuda_available() == True:
@@ -52,8 +52,8 @@ def test_memory_reference_for_gpu():
         print(type(output))
 
         assert(cp.array_equal(input,output))
-        assert(str(type(input)) == "<class 'cupy._core.core.ndarray'>")
-        assert(str(type(output)) == "<class 'cupy._core.core.ndarray'>")
+        assert(isinstance(input, cp._core.core.ndarray))
+        assert(isinstance(output, cp._core.core.ndarray))
     
     else:
         print("CUDA is not available")

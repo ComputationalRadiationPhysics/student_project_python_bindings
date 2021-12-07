@@ -1,13 +1,13 @@
 from binding import *
 
-algos = [AlgoCPU()]
-
-if is_cuda_available() == True:
-    from algogpu import AlgoGPU
-    import cupy_ref
-    algos.append(AlgoGPU())
-
 if __name__ == "__main__":
+
+    algos = [AlgoCPU()]
+
+    if is_cuda_available() == True:
+        from algogpu import AlgoGPU
+        import cupy_ref
+        algos.append(AlgoGPU())
 
     print("Devices :")
     for device in get_available_device():
