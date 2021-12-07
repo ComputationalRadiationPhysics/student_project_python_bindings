@@ -28,6 +28,8 @@ std::vector<std::tuple<std::string, bool>> get_available_device()
 
   #ifdef ENABLED_CUDA
   device_list.push_back({"GPU-CUDA", true});
+  #else
+  device_list.push_back({"GPU-CUDA", false});
   #endif
 
   return device_list;
