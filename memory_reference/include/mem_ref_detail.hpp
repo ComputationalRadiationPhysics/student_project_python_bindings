@@ -21,6 +21,17 @@ struct Mem_Ref_Detail<CUDAGPU>{
 template <class T>
 using Mem_Ref = typename Mem_Ref_Detail<T>::type;
 
+std::vector<std::tuple<std::string, bool>> get_available_device()
+{
+  std::vector<std::tuple<std::string, bool>> device_list;
+  device_list.push_back({"CPU", true});
+
+  #ifdef ENABLED_CUDA
+  device_list.push_back({"GPU-CUDA", true});
+  #endif
+
+  return device_list;
+}
 bool is_cuda_available()
 {
   #ifdef ENABLED_CUDA

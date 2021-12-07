@@ -57,3 +57,7 @@ def test_memory_reference_for_gpu():
     
     else:
         print("CUDA is not available")
+
+    
+def test_get_algo():
+    print(Test_Mem_Ref.get_available_device())

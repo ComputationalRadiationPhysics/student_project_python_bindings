@@ -8,6 +8,14 @@ if is_cuda_available() == True:
     algos.append(AlgoGPU())
 
 if __name__ == "__main__":
+
+    print("Devices :")
+    for device in get_available_device():
+        print(device[0], end = ' ')
+        if(device[1] == True) : print("Ready")
+        else : print("Not Ready")
+    print()
+
     for algo in algos:
         
         algo.whoami()
