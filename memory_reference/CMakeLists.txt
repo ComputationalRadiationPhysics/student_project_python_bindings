@@ -40,7 +40,3 @@ if(ENABLE_TEST)
   enable_testing("test/")
   add_subdirectory("test/")
 endif()
-
-# copy example images to build folder
-# file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../example_images/
-#   DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/example_images/ )

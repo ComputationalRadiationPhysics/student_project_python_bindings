@@ -1,28 +1,28 @@
 from binding import *
 
+algos = [AlgoCPU()]
+
 if is_cuda_available() == True:
     from algogpu import AlgoGPU
     import cupy_ref
+    algos.append(AlgoGPU())
 
-print(get_available_device())
+if __name__ == "__main__":
+    for algo in algos:
+        
+        algo.whoami()
+        algo.initialize_array(10)
 
-# algo can be easily replace by 
-# algo = AlgoCPU()
-algo = AlgoGPU()
+        input = algo.get_input_memory()
+        output = algo.get_output_memory()
 
-algo.whoami()
-algo.initialize_array(10)
+        print(input)
+        print(type(input))
 
-input = algo.get_input_memory()
-output = algo.get_output_memory()
+        for i in range(10):
+            input[i] = 2.0
 
-print(input)
-print(type(input))
+        algo.compute(input, output)
 
-for i in range(10):
-    input[i] = 2.0
-
-algo.compute(input, output)
-
-print(output)
-print(type(output))
+        print(output)
+        print(type(output))
