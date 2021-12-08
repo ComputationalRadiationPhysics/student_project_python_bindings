@@ -27,7 +27,6 @@ PYBIND11_MODULE(binding, m)
     #endif
 
     #ifdef ENABLED_HIP
-    //initialize_array, get_input and get_output will be handled by class AlgoGPUHIP in include\algogpu.py
     pybind11::class_<Algo<HIPGPU>>(m, "AlgoHIP", pybind11::module_local())
         .def(pybind11::init())
         .def("whoami", &Algo<HIPGPU>::whoami)
