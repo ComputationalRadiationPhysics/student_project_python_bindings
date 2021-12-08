@@ -1,4 +1,7 @@
 struct CPU;
 #ifdef ENABLED_CUDA
 struct CUDAGPU;
-#endif 
+#endif
+#ifdef ENABLED_HIP
+struct HIPGPU;
+#endif  

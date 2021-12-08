@@ -26,7 +26,10 @@ set_target_properties(${_targetName} PROPERTIES PREFIX "")
 
 set(python_files
   ${PROJECT_SOURCE_DIR}/include/cupy_ref.py
-  ${PROJECT_SOURCE_DIR}/include/algogpu.py
+  ${PROJECT_SOURCE_DIR}/include/algogpucuda.py
+  ${PROJECT_SOURCE_DIR}/include/algogpuhip.py
+  ${PROJECT_SOURCE_DIR}/include/hip_mem.py
+  ${PROJECT_SOURCE_DIR}/include/hip_ref.py
   ${CMAKE_CURRENT_SOURCE_DIR}/main.py
   )
 
