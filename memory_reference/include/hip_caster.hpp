@@ -3,22 +3,11 @@
 #include <cstdio>
 #include <iostream>
 #include <complex>
+#include "hip_ref.hpp"
+#include "dtype_getter.hpp"
 
 using namespace std::literals::complex_literals;
 using namespace pybind11::literals;
-
-template<typename TData> std::string hip_ref_get_dtype(){ return "C++ type not implemented";}
-template<> std::string hip_ref_get_dtype<short int>(){ return "int16";}
-template<> std::string hip_ref_get_dtype<int>(){ return "int32";}
-template<> std::string hip_ref_get_dtype<long long int>(){ return "int64";}
-template<> std::string hip_ref_get_dtype<std::uint16_t>(){ return "uint16";}
-template<> std::string hip_ref_get_dtype<std::uint32_t>(){ return "uint32";}
-template<> std::string hip_ref_get_dtype<std::uint64_t>(){ return "uint64";}
-template<> std::string hip_ref_get_dtype<float>(){ return "float32";}
-template<> std::string hip_ref_get_dtype<double>(){ return "float64";}
-template<> std::string hip_ref_get_dtype<std::complex<float>>(){ return "complex64";}
-template<> std::string hip_ref_get_dtype<std::complex<double>>(){ return "complex128";}
-
 
 namespace pybind11 { namespace detail {
     template <typename T, int TDim> struct type_caster<Hip_Ref<T, TDim>> 
@@ -36,12 +25,11 @@ namespace pybind11 { namespace detail {
                  return false;
             }
 
-            if(src.attr("dtype").cast<std::string>() !=
-				   hip_ref_get_dtype<T>()){
+            if(src.attr("dtype").cast<std::string>() != get_dtype<T>()){
 					std::ostringstream oss;
 					oss << "HIP Ref type missmatch\n";
 					oss << "  Python type: " << src.attr("dtype").cast<std::string>() << "\n";
-					oss << "  Expected Python type: " << hip_ref_get_dtype<T>() << "\n";
+					oss << "  Expected Python type: " << get_dtype<T>() << "\n";
 					std::cerr << oss.str();
 					return false;
             }

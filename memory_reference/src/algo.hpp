@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include "tags.hpp"
 #include "mem_ref_detail.hpp"
+#include "dtype_getter.hpp"
 
 #ifdef ENABLED_CUDA
 #include "cupy_ref.hpp"
@@ -161,7 +162,7 @@ public:
         hipMemcpy(device_array, cpu_array.data(), size * sizeof(double), hipMemcpyHostToDevice);
 
         hip_array.ptr = device_array;
-        hip_array.dtype = "float64";
+        hip_array.dtype = get_dtype<double>();
         hip_array.shape.push_back(size);
 
         return hip_array;   

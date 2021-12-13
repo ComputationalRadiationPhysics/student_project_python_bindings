@@ -26,43 +26,34 @@ if __name__ == "__main__":
 
     print()
 
-    for algo in algos:
-        
+    for algo in algos:   
+        algo.whoami()
+        algo.initialize_array(size)
+
+        input = algo.get_input_memory()
+        output = algo.get_output_memory()
+
         if(algo.is_synced_mem() == True):
-            algo.whoami()
-            algo.initialize_array(size)
-
-            input = algo.get_input_memory()
-            output = algo.get_output_memory()
-
             input.read()
-            print(input.buffer)
-            print(type(input.buffer))
+            input_temp = input.buffer
+            output_temp = output.buffer
+        else :
+            input_temp = input
+            output_temp = output
 
-            for i in range(size):
-                input.buffer[i] = 2.0
+        print(input_temp)
+        print(type(input_temp))
+
+        for i in range(size):
+            input_temp[i] = 2.0
+
+        if(algo.is_synced_mem() == True): 
             input.write()
 
-            algo.compute(input, output)
+        algo.compute(input, output)
 
+        if(algo.is_synced_mem() == True): 
             output.read()
-            print(output.buffer)
-            print(type(output.buffer))
 
-        else:
-            algo.whoami()
-            algo.initialize_array(size)
-
-            input = algo.get_input_memory()
-            output = algo.get_output_memory()
-
-            print(input)
-            print(type(input))
-
-            for i in range(size):
-                input[i] = 2.0
-
-            algo.compute(input, output)
-
-            print(output)
-            print(type(output))
+        print(output_temp)
+        print(type(output_temp))
