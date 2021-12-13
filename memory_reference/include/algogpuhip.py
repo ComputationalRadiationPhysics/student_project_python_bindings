@@ -24,7 +24,7 @@ class AlgoGPUHIP:
 
     def compute(self, input = None, output = None):
 
-        if(input == None and output == None):
+        if(input is None and output is None):
             self.algohip.compute(self.input.device_mem, self.output.device_mem, self.size)
         else:    
             self.algohip.compute(input.device_mem, output.device_mem, self.size)

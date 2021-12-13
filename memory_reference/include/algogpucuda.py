@@ -14,15 +14,20 @@ class AlgoGPUCUDA:
     
     def initialize_array(self, size):
         self.algocuda.initialize_array(size)
+        self.input = cp.array(self.algocuda.get_input_memory(), copy = False)
+        self.output = cp.array(self.algocuda.get_output_memory(), copy = False)
 
     def get_input_memory(self):
-        return cp.array(self.algocuda.get_input_memory(), copy = False)
+        return self.input
     
     def get_output_memory(self):
-        return cp.array(self.algocuda.get_output_memory(), copy = False)
+        return self.output
 
-    def compute(self, input, output):
+    def compute(self, input = None, output = None):
 
-        cupy_ref_input = cupy_ref.Cupy_Ref(ptr = input.data.ptr, shape = input.shape, dtype = input.dtype, typestr = input.dtype.str)
-        cupy_ref_output = cupy_ref.Cupy_Ref(ptr = output.data.ptr, shape = output.shape, dtype = output.dtype, typestr = output.dtype.str)
-        self.algocuda.compute(cupy_ref_input, cupy_ref_output)
+        if(input is None and output is None):
+            self.algocuda.compute(self.algocuda.get_input_memory(), self.algocuda.get_output_memory())
+        else:
+            cupy_ref_input = cupy_ref.Cupy_Ref(ptr = input.data.ptr, shape = input.shape, dtype = input.dtype, typestr = input.dtype.str)
+            cupy_ref_output = cupy_ref.Cupy_Ref(ptr = output.data.ptr, shape = output.shape, dtype = output.dtype, typestr = output.dtype.str)
+            self.algocuda.compute(cupy_ref_input, cupy_ref_output)

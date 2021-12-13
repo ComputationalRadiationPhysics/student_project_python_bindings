@@ -30,7 +30,7 @@ def test_memory_reference_for_cpu():
     assert(isinstance(input, np.ndarray))
     assert(isinstance(output, np.ndarray))
 
-def test_memory_reference_for_gpu():
+def test_memory_reference_for_gpu_cuda():
     if Test_Mem_Ref.is_cuda_available() == True:
         algo = AlgoGPU()
 
