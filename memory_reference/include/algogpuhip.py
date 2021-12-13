@@ -22,6 +22,9 @@ class AlgoGPUHIP:
     def get_output_memory(self):
         return self.output
 
-    def compute(self, input, output):
+    def compute(self, input = None, output = None):
 
-        self.algohip.compute(input.device_mem, output.device_mem, self.size)
+        if(input == None and output == None):
+            self.algohip.compute(self.input.device_mem, self.output.device_mem, self.size)
+        else:    
+            self.algohip.compute(input.device_mem, output.device_mem, self.size)

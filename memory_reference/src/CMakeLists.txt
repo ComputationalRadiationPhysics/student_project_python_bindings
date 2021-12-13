@@ -30,6 +30,8 @@ set(python_files
   ${PROJECT_SOURCE_DIR}/include/algogpuhip.py
   ${PROJECT_SOURCE_DIR}/include/hip_mem.py
   ${PROJECT_SOURCE_DIR}/include/hip_ref.py
+  ${PROJECT_SOURCE_DIR}/include/context_manager.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/example_copy.py
   ${CMAKE_CURRENT_SOURCE_DIR}/main.py
   )
 

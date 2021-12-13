@@ -74,6 +74,21 @@ public:
         return output;
         
     }
+
+    void compute()
+    {
+        pybind11::buffer_info bufInput = input.request();
+        double *ptrInput = static_cast<double*>(bufInput.ptr);
+
+        pybind11::buffer_info bufOutput = output.request();
+        double *ptrOutput = static_cast<double*>(bufOutput.ptr);
+
+        for(int i = 0; i < size; i++)
+        {
+            ptrOutput[i] =  ptrInput[i];
+        }
+    }
+    
     void compute(Mem_Ref<CPU> input, Mem_Ref<CPU> output)
     {
         pybind11::buffer_info bufInput = input.request();

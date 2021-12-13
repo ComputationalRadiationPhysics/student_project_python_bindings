@@ -14,7 +14,9 @@ PYBIND11_MODULE(binding, m)
         .def("initialize_array", &Algo<CPU>::initialize_array)
         .def("get_input_memory", &Algo<CPU>::get_input_memory)
         .def("get_output_memory", &Algo<CPU>::get_output_memory)
-        .def("compute", &Algo<CPU>::compute);
+        // .def("compute", &Algo<CPU>::compute);
+        .def("compute", pybind11::overload_cast<>(&Algo<CPU>::compute))
+        .def("compute", pybind11::overload_cast<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>>(&Algo<CPU>::compute));
 
     #ifdef ENABLED_CUDA
     pybind11::class_<Algo<CUDAGPU>>(m, "AlgoCUDA", pybind11::module_local())
