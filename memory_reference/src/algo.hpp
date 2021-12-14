@@ -168,8 +168,7 @@ public:
         this->size = size;
         Mem_Ref<HIPGPU> hip_array;
 
-        std::vector<double> cpu_array;
-        for(int i = 0; i < size; i++) cpu_array.push_back(0.0);
+        std::vector<double> cpu_array(size, 0.0);
 
         double *device_array;
         hipMalloc((void**)&device_array, size*sizeof(double));
