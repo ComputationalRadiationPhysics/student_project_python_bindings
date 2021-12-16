@@ -2,7 +2,8 @@ from binding import is_cuda_available
 from binding import is_hip_available
 from binding import get_available_device
 from binding import AlgoCPU
-from sync_open import sync_open
+from sync_open import sync_open_r
+from sync_open import sync_open_w
 
 def example_manual_copy(algos, size):
      for algo in algos:   
@@ -43,13 +44,13 @@ def example_context_copy(algos, size):
         algo.whoami()
         algo.initialize_array(size)
 
-        with sync_open(algo.get_input_memory(), algo.is_synced_mem()) as input:
+        with sync_open_w(algo.get_input_memory(), algo.is_synced_mem()) as input:
             for i in range(size):
                 input[i] = 2.0
 
         algo.compute()
                 
-        with sync_open(algo.get_output_memory(), algo.is_synced_mem()) as output:
+        with sync_open_r(algo.get_output_memory(), algo.is_synced_mem()) as output:
             print(output)
 
 if __name__ == "__main__":
