@@ -41,7 +41,7 @@ public:
 
     bool is_synced_mem()
     {
-        return false;
+        return true;
     }
 
     void initialize_array(int size)

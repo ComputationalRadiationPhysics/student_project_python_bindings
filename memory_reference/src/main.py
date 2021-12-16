@@ -13,7 +13,7 @@ def example_manual_copy(algos, size):
         input = algo.get_input_memory()
         output = algo.get_output_memory()
 
-        if(algo.is_synced_mem() == True):
+        if(algo.is_synced_mem() == False):
             input.read()
             input_temp = input.buffer
             output_temp = output.buffer
@@ -27,12 +27,12 @@ def example_manual_copy(algos, size):
         for i in range(size):
             input_temp[i] = 2.0
 
-        if(algo.is_synced_mem() == True): 
+        if(algo.is_synced_mem() == False): 
             input.write()
 
         algo.compute(input, output)
 
-        if(algo.is_synced_mem() == True): 
+        if(algo.is_synced_mem() == False): 
             output.read()
 
         print(output_temp)

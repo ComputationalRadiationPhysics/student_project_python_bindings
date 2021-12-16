@@ -10,7 +10,7 @@ class AlgoGPUCUDA:
         self.algocuda.whoami()
 
     def is_synced_mem(self):
-        return False
+        return True
     
     def initialize_array(self, size):
         self.algocuda.initialize_array(size)

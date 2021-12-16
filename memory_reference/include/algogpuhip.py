@@ -9,7 +9,7 @@ class AlgoGPUHIP:
         self.algohip.whoami()
 
     def is_synced_mem(self):
-        return True
+        return False
     
     def initialize_array(self, size):
         self.size = size
