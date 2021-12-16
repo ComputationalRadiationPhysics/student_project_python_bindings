@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 option(ENABLE_CUDA "enable cuda support" OFF)
+option(ENABLE_HIP "enable hip support" OFF)
 set(ENABLE_TEST ON CACHE BOOL "Enable Python binding tests")
 
 project(binding LANGUAGES CXX)
@@ -17,6 +18,10 @@ set(CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD ${CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(${ENABLE_CUDA} AND ${ENABLE_HIP})
+  message(FATAL_ERROR "CUDA and HIP on the same time is not supported yet.")
+endif()
+
 if(ENABLE_CUDA)
   enable_language(CUDA)
 
@@ -32,6 +37,15 @@ if(ENABLE_CUDA)
     )
   target_compile_definitions(cpyrefcuda INTERFACE ENABLED_CUDA)
   add_library(cpyref::cuda ALIAS cpyrefcuda)
+endif()
+
+if(ENABLE_HIP)
+  set(CMAKE_CXX_COMPILER hipcc)
+  find_package(HIP REQUIRED)
+
+  add_library(cpyrefhip INTERFACE)
+  target_compile_definitions(cpyrefhip INTERFACE ENABLED_HIP)
+  add_library(cpyref::hip ALIAS cpyrefhip)
 endif()
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/include")

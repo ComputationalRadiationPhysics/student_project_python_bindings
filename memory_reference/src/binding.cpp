@@ -4,15 +4,19 @@
 PYBIND11_MODULE(binding, m) 
 {
     m.def("is_cuda_available", &is_cuda_available);
+    m.def("is_hip_available", &is_hip_available);
     m.def("get_available_device", &get_available_device);
     
     pybind11::class_<Algo<CPU>>(m, "AlgoCPU", pybind11::module_local())
         .def(pybind11::init())
         .def("whoami", &Algo<CPU>::whoami)
+        .def("is_synced_mem", &Algo<CPU>::is_synced_mem)
         .def("initialize_array", &Algo<CPU>::initialize_array)
         .def("get_input_memory", &Algo<CPU>::get_input_memory)
         .def("get_output_memory", &Algo<CPU>::get_output_memory)
-        .def("compute", &Algo<CPU>::compute);
+        // .def("compute", &Algo<CPU>::compute);
+        .def("compute", pybind11::overload_cast<>(&Algo<CPU>::compute))
+        .def("compute", pybind11::overload_cast<pybind11::array_t<double, pybind11::array::c_style>, pybind11::array_t<double, pybind11::array::c_style>>(&Algo<CPU>::compute));
 
     #ifdef ENABLED_CUDA
     pybind11::class_<Algo<CUDAGPU>>(m, "AlgoCUDA", pybind11::module_local())
@@ -22,5 +26,19 @@ PYBIND11_MODULE(binding, m)
         .def("get_input_memory", &Algo<CUDAGPU>::get_input_memory)
         .def("get_output_memory", &Algo<CUDAGPU>::get_output_memory)
         .def("compute", &Algo<CUDAGPU>::compute);
-    #endif 
+    #endif
+
+    #ifdef ENABLED_HIP
+    pybind11::class_<Algo<HIPGPU>>(m, "AlgoHIP", pybind11::module_local())
+        .def(pybind11::init())
+        .def("whoami", &Algo<HIPGPU>::whoami)
+        .def("compute", &Algo<HIPGPU>::compute);
+
+    pybind11::class_<Hip_Mem_Impl>(m, "Hip_Mem_Impl", pybind11::module_local())
+        .def(pybind11::init())
+        .def("read", &Hip_Mem_Impl::read)
+        .def("write", &Hip_Mem_Impl::write)
+        .def("get_hip_array", &Hip_Mem_Impl::get_hip_array);   
+
+    #endif
 }
